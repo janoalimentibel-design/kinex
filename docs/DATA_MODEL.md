@@ -1,6 +1,6 @@
 # KINEX — Diseño de datos y migraciones (Fase 1)
 
-Estado: **propuesta, pendiente de aprobación**
+Estado: **aprobado e implementado** (`src/db/`; tests en `tests/`)
 Fecha: 2026-07-05
 Base analizada: código real de A2.8 (`src/storage.js`, `src/app.js`, `src/data/exercises.js`)
 

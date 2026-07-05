@@ -3,17 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>KINEX A2.8 · Batch 2 finalizado</title>
-<link rel="stylesheet" href="./src/styles.css">
+<title>KINEX</title>
 </head>
 <body>
-<div class="topbar"><div class="brand"><div><div class="logo">KI<span>NEX</span></div><div class="tag">Fuerza · control · movimiento</div></div><div class="streak"><div class="n" id="streakN">0</div><div class="l">sesiones</div></div></div></div>
-<div class="view show" id="view-today"><div class="weekwrap"><div class="weekhead"><h2>Tu semana</h2><span class="wk" id="wkRange"></span></div><div class="days" id="daystrip"></div></div><div id="dayContent"></div></div>
-<div class="view" id="view-lib"><div class="lib"><div class="sectionhead"><div><h2>Biblioteca</h2><p>Ejercicios por músculo, con intención interna de recuperación y rendimiento. Las fotos limpias se integran como assets individuales, no como flyers.</p></div><button class="addbtn" onclick="openAdd()">+ Nuevo</button></div><input class="search" id="searchBox" placeholder="Buscar ejercicio o tag..." oninput="renderLib()"><div class="filters" id="filters"></div><div class="libgrid" id="libgrid"></div></div></div>
-<div class="view" id="view-hist"><div class="hist"><div class="sectionhead"><div><h2>Historial</h2><p>Sesiones, cambios, molestias y volumen semanal.</p></div></div><div class="iobar"><button class="iobtn" onclick="exportData()">Exportar backup</button><button class="iobtn" onclick="document.getElementById('importFile').click()">Importar</button><input id="importFile" type="file" accept="application/json" style="display:none" onchange="importData(event)"></div><div class="wkvol"><div class="t">Volumen últimos 7 días</div><div id="volBars"></div></div><div id="histList"></div></div></div>
-<div class="view" id="view-plan"><div class="plan"><div class="sectionhead"><div><h2>Plan</h2><p>Foco semanal editable y resumen para ajustar la próxima semana.</p></div></div><div id="planBox"></div><div class="apibox"><h3>Resumen semanal</h3><p>Copia un resumen con tu historial, molestias y ejercicios para ajustar la siguiente semana.</p><button class="btn btn-primary" onclick="copyWeeklySummary()">Copiar resumen</button></div></div></div>
-<div class="nav"><button class="on" data-v="today" onclick="nav('today')">⌂<span>Hoy</span></button><button data-v="lib" onclick="nav('lib')">▥<span>Biblioteca</span></button><button data-v="hist" onclick="nav('hist')">↗<span>Historial</span></button><button data-v="plan" onclick="nav('plan')">☰<span>Plan</span></button></div>
-<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
-<script type="module" src="./src/app.js"></script>
+<div id="root"></div>
+<script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

@@ -6,7 +6,6 @@
 // warnings visibles. Solo lanza MigrationError si la entrada no es un backup v0
 // reconocible (sin objeto `sessions`).
 import {
-  GROUP_IDS,
   createDefaultPlan,
   zEnergy,
   zExtraTarget,

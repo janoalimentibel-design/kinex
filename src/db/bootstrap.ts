@@ -22,7 +22,7 @@ interface LegacyStore {
   getItem(key: string): string | null;
 }
 
-function toAppData(data: V1Data): AppData {
+export function toAppData(data: V1Data): AppData {
   return {
     sessions: Object.fromEntries(data.sessions.map((s) => [s.date, s])),
     custom: Object.fromEntries(data.customExercises.map((e) => [e.id, e])),

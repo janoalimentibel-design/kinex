@@ -1,13 +1,43 @@
-# KINEX A2.8 — Batch 2 finalizado
+# KINEX A3 — base profesional (Fase 1)
 
-**Claude Code u otra IA:** comenzar obligatoriamente por `START_HERE_CLAUDE_CODE.md`.
+App personal mobile-first de entrenamiento: fuerza, control y movimiento. Migración de KINEX A2.8 a Vite + TypeScript + React + IndexedDB, conservando exactamente la UX, la estética oscura/neón y la compatibilidad de datos.
 
-Versión modular basada en A2.7. Conserva la interfaz y la compatibilidad de almacenamiento. Batch 2 incorpora Dead Bug, Bird Dog y Wall Sit con tres fases visuales distintas.
+**Referencia estable congelada:** `../KINEX_A2.8_Batch2_finalizado/` (no modificar).
+**Modelo de datos y migraciones:** `docs/DATA_MODEL.md`.
 
 ## Ejecutar
 
-`python3 -m http.server 4173` y abrir `http://localhost:4173/outputs/KINEX_A2.8_Batch2_finalizado/` desde la raíz del workspace, o `http://localhost:4173/` si el servidor se inicia dentro de esta carpeta.
+```bash
+npm install
+npm run dev        # http://localhost:5173/
+```
 
-## Tests
+## Tests y build
 
-`npm test`
+```bash
+npm test           # Vitest: migración v0→v1, bootstrap, contratos de A2.6/A2.8
+npm run build      # tsc --noEmit + vite build → dist/
+```
+
+## Datos
+
+- IndexedDB (Dexie) con `schemaVersion: 1`; validación Zod estricta.
+- Al primer arranque migra automáticamente los datos de A2.x desde la clave
+  `localStorage` heredada (`kinex_A2_6_pullups_corregidas`), en **solo-lectura**:
+  los datos originales de A2.8 nunca se tocan.
+- Backups: exporta JSON v1 con sobre versionado; importa backups v1 **y** v0
+  (A2.6/A2.7/A2.8) con vista previa antes de reemplazar.
+
+## Estructura
+
+```
+src/
+├── main.tsx            entrada
+├── styles.css          estética oscura/neón heredada de A2.8
+├── data/               catálogo de 81 ejercicios + mapa de imágenes (código, no DB)
+├── db/                 schema Zod, Dexie, migración v0→v1, backups, bootstrap
+├── logic/              lógica pura de sesiones (portada 1:1 de A2.8)
+└── components/         las cuatro vistas + sheets
+public/assets/          fotografías por ejercicio y fase
+tests/                  Vitest (migración, bootstrap, contratos)
+```
