@@ -1,0 +1,6 @@
+{
+  "name": "kinex-a2-8",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test" }
+}
