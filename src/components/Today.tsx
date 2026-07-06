@@ -2,9 +2,10 @@
 import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES } from '../data/exercises';
 import type { GroupId, Mode } from '../db/schema';
-import { buildExerciseList, isoDate, type SessionEntry } from '../logic/session';
+import { buildExerciseList, isoDate, restSeconds, type SessionEntry } from '../logic/session';
 import { colorOf, hasImage, PhaseBlock } from './media';
 import { IconCaret, IconCheck } from './icons';
+import SetLogger from './SetLogger';
 import type { Ctx } from './types';
 
 function weekDays(): Date[] {
@@ -96,6 +97,22 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
             <span><b>{session.groups.length}</b> grupos</span>
           </div>
         </div>
+
+        {session.checkin ? (
+          <div className="checkin-chip" onClick={() => ctx.setModal({ type: 'checkin' })}>
+            <span className="ck-dot"></span>
+            Check-in: lumbar <b>{session.checkin.lumbar}</b> · rodilla <b>{session.checkin.knee}</b> · energía <b>{session.checkin.energy}</b> · ~<b>{session.checkin.timeMinutes} min</b>
+          </div>
+        ) : (
+          <div className="checkin-cta">
+            <button className="btn btn-ghost" onClick={() => ctx.setModal({ type: 'checkin' })}>◇ Check-in del día</button>
+          </div>
+        )}
+        {session.checkin && (session.checkin.lumbar >= 4 || session.checkin.knee >= 4) && (
+          <div className="care-note">
+            Molestia alta hoy: bajá intensidad, evitá impacto y frená si algo empeora durante la sesión.
+          </div>
+        )}
 
         <div className="segwrap">
           <div className="seglabel">Formato</div>
@@ -222,6 +239,10 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
             <div className="stat"><div className="v">{e.reps}</div><div className="k">Reps</div></div>
             <div className="stat"><div className="v">{e.rest}</div><div className="k">Descanso</div></div>
           </div>
+          <SetLogger ctx={ctx} id={entry.id} exercise={e} />
+          <button className="btn btn-soft rest-start" onClick={() => ctx.startRest(e.name, restSeconds(e.rest))}>
+            ▶ Descanso {e.rest}
+          </button>
           <div className="block">
             <div className="bt"><span className="bd"></span>Puntos técnicos</div>
             {e.cues.map((c, i) => <div className="cue" key={i}><span className="n">{i + 1}</span><span>{c}</span></div>)}

@@ -1,7 +1,7 @@
 // Los 9 tests de migración definidos en docs/DATA_MODEL.md §8 — criterio de cierre.
 import { describe, expect, test } from 'vitest';
 import { parseBackup, serializeBackup, BackupError } from '../src/db/backup';
-import { migrateV0toV1, MigrationError } from '../src/db/migrate';
+import { migrateV0toV1, migrateV1toV2, MigrationError } from '../src/db/migrate';
 import { zV1Data } from '../src/db/schema';
 
 // Fixture con la estructura EXACTA que produce A2.8 (createDefaultDB + app.js).
@@ -112,11 +112,12 @@ test('4. custom con id divergente: id resultante = clave, nada se pierde', () =>
   expect(data.customExercises[0].notes).toBe('agarre cerrado');
 });
 
-test('5. roundtrip v1: export → import → datos idénticos', () => {
+test('5. roundtrip: export → import → datos idénticos', () => {
   const { data } = migrateV0toV1(realV0Backup());
-  const parsed = parseBackup(serializeBackup(data));
-  expect(parsed.source).toBe('v1');
-  expect(parsed.data).toEqual(data);
+  const v2 = migrateV1toV2(data);
+  const parsed = parseBackup(serializeBackup(v2));
+  expect(parsed.source).toBe('v2');
+  expect(parsed.data).toEqual(v2);
   expect(parsed.warnings).toEqual([]);
 });
 
@@ -127,11 +128,11 @@ test('6. idempotencia: migrar el mismo v0 dos veces da exactamente lo mismo', ()
   expect(a.warnings).toEqual(b.warnings);
 });
 
-test('7. equivalencia de caminos: backup v0 importado = migración directa', () => {
+test('7. equivalencia de caminos: backup v0 importado = migración directa encadenada', () => {
   const direct = migrateV0toV1(realV0Backup());
   const viaBackup = parseBackup(JSON.stringify(realV0Backup()));
   expect(viaBackup.source).toBe('v0');
-  expect(viaBackup.data).toEqual(direct.data);
+  expect(viaBackup.data).toEqual(migrateV1toV2(direct.data));
   expect(viaBackup.warnings).toEqual(direct.warnings);
 });
 
@@ -144,6 +145,9 @@ describe('8. rechazos con mensaje claro', () => {
   });
   test('schemaVersion futura', () => {
     expect(() => parseBackup(JSON.stringify({ app: 'KINEX', schemaVersion: 99, data: {} }))).toThrow(/versión/i);
+  });
+  test('v2 con estructura rota', () => {
+    expect(() => parseBackup(JSON.stringify({ app: 'KINEX', schemaVersion: 2, exportedAt: 'x', data: { sessions: 'no' } }))).toThrow(BackupError);
   });
   test('v1 con estructura rota', () => {
     expect(() => parseBackup(JSON.stringify({ app: 'KINEX', schemaVersion: 1, exportedAt: 'x', data: { sessions: 'no' } }))).toThrow(BackupError);

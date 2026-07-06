@@ -208,10 +208,29 @@ Los `schemaVersion` futuros migran en cadena (v0→v1→v2…), cada salto con s
 8. **Rechazos**: JSON corrupto, vacío, o de otra app → error claro, base intacta.
 9. **DB por defecto**: `createDefaultDB()` de A2.8 migrado = base v1 vacía con plan por defecto.
 
-## 9. Reservado para v2+ (documentado, NO se implementa ahora)
+## 9. Esquema v2 (Fase 3 — implementado)
 
-- Registro por serie (reps reales, carga, RPE/RIR, dolor durante el ejercicio) — aquí es donde `sets/reps/rest` se estructuran.
-- Check-in pre-sesión (lumbar, rodilla, energía, sueño, tiempo).
+Aditivo sobre v1; ningún campo existente cambia. La sesión gana:
+
+```ts
+checkin: { lumbar: 0-10, knee: 0-10, energy: Energy, timeMinutes: number } | null
+setLogs: Record<ExerciseId, Array<{ reps: number|null, load: number|null, rpe: number|null, done: boolean }>>
+```
+
+- **Migración v1→v2** (`migrateV1toV2`): pura y aditiva — `checkin: null`, `setLogs: {}`.
+  No puede perder información por construcción.
+- **Dexie `version(2).upgrade()`**: eleva bases v1 existentes en el dispositivo y
+  actualiza el meta a `schemaVersion: 2` en la misma transacción.
+- **Backups**: se exporta v2; se importa v2 (estricto), v1 (estricto + v1→v2) y
+  v0 (tolerante + v0→v1→v2). La cadena garantiza que todo backup viejo importa
+  para siempre.
+- El check-in solo *sugiere* el formato por tiempo disponible (`suggestedFormat`)
+  y muestra un aviso prudente si lumbar/rodilla ≥ 4; nunca bloquea ni diagnostica.
+
+## 10. Reservado para v3+ (documentado, NO se implementa ahora)
+
+- Progresiones/regresiones enlazadas por ejercicio.
 - Inventario de material y favoritos/bloqueados.
+- Sugerencias que usen el historial de check-ins y RPE.
 
-Se listan solo para garantizar que ninguna decisión de v1 los bloquee: ninguno exige cambiar claves primarias ni enums, solo agregar tablas o campos opcionales → migraciones aditivas simples.
+Ninguno exige cambiar claves primarias ni enums → migraciones aditivas simples.

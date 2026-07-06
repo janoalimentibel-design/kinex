@@ -15,7 +15,7 @@ import {
   zMode,
   zV1Data,
 } from './schema';
-import type { CustomExercise, GroupId, Plan, Session, SessionMetrics, V1Data } from './schema';
+import type { CustomExercise, GroupId, Plan, SessionMetrics, SessionV1, V1Data, V2Data } from './schema';
 
 export class MigrationError extends Error {}
 
@@ -87,7 +87,7 @@ function migrateStringMap(raw: unknown): Record<string, string> {
   return out;
 }
 
-function migrateSession(date: string, raw: unknown, warnings: string[]): Session {
+function migrateSession(date: string, raw: unknown, warnings: string[]): SessionV1 {
   const s = isRecord(raw) ? raw : {};
   const mode = zMode.safeParse(s.mode);
   if (!mode.success && s.mode !== undefined) warnings.push(`Sesión ${date}: modo desconocido ("${String(s.mode)}") → "mix"`);
@@ -165,7 +165,7 @@ export function migrateV0toV1(raw: unknown): MigrationResult {
   }
   const warnings: string[] = [];
 
-  const sessions: Session[] = [];
+  const sessions: SessionV1[] = [];
   for (const [key, value] of Object.entries(raw.sessions)) {
     if (!isValidDateKey(key)) {
       warnings.push(`Sesión con fecha inválida ("${key}") → descartada`);
@@ -185,4 +185,14 @@ export function migrateV0toV1(raw: unknown): MigrationResult {
 
   const data = zV1Data.parse({ sessions, customExercises, plan: migratePlan(raw.plan) });
   return { data, warnings };
+}
+
+// v1 → v2: puramente aditiva — check-in y registro por serie arrancan vacíos.
+// Ningún campo de v1 se transforma, así que no puede perder información.
+export function migrateV1toV2(data: V1Data): V2Data {
+  return {
+    sessions: data.sessions.map((s) => ({ ...s, checkin: null, setLogs: {} })),
+    customExercises: data.customExercises,
+    plan: data.plan,
+  };
 }

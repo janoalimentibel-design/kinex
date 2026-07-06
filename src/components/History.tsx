@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { DIAS, FORMATS, GROUPS, MES } from '../data/exercises';
 import { parseBackup, serializeBackup, BackupError } from '../db/backup';
-import { toV1Data } from '../db/bootstrap';
+import { toExportData } from '../db/bootstrap';
 import { buildExerciseList, isoDate } from '../logic/session';
 import { colorOf } from './media';
 import type { Ctx } from './types';
@@ -26,7 +26,7 @@ export default function History({ ctx }: { ctx: Ctx }) {
   const max = Math.max(1, ...Object.values(vol));
 
   const exportData = () => {
-    const blob = new Blob([serializeBackup(toV1Data(data))], { type: 'application/json' });
+    const blob = new Blob([serializeBackup(toExportData(data))], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

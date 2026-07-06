@@ -43,7 +43,30 @@ export function createSession(date: string): Session {
     extras: [],
     saved: false,
     metrics: null,
+    checkin: null,
+    setLogs: {},
   };
+}
+
+// Cantidad de series objetivo a partir del string del catálogo ("3", "2–3", "4").
+export function targetSets(sets: string): number {
+  const n = parseInt(sets, 10);
+  return Number.isNaN(n) ? 3 : Math.min(6, Math.max(1, n));
+}
+
+// Segundos de descanso a partir del string del catálogo ("60s", "75s", "2min").
+export function restSeconds(rest: string): number {
+  const match = rest.match(/(\d+)\s*(min|s)?/);
+  if (!match) return 60;
+  const value = Number(match[1]);
+  return match[2] === 'min' ? value * 60 : value;
+}
+
+// Sugerencia de formato según el tiempo disponible del check-in.
+export function suggestedFormat(timeMinutes: number): Format {
+  if (timeMinutes <= 25) return 'base';
+  if (timeMinutes <= 35) return 'ext';
+  return 'long';
 }
 
 export function candidates(all: ExerciseMap, group: GroupId, mode: Mode, includeAdvanced = false): CatalogExercise[] {

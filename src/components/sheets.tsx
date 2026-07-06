@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { COMBOS, FORMATS, GROUPS } from '../data/exercises';
 import type { ParsedBackup } from '../db/backup';
 import type { CustomExercise, Energy, GroupId, Level } from '../db/schema';
-import { buildExerciseList, candidates } from '../logic/session';
+import { buildExerciseList, candidates, suggestedFormat } from '../logic/session';
 import { GalleryBlock } from './media';
 import type { Ctx, ModalState } from './types';
 
@@ -14,6 +14,7 @@ export function Sheet({ modal, ctx }: { modal: NonNullable<ModalState>; ctx: Ctx
     case 'addToGroup': return <AddToGroupSheet ctx={ctx} group={modal.group} />;
     case 'replace': return <ReplaceSheet ctx={ctx} origId={modal.origId} group={modal.group} />;
     case 'saveSession': return <SaveSessionSheet ctx={ctx} />;
+    case 'checkin': return <CheckinSheet ctx={ctx} />;
     case 'libInfo': return <LibInfoSheet ctx={ctx} id={modal.id} />;
     case 'addCustom': return <AddCustomSheet ctx={ctx} />;
     case 'summary': return <SummarySheet text={modal.text} />;
@@ -167,6 +168,57 @@ function SaveSessionSheet({ ctx }: { ctx: Ctx }) {
         <textarea placeholder="Ej: rodilla bien, dominadas fáciles..." value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
       <button className="btn btn-primary" onClick={save}>Guardar sesión</button>
+    </>
+  );
+}
+
+function CheckinSheet({ ctx }: { ctx: Ctx }) {
+  const c = ctx.session.checkin;
+  const [lumbar, setLumbar] = useState(String(c?.lumbar ?? 0));
+  const [knee, setKnee] = useState(String(c?.knee ?? 0));
+  const [energy, setEnergy] = useState<Energy>(c?.energy ?? 'media');
+  const [timeMinutes, setTimeMinutes] = useState(c?.timeMinutes ?? 30);
+
+  const score = (v: string) => Math.min(10, Math.max(0, Math.round(Number(v) || 0)));
+  const format = suggestedFormat(timeMinutes);
+
+  const save = () => {
+    ctx.patchSession({
+      checkin: { lumbar: score(lumbar), knee: score(knee), energy, timeMinutes },
+      format, // sugerencia aplicada; el formato sigue siendo editable a mano
+    });
+    ctx.setModal(null);
+  };
+
+  return (
+    <>
+      <div className="grip"></div>
+      <h3>Check-in del día</h3>
+      <div className="sh-sub">Cómo llegás hoy. La sesión se ajusta a tu tiempo; el resto queda registrado para decidir mejor.</div>
+      <div className="field-row">
+        <div className="field"><label>Lumbar hoy (0–10)</label><input type="number" min={0} max={10} value={lumbar} onChange={(e) => setLumbar(e.target.value)} /></div>
+        <div className="field"><label>Rodilla hoy (0–10)</label><input type="number" min={0} max={10} value={knee} onChange={(e) => setKnee(e.target.value)} /></div>
+      </div>
+      <div className="field-row">
+        <div className="field">
+          <label>Energía</label>
+          <select value={energy} onChange={(e) => setEnergy(e.target.value as Energy)}>
+            <option value="baja">baja</option>
+            <option value="media">media</option>
+            <option value="alta">alta</option>
+          </select>
+        </div>
+        <div className="field">
+          <label>Tiempo disponible</label>
+          <select value={timeMinutes} onChange={(e) => setTimeMinutes(Number(e.target.value))}>
+            <option value={20}>~20 min</option>
+            <option value={30}>~30 min</option>
+            <option value={45}>~45 min</option>
+          </select>
+        </div>
+      </div>
+      <div className="sh-sub">Formato sugerido: <b>{FORMATS[format].name}</b> ({FORMATS[format].duration})</div>
+      <button className="btn btn-primary" onClick={save}>Guardar check-in</button>
     </>
   );
 }

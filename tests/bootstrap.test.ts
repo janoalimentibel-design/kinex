@@ -2,10 +2,10 @@
 // legacy, arranque en frío y re-arranque sin re-migrar.
 import 'fake-indexeddb/auto';
 import { expect, test } from 'vitest';
-import { bootstrap, replaceAll, toV1Data } from '../src/db/bootstrap';
+import { bootstrap, replaceAll, toExportData } from '../src/db/bootstrap';
 import { createDatabase } from '../src/db/database';
 import { LEGACY_STORAGE_KEY } from '../src/data/exercises';
-import { migrateV0toV1 } from '../src/db/migrate';
+import { migrateV0toV1, migrateV1toV2 } from '../src/db/migrate';
 
 let dbCount = 0;
 const freshDb = () => createDatabase(`kinex-test-${++dbCount}`);
@@ -58,8 +58,8 @@ test('localStorage corrupto: arranca vacío con aviso, sin lanzar', async () => 
 
 test('replaceAll + bootstrap reconstruyen exactamente los mismos datos (import de backup)', async () => {
   const db = freshDb();
-  const { data } = migrateV0toV1(legacyPayload);
+  const data = migrateV1toV2(migrateV0toV1(legacyPayload).data);
   await replaceAll(db, data, 'backup-v0');
   const result = await bootstrap(db, fakeStore(null));
-  expect(toV1Data(result.data)).toEqual(data);
+  expect(toExportData(result.data)).toEqual(data);
 });

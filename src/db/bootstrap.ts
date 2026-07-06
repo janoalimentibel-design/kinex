@@ -1,10 +1,11 @@
 // Flujo de arranque — ver docs/DATA_MODEL.md §6.
 // El localStorage legacy es SOLO-LECTURA: se lee una vez para migrar y nunca se
 // escribe ni se borra, así A2.8 congelada sigue funcionando con sus datos.
+// Las bases v1 existentes en IndexedDB se elevan a v2 por el upgrade de Dexie.
 import { LEGACY_STORAGE_KEY } from '../data/exercises';
 import type { KinexDB } from './database';
-import { migrateV0toV1 } from './migrate';
-import { createDefaultPlan, type CustomExercise, type Meta, type Plan, type Session, type V1Data } from './schema';
+import { migrateV0toV1, migrateV1toV2 } from './migrate';
+import { createDefaultPlan, type CustomExercise, type Meta, type Plan, type Session, type V2Data } from './schema';
 
 export interface AppData {
   sessions: Record<string, Session>;
@@ -22,7 +23,7 @@ interface LegacyStore {
   getItem(key: string): string | null;
 }
 
-export function toAppData(data: V1Data): AppData {
+export function toAppData(data: V2Data): AppData {
   return {
     sessions: Object.fromEntries(data.sessions.map((s) => [s.date, s])),
     custom: Object.fromEntries(data.customExercises.map((e) => [e.id, e])),
@@ -30,7 +31,7 @@ export function toAppData(data: V1Data): AppData {
   };
 }
 
-export function toV1Data(data: AppData): V1Data {
+export function toExportData(data: AppData): V2Data {
   return {
     sessions: Object.values(data.sessions).sort((a, b) => a.date.localeCompare(b.date)),
     customExercises: Object.values(data.custom),
@@ -38,8 +39,8 @@ export function toV1Data(data: AppData): V1Data {
   };
 }
 
-export async function replaceAll(db: KinexDB, data: V1Data, migratedFrom: Meta['migratedFrom']): Promise<void> {
-  const meta: Meta = { schemaVersion: 1, migratedFrom, migratedAt: new Date().toISOString() };
+export async function replaceAll(db: KinexDB, data: V2Data, migratedFrom: Meta['migratedFrom']): Promise<void> {
+  const meta: Meta = { schemaVersion: 2, migratedFrom, migratedAt: new Date().toISOString() };
   await db.transaction('rw', db.sessions, db.customExercises, db.kv, async () => {
     await Promise.all([db.sessions.clear(), db.customExercises.clear()]);
     await db.sessions.bulkPut(data.sessions);
@@ -75,10 +76,10 @@ export async function bootstrap(
   if (legacyRaw !== null) {
     let notice: string;
     let warnings: string[] = [];
-    let data: V1Data;
+    let data: V2Data;
     try {
       const result = migrateV0toV1(JSON.parse(legacyRaw));
-      data = result.data;
+      data = migrateV1toV2(result.data);
       warnings = result.warnings;
       notice = `Datos migrados de la versión anterior: ${data.sessions.length} sesiones y ${data.customExercises.length} ejercicios personalizados. Los datos originales quedan intactos en la versión A2.8.`;
     } catch {
@@ -90,7 +91,7 @@ export async function bootstrap(
     return { data: toAppData(data), migrationNotice: notice, warnings };
   }
 
-  const fresh: V1Data = { sessions: [], customExercises: [], plan: createDefaultPlan() };
+  const fresh: V2Data = { sessions: [], customExercises: [], plan: createDefaultPlan() };
   await replaceAll(db, fresh, 'fresh');
   return { data: toAppData(fresh), migrationNotice: null, warnings: [] };
 }

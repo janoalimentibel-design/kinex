@@ -1,6 +1,6 @@
 import type { ParsedBackup } from '../db/backup';
 import type { AppData } from '../db/bootstrap';
-import type { CustomExercise, GroupId, Plan, Session, V1Data } from '../db/schema';
+import type { CustomExercise, GroupId, Plan, Session, V2Data } from '../db/schema';
 import type { ExerciseMap } from '../logic/session';
 
 export type View = 'today' | 'lib' | 'hist' | 'plan';
@@ -10,6 +10,7 @@ export type ModalState =
   | { type: 'addToGroup'; group: GroupId }
   | { type: 'replace'; origId: string; group: GroupId }
   | { type: 'saveSession' }
+  | { type: 'checkin' }
   | { type: 'libInfo'; id: string }
   | { type: 'addCustom' }
   | { type: 'summary'; text: string }
@@ -28,5 +29,6 @@ export interface Ctx {
   patchSession(patch: Partial<Session>): void;
   putPlan(plan: Plan): void;
   putCustom(exercise: CustomExercise): void;
-  importAll(data: V1Data, source: 'v0' | 'v1'): Promise<void>;
+  importAll(data: V2Data, source: 'v0' | 'v1' | 'v2'): Promise<void>;
+  startRest(label: string, seconds: number): void;
 }

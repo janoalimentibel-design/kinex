@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { CATALOG } from '../data/exercises';
 import { bootstrap, replaceAll, toAppData, type AppData } from '../db/bootstrap';
 import { db } from '../db/instance';
-import type { CustomExercise, Plan, Session, V1Data } from '../db/schema';
+import type { CustomExercise, Plan, Session, V2Data } from '../db/schema';
 import { createSession, isoDate } from '../logic/session';
 import History from './History';
 import Library from './Library';
 import PlanView from './PlanView';
+import RestTimer, { type RestState } from './RestTimer';
 import { Sheet } from './sheets';
 import Today from './Today';
 import type { Ctx, ModalState, View } from './types';
@@ -21,6 +22,21 @@ export default function App() {
   const [view, setView] = useState<View>('today');
   const [curDate, setCurDate] = useState(() => isoDate(new Date()));
   const [modal, setModal] = useState<ModalState>(null);
+  const [rest, setRest] = useState<RestState | null>(null);
+
+  // Cuenta regresiva del descanso; al llegar a 0 vibra y se cierra sola.
+  useEffect(() => {
+    if (!rest) return;
+    if (rest.left <= 0) {
+      navigator.vibrate?.([200, 100, 200]);
+      const timeout = setTimeout(() => setRest(null), 4000);
+      return () => clearTimeout(timeout);
+    }
+    const interval = setInterval(() => {
+      setRest((r) => (r ? { ...r, left: r.left - 1 } : r));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [rest]);
 
   useEffect(() => {
     bootPromise ??= bootstrap(db);
@@ -58,10 +74,11 @@ export default function App() {
       setData((d) => (d ? { ...d, custom: { ...d.custom, [exercise.id]: exercise } } : d));
       void db.customExercises.put(exercise);
     },
-    importAll: async (v1: V1Data, source) => {
-      await replaceAll(db, v1, source === 'v0' ? 'backup-v0' : 'backup-v1');
-      setData(toAppData(v1));
+    importAll: async (v2: V2Data, source) => {
+      await replaceAll(db, v2, source === 'v0' ? 'backup-v0' : source === 'v1' ? 'backup-v1' : 'backup-v2');
+      setData(toAppData(v2));
     },
+    startRest: (label, seconds) => setRest({ label, left: seconds, total: seconds }),
   };
 
   const savedCount = Object.values(data.sessions).filter((s) => s.saved).length;
@@ -99,6 +116,14 @@ export default function App() {
       <div className={`view ${view === 'plan' ? 'show' : ''}`} id="view-plan">
         <PlanView ctx={ctx} />
       </div>
+
+      {rest && (
+        <RestTimer
+          rest={rest}
+          onExtend={() => setRest((r) => (r ? { ...r, left: r.left + 15, total: r.total + 15 } : r))}
+          onClose={() => setRest(null)}
+        />
+      )}
 
       <div className="nav">
         {tabs.map(([v, icon, label]) => (
