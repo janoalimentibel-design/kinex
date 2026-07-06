@@ -1,6 +1,9 @@
-# KINEX A3 — base profesional (Fase 1)
+# KINEX A3 — base profesional
 
-App personal mobile-first de entrenamiento: fuerza, control y movimiento. Migración de KINEX A2.8 a Vite + TypeScript + React + IndexedDB, conservando exactamente la UX, la estética oscura/neón y la compatibilidad de datos.
+App personal mobile-first de entrenamiento: fuerza, control y movimiento. Migración de KINEX A2.8 a Vite + TypeScript + React + IndexedDB, conservando exactamente la UX, la estética oscura/neón y la compatibilidad de datos. PWA instalable y 100% offline.
+
+**App en producción:** https://janoalimentibel-design.github.io/kinex/
+(en el teléfono: abrir la URL → "Añadir a pantalla de inicio" → funciona sin conexión)
 
 **Referencia estable congelada:** `../KINEX_A2.8_Batch2_finalizado/` (no modificar).
 **Modelo de datos y migraciones:** `docs/DATA_MODEL.md`.
@@ -15,9 +18,14 @@ npm run dev        # http://localhost:5173/
 ## Tests y build
 
 ```bash
-npm test           # Vitest: migración v0→v1, bootstrap, contratos de A2.6/A2.8
-npm run build      # tsc --noEmit + vite build → dist/
+npm test              # Vitest: migración v0→v1, bootstrap, contratos de A2.6/A2.8
+npm run test:e2e      # Playwright: flujos completos en 390×844 (requiere build previo)
+npm run check:assets  # duplicados por hash y fases faltantes
+npm run build         # tsc --noEmit + vite build + service worker → dist/
+npm run images        # regenera WebP desde assets-src/ (originales archivados)
 ```
+
+Cada push a `main` corre tests + chequeo de assets y despliega a GitHub Pages.
 
 ## Datos
 
