@@ -8,7 +8,11 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "images": "node scripts/optimize-images.mjs",
+    "icons": "node scripts/gen-icons.mjs",
+    "check:assets": "node scripts/check-assets.mjs"
   },
   "dependencies": {
     "dexie": "^4.0.11",
