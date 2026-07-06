@@ -58,3 +58,35 @@
 .rt-time{font-family:var(--disp);font-size:24px;color:var(--neon);letter-spacing:-.5px}
 .rt-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rt-btn{background:var(--card2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:8px 12px;font-size:13px}
+
+/* Fase 4 — racha */
+.streakcard{margin:0 14px 12px;padding:14px;background:var(--card);border:1px solid var(--line2);border-radius:var(--r);display:flex;align-items:baseline;gap:10px}
+.streakcard .sk-n{font-family:var(--disp);font-size:30px;color:var(--neon)}
+.streakcard .sk-t{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
+
+/* Fase 4 — calendario */
+.cal{margin:0 14px 12px;padding:14px;background:var(--card);border:1px solid var(--line2);border-radius:var(--r)}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-title{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--txt)}
+.cal-nav{width:34px;height:34px;border-radius:9px;background:var(--card2);border:1px solid var(--line2);color:var(--txt);font-size:17px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-dow{font-size:10px;color:var(--muted2);text-align:center;padding:4px 0;text-transform:uppercase}
+.cal-day{aspect-ratio:1;border-radius:9px;background:var(--card2);border:1px solid transparent;color:var(--muted);font-size:12.5px}
+.cal-day.trained{background:rgba(198,242,78,.14);border-color:rgba(198,242,78,.45);color:var(--neon);font-weight:700}
+.cal-day.today{border-color:var(--cool)}
+
+/* Fase 4 — gráficos */
+.chartwrap{width:100%}
+.chart{width:100%;height:auto;display:block}
+.chart .ch-grid{stroke:var(--line);stroke-width:1}
+.chart .ch-axis{fill:var(--muted2);font-size:9px;font-family:var(--body)}
+.chart .ch-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chart .ch-line.lumbar,.chart .ch-dot.lumbar{stroke:var(--cool)}
+.chart .ch-dot.lumbar{fill:var(--cool);opacity:1}
+.chart .ch-line.knee,.chart .ch-dot.knee{stroke:var(--warn)}
+.chart .ch-dot.knee{fill:var(--warn);opacity:1}
+.chart .ch-bar{fill:var(--neon);opacity:.85}
+.ch-legend{display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--muted)}
+.ch-legend .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.ch-legend .sw.lumbar{background:var(--cool)}
+.ch-legend .sw.knee{background:var(--warn)}

@@ -5,6 +5,9 @@ import { DIAS, FORMATS, GROUPS, MES } from '../data/exercises';
 import { parseBackup, serializeBackup, BackupError } from '../db/backup';
 import { toExportData } from '../db/bootstrap';
 import { buildExerciseList, isoDate } from '../logic/session';
+import { metricSeries, sessionsPerWeek, weeklyStreak } from '../logic/stats';
+import Calendar from './Calendar';
+import { MetricLines, WeekBars } from './charts';
 import { colorOf } from './media';
 import type { Ctx } from './types';
 
@@ -24,6 +27,10 @@ export default function History({ ctx }: { ctx: Ctx }) {
     if (diff <= 7 && diff >= -1) for (const g of s.groups) vol[g]++;
   }
   const max = Math.max(1, ...Object.values(vol));
+  const todayIso = isoDate(now);
+  const streak = weeklyStreak(data.sessions, todayIso);
+  const metrics = metricSeries(data.sessions, 12);
+  const weekCounts = sessionsPerWeek(data.sessions, 8, todayIso);
 
   const exportData = () => {
     const blob = new Blob([serializeBackup(toExportData(data))], { type: 'application/json' });
@@ -58,6 +65,25 @@ export default function History({ ctx }: { ctx: Ctx }) {
         <button className="iobtn" onClick={exportData}>Exportar backup</button>
         <button className="iobtn" onClick={() => fileRef.current?.click()}>Importar</button>
         <input ref={fileRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={(e) => void importData(e.target.files?.[0])} />
+      </div>
+
+      {streak > 0 && (
+        <div className="streakcard">
+          <span className="sk-n">{streak}</span>
+          <span className="sk-t">{streak === 1 ? 'semana activa' : 'semanas seguidas entrenando'}</span>
+        </div>
+      )}
+
+      <Calendar ctx={ctx} />
+
+      <div className="wkvol">
+        <div className="t">Lumbar y rodilla por sesión</div>
+        <MetricLines points={metrics} />
+      </div>
+
+      <div className="wkvol">
+        <div className="t">Sesiones por semana</div>
+        <WeekBars weeks={weekCounts} />
       </div>
       <div className="wkvol">
         <div className="t">Volumen últimos 7 días</div>
