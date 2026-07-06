@@ -23,7 +23,7 @@ test('check-in: sugiere formato por tiempo, muestra chip y aviso de molestia alt
   // formato aplicado + chip + nota de cuidado (lumbar 5 ≥ 4)
   await expect(page.locator('.segment button.on', { hasText: 'Largo' })).toBeVisible();
   await expect(page.locator('.checkin-chip')).toContainText('lumbar 5');
-  await expect(page.locator('.care-note')).toContainText('Molestia alta');
+  await expect(page.locator('.care-note')).toContainText('Lumbar 5/10');
 
   await page.reload();
   await expect(page.locator('.checkin-chip')).toContainText('lumbar 5');

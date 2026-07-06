@@ -109,3 +109,67 @@ export const CATALOG: Record<string, CatalogExercise> = {
   "burpee": {"id":"burpee","name":"Burpee","group":"core","modes":["sinpeso"],"level":"Avanzado","sets":"3","reps":"5–8","rest":"90s","tags":["impacto","avanzado"],"cues":["Bajá con control a la plancha, sin tirarte","Plancha sólida antes de volver","Salto chico o sin salto según tolerancia","Ritmo que permita técnica constante"],"errors":["Quebrar la lumbar al bajar al piso","Aterrizar rígido del salto","Sumar velocidad perdiendo forma"],"notes":"Avanzado, no sugerido al inicio."},
   "rot_expl": {"id":"rot_expl","name":"Rotaciones explosivas","group":"core","modes":["peso","sinpeso"],"level":"Avanzado","sets":"3","reps":"6–8 c/lado","rest":"90s","tags":["rotación","pádel","avanzado"],"cues":["Cadera y torso giran juntos","Girá con fuerza y frená con control","Pies pivotando con el giro","Empezá lento y sumá velocidad de a poco"],"errors":["Girar solo con los brazos","Frenar en seco con la lumbar","Cargar de más el primer día"],"notes":"Transferencia a pádel, fase posterior."},
 };
+
+// Progresiones/regresiones enlazadas por ejercicio (mismo grupo, dificultad ordenada).
+// El test de contrato valida ids existentes, mismo grupo y orden de nivel coherente.
+export const PROGRESSIONS: Record<string, { easier?: string; harder?: string }> = {
+  // pierna
+  step_bajo: { harder: 'step_medio' },
+  step_medio: { easier: 'step_bajo' },
+  wall_sit: { harder: 'spanish_squat' },
+  spanish_squat: { easier: 'wall_sit' },
+  sit_to_stand: { harder: 'lunge_back_assist' },
+  lunge_back_assist: { easier: 'sit_to_stand', harder: 'lunge_static' },
+  lunge_static: { easier: 'lunge_back_assist', harder: 'lunge_walk' },
+  lunge_walk: { easier: 'lunge_static' },
+  lunge_lateral: { easier: 'lunge_static' },
+  jump_rope: { easier: 'calf_machine' },
+  // espalda
+  dead_hang: { harder: 'active_hang' },
+  active_hang: { easier: 'dead_hang', harder: 'scap_pull' },
+  scap_pull: { easier: 'active_hang', harder: 'pullup_band' },
+  pullup_band: { easier: 'scap_pull', harder: 'pullup' },
+  pullup: { easier: 'pullup_band' },
+  band_pulldown: { harder: 'lat_pulldown_chest' },
+  lat_pulldown_chest: { easier: 'band_pulldown' },
+  lat_pulldown_back: { easier: 'lat_pulldown_chest' },
+  band_row: { harder: 'one_arm_row' },
+  one_arm_row: { easier: 'band_row' },
+  // pecho
+  incline_pushup: { harder: 'knee_pushup' },
+  knee_pushup: { easier: 'incline_pushup', harder: 'pushup' },
+  pushup: { easier: 'knee_pushup', harder: 'pause_pushup' },
+  pause_pushup: { easier: 'pushup', harder: 'ecc_pushup' },
+  ecc_pushup: { easier: 'pause_pushup' },
+  diamond_reg: { easier: 'pushup' },
+  top_hold: { harder: 'pushup' },
+  // hombro
+  wall_angels: { harder: 'ytw' },
+  ytw: { easier: 'wall_angels' },
+  serratus: { harder: 'shoulder_taps' },
+  shoulder_taps: { easier: 'serratus' },
+  band_sh_press: { harder: 'pike' },
+  pike: { easier: 'band_sh_press' },
+  // bíceps
+  supine_hang: { harder: 'chin_iso' },
+  chin_iso: { easier: 'supine_hang', harder: 'chin_assist' },
+  chin_assist: { easier: 'chin_iso' },
+  // tríceps
+  close_band: { harder: 'triceps_pushup' },
+  triceps_pushup: { easier: 'close_band', harder: 'diamond_tri' },
+  diamond_tri: { easier: 'triceps_pushup', harder: 'dips_assist' },
+  dips_assist: { easier: 'diamond_tri' },
+  // core
+  bracing_90: { harder: 'dead_bug' },
+  dead_bug: { easier: 'bracing_90', harder: 'bird_dog' },
+  bird_dog: { easier: 'dead_bug', harder: 'bear_hold' },
+  bear_hold: { easier: 'bird_dog' },
+  heel_taps: { harder: 'hollow_reg' },
+  hollow_reg: { easier: 'heel_taps' },
+  plank_short: { harder: 'side_plank' },
+  side_plank: { easier: 'plank_short' },
+  farmer: { harder: 'suitcase' },
+  suitcase: { easier: 'farmer' },
+  burpee: { easier: 'bear_hold' },
+  rot_expl: { easier: 'pallof' },
+};

@@ -1,7 +1,8 @@
 // Vista Hoy — port de renderStrip/renderDay/renderGroups/renderExercise de A2.8.
 import { useEffect, useState } from 'react';
-import { DIAS, FORMATS, GROUPS, MES } from '../data/exercises';
+import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
 import type { GroupId, Mode } from '../db/schema';
+import { computeAdjustments, progressionHint, type Adjustments } from '../logic/engine';
 import { buildExerciseList, isoDate, restSeconds, type SessionEntry } from '../logic/session';
 import { colorOf, hasImage, PhaseBlock } from './media';
 import { IconCaret, IconCheck } from './icons';
@@ -32,7 +33,8 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
   const [openEx, setOpenEx] = useState<Record<string, boolean>>({});
   useEffect(() => setOpenEx({}), [curDate]);
 
-  const list = buildExerciseList(session, allEx, data.sessions);
+  const adjustments = computeAdjustments(session, data.sessions);
+  const list = buildExerciseList(session, allEx, data.sessions, new Date(), adjustments.allow);
   const done = list.filter((x) => session.completed[x.id]).length;
   const pct = list.length ? Math.round((done / list.length) * 100) : 0;
   const d = new Date(curDate);
@@ -108,9 +110,9 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
             <button className="btn btn-ghost" onClick={() => ctx.setModal({ type: 'checkin' })}>◇ Check-in del día</button>
           </div>
         )}
-        {session.checkin && (session.checkin.lumbar >= 4 || session.checkin.knee >= 4) && (
+        {adjustments.reasons.length > 0 && (
           <div className="care-note">
-            Molestia alta hoy: bajá intensidad, evitá impacto y frená si algo empeora durante la sesión.
+            {adjustments.reasons.map((r, i) => <div key={i}>{r}</div>)}
           </div>
         )}
 
@@ -179,6 +181,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
                     key={entry.id}
                     ctx={ctx}
                     entry={entry}
+                    adjustments={adjustments}
                     open={Boolean(openEx[entry.id])}
                     toggleOpen={() => setOpenEx((o) => ({ ...o, [entry.id]: !o[entry.id] }))}
                     toggleDone={() => toggleDone(entry.id)}
@@ -193,9 +196,10 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
   );
 }
 
-function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
+function ExerciseCard({ ctx, entry, adjustments, open, toggleOpen, toggleDone }: {
   ctx: Ctx;
   entry: SessionEntry;
+  adjustments: Adjustments;
   open: boolean;
   toggleOpen: () => void;
   toggleDone: () => void;
@@ -211,6 +215,13 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
     delete completed[entry.id];
     ctx.patchSession({ extras: session.extras.filter((x) => x !== entry.id), completed });
   };
+
+  // Progresiones: los reemplazos se registran sobre el id ORIGINAL de la lista.
+  const origId = entry.from ?? entry.id;
+  const replaceWith = (targetId: string) =>
+    ctx.patchSession({ replacements: { ...session.replacements, [origId]: targetId }, saved: false });
+  const links = PROGRESSIONS[entry.id];
+  const hint = progressionHint(entry.id, session, ctx.data.sessions, allEx);
 
   return (
     <div className={`ex ${done ? 'done' : ''} ${open ? 'open' : ''}`}>
@@ -256,8 +267,21 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
             <br /><br />
             <b>Tags:</b> {e.tags.join(' · ')}
           </div>
+          {hint && (
+            <div className="prog-hint" onClick={() => replaceWith(hint.targetId)}>
+              ✦ Última vez RPE {hint.avgRpe.toFixed(1)} — {hint.type === 'harder' ? 'podés probar la progresión' : 'considerá la regresión'}: <b>{allEx[hint.targetId].name}</b>
+            </div>
+          )}
           <div className="card-actions">
-            <button className="btn btn-soft" onClick={() => ctx.setModal({ type: 'replace', origId: entry.from ?? entry.id, group: e.group as GroupId })}>Cambiar</button>
+            <button className="btn btn-soft" onClick={() => ctx.setModal({ type: 'replace', origId, group: e.group as GroupId })}>Cambiar</button>
+            {links?.easier && allEx[links.easier] && (
+              <button className="btn btn-soft prog-btn" onClick={() => replaceWith(links.easier!)}>↓ {allEx[links.easier].name}</button>
+            )}
+            {links?.harder && allEx[links.harder] && (
+              <button className="btn btn-soft prog-btn" onClick={() => replaceWith(links.harder!)}>
+                ↑ {allEx[links.harder].name}{adjustments.risky(allEx[links.harder]) ? ' ⚠' : ''}
+              </button>
+            )}
             {entry.src === 'extra' && <button className="btn btn-danger" onClick={removeExtra}>Quitar</button>}
           </div>
         </div>

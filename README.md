@@ -1,9 +1,13 @@
-# KINEX A3 — base profesional
+# KINEX A3 — app completa (v3.5.0)
 
-App personal mobile-first de entrenamiento: fuerza, control y movimiento. Migración de KINEX A2.8 a Vite + TypeScript + React + IndexedDB, conservando exactamente la UX, la estética oscura/neón y la compatibilidad de datos. PWA instalable y 100% offline.
+App personal mobile-first de entrenamiento: fuerza, control y movimiento. PWA instalable y 100% offline, con la UX y estética oscura/neón heredadas de A2.8 y compatibilidad total de datos.
+
+**Codex u otra IA: comenzar obligatoriamente por `START_HERE_CODEX.md`** (la única tarea pendiente son las imágenes de ejercicios; todo lo demás está terminado).
 
 **App en producción:** https://janoalimentibel-design.github.io/kinex/
 (en el teléfono: abrir la URL → "Añadir a pantalla de inicio" → funciona sin conexión)
+
+Funcionalidades: sesiones por grupos/formato/modo, biblioteca de 81 ejercicios con fichas técnicas específicas, check-in diario que ajusta la sesión, registro por serie (reps/kg/RPE), temporizador de descanso, progresiones/regresiones enlazadas, motor de sugerencias explicado, historial con gráficos de lumbar/rodilla, calendario mensual y racha, plan semanal, export/import de backups (v0/v1/v2).
 
 **Referencia estable congelada:** `../KINEX_A2.8_Batch2_finalizado/` (no modificar).
 **Modelo de datos y migraciones:** `docs/DATA_MODEL.md`.
@@ -29,12 +33,13 @@ Cada push a `main` corre tests + chequeo de assets y despliega a GitHub Pages.
 
 ## Datos
 
-- IndexedDB (Dexie) con `schemaVersion: 1`; validación Zod estricta.
+- IndexedDB (Dexie) con `schemaVersion: 2`; validación Zod estricta; las bases v1
+  del dispositivo se elevan solas con `db.version(2).upgrade()`.
 - Al primer arranque migra automáticamente los datos de A2.x desde la clave
   `localStorage` heredada (`kinex_A2_6_pullups_corregidas`), en **solo-lectura**:
   los datos originales de A2.8 nunca se tocan.
-- Backups: exporta JSON v1 con sobre versionado; importa backups v1 **y** v0
-  (A2.6/A2.7/A2.8) con vista previa antes de reemplazar.
+- Backups: exporta JSON v2 con sobre versionado; importa v2, v1 **y** v0
+  (A2.6/A2.7/A2.8) en cadena, con vista previa antes de reemplazar.
 
 ## Estructura
 

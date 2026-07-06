@@ -90,3 +90,11 @@
 .ch-legend .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 .ch-legend .sw.lumbar{background:var(--cool)}
 .ch-legend .sw.knee{background:var(--warn)}
+
+/* Fase 5 — progresiones y motor */
+.prog-hint{margin-bottom:12px;padding:10px 12px;background:rgba(198,242,78,.07);border:1px solid rgba(198,242,78,.3);border-radius:10px;font-size:12.5px;color:var(--muted);cursor:pointer}
+.prog-hint b{color:var(--neon)}
+.prog-btn{font-size:12px}
+.card-actions{flex-wrap:wrap}
+.riskflag{color:var(--warn);font-size:11px;font-weight:600}
+.proglinks{display:flex;flex-direction:column;gap:8px}

@@ -1,9 +1,10 @@
 // Todos los bottom-sheets de la app — ports de los open* de A2.8.
 // Nuevo respecto de A2.8: ImportPreviewSheet (vista previa antes de reemplazar datos).
 import { useState } from 'react';
-import { COMBOS, FORMATS, GROUPS } from '../data/exercises';
+import { COMBOS, FORMATS, GROUPS, PROGRESSIONS } from '../data/exercises';
 import type { ParsedBackup } from '../db/backup';
 import type { CustomExercise, Energy, GroupId, Level } from '../db/schema';
+import { computeAdjustments } from '../logic/engine';
 import { buildExerciseList, candidates, suggestedFormat } from '../logic/session';
 import { GalleryBlock } from './media';
 import type { Ctx, ModalState } from './types';
@@ -75,6 +76,7 @@ function ComboSheet({ ctx }: { ctx: Ctx }) {
 function AddToGroupSheet({ ctx, group }: { ctx: Ctx; group: GroupId }) {
   const current = buildExerciseList(ctx.session, ctx.allEx, ctx.data.sessions).map((x) => x.id);
   const opts = candidates(ctx.allEx, group, ctx.session.mode, true).filter((e) => !current.includes(e.id));
+  const { risky } = computeAdjustments(ctx.session, ctx.data.sessions);
 
   const add = (id: string) => {
     if (!ctx.session.extras.includes(id)) ctx.patchSession({ extras: [...ctx.session.extras, id], saved: false });
@@ -85,11 +87,11 @@ function AddToGroupSheet({ ctx, group }: { ctx: Ctx; group: GroupId }) {
     <>
       <div className="grip"></div>
       <h3>{GROUPS[group].label} · agregar</h3>
-      <div className="sh-sub">Incluye ejercicios avanzados para elegir manualmente.</div>
+      <div className="sh-sub">Incluye ejercicios avanzados para elegir manualmente. ⚠ = hoy convendría evitarlo según tu check-in.</div>
       {opts.length ? opts.map((e) => (
         <div className="swap-item" key={e.id} onClick={() => add(e.id)}>
           <div className="si-n">
-            <div className="nm">{e.name}</div>
+            <div className="nm">{e.name}{risky(e) && <span className="riskflag"> ⚠ hoy</span>}</div>
             <div className="mt">{e.sets}×{e.reps} · {e.level}</div>
           </div>
           <div className="si-add">+ sumar</div>
@@ -101,6 +103,7 @@ function AddToGroupSheet({ ctx, group }: { ctx: Ctx; group: GroupId }) {
 
 function ReplaceSheet({ ctx, origId, group }: { ctx: Ctx; origId: string; group: GroupId }) {
   const opts = candidates(ctx.allEx, group, ctx.session.mode, true).filter((e) => e.id !== origId);
+  const { risky } = computeAdjustments(ctx.session, ctx.data.sessions);
 
   const replace = (newId: string) => {
     ctx.patchSession({ replacements: { ...ctx.session.replacements, [origId]: newId }, saved: false });
@@ -111,11 +114,11 @@ function ReplaceSheet({ ctx, origId, group }: { ctx: Ctx; origId: string; group:
     <>
       <div className="grip"></div>
       <h3>Cambiar ejercicio</h3>
-      <div className="sh-sub">Reemplaza por otro de {GROUPS[group].label}.</div>
+      <div className="sh-sub">Reemplaza por otro de {GROUPS[group].label}. ⚠ = hoy convendría evitarlo según tu check-in.</div>
       {opts.map((e) => (
         <div className="swap-item" key={e.id} onClick={() => replace(e.id)}>
           <div className="si-n">
-            <div className="nm">{e.name}</div>
+            <div className="nm">{e.name}{risky(e) && <span className="riskflag"> ⚠ hoy</span>}</div>
             <div className="mt">{e.sets}×{e.reps} · {e.level} · {e.tags.slice(0, 3).join(' · ')}</div>
           </div>
           <div className="si-add">cambiar →</div>
@@ -247,6 +250,23 @@ function LibInfoSheet({ ctx, id }: { ctx: Ctx; id: string }) {
         <div className="stat"><div className="v">{e.rest}</div><div className="k">Descanso</div></div>
       </div>
       <GalleryBlock id={id} exercise={e} />
+      {(PROGRESSIONS[id]?.easier || PROGRESSIONS[id]?.harder) && (
+        <div className="block">
+          <div className="bt"><span className="bd"></span>Progresión</div>
+          <div className="proglinks">
+            {PROGRESSIONS[id]?.easier && ctx.allEx[PROGRESSIONS[id].easier!] && (
+              <button className="btn btn-soft prog-btn" onClick={() => ctx.setModal({ type: 'libInfo', id: PROGRESSIONS[id].easier! })}>
+                ↓ Más fácil: {ctx.allEx[PROGRESSIONS[id].easier!].name}
+              </button>
+            )}
+            {PROGRESSIONS[id]?.harder && ctx.allEx[PROGRESSIONS[id].harder!] && (
+              <button className="btn btn-soft prog-btn" onClick={() => ctx.setModal({ type: 'libInfo', id: PROGRESSIONS[id].harder! })}>
+                ↑ Más difícil: {ctx.allEx[PROGRESSIONS[id].harder!].name}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       {e.notes && (
         <div className="block">
           <div className="bt"><span className="bd"></span>{noteTitle}</div>

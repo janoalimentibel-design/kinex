@@ -97,18 +97,19 @@ export function buildExerciseList(
   all: ExerciseMap,
   sessions: Record<string, Session>,
   now: Date = new Date(),
+  allow: (e: CatalogExercise) => boolean = () => true, // filtro del motor (engine.ts) sobre la selección automática
 ): SessionEntry[] {
   const format = FORMATS[session.format as Format] ?? FORMATS.base;
   const entries: SessionEntry[] = [];
   for (const group of session.groups) {
-    for (const e of candidates(all, group, session.mode, false).slice(0, format.perGroup)) {
+    for (const e of candidates(all, group, session.mode, false).filter(allow).slice(0, format.perGroup)) {
       entries.push({ id: e.id, group, src: 'auto' });
     }
   }
   if (format.extraOne && session.groups.length === 2) {
     const target = extendedTargetGroup(session, sessions, now);
     const already = entries.map((x) => x.id);
-    const extra = candidates(all, target, session.mode, false).find((e) => !already.includes(e.id));
+    const extra = candidates(all, target, session.mode, false).filter(allow).find((e) => !already.includes(e.id));
     if (extra) entries.push({ id: extra.id, group: target, src: 'extra-auto' });
   }
   for (const id of session.extras) {
