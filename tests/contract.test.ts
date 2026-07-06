@@ -30,6 +30,16 @@ test('el catálogo conserva los 81 ejercicios con la distribución de A2.8', () 
   expect(byGroup).toEqual({ pierna: 15, espalda: 12, pecho: 10, hombro: 10, bicep: 10, tricep: 10, core: 14 });
 });
 
+test('ninguna ficha usa la plantilla genérica de cues heredada del prototipo', () => {
+  // La plantilla genérica de A2.8 ("Controlá el movimiento", ...) fue reemplazada
+  // por técnica específica en cada ficha; este test evita que vuelva a entrar.
+  for (const e of Object.values(CATALOG)) {
+    expect(e.cues.length, `${e.name}: sin puntos técnicos`).toBeGreaterThanOrEqual(3);
+    expect(e.errors.length, `${e.name}: sin errores comunes`).toBeGreaterThanOrEqual(2);
+    expect(e.cues[0], `${e.name}: cues genéricas`).not.toBe('Controlá el movimiento');
+  }
+});
+
 test('la sesión inicial conserva modo mixto y dos grupos', () => {
   const session = createSession('2026-06-27');
   expect(session.mode).toBe('mix');
