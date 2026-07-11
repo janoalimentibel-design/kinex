@@ -50,11 +50,21 @@ export const zSetEntry = z.object({
   done: z.boolean(),
 });
 
+// Foto fija de una sesión guardada. Evita que el historial cambie si el
+// catálogo automático se reorganiza o recibe ejercicios nuevos en el futuro.
+export const zExerciseLogEntry = z.object({
+  id: z.string(),
+  name: z.string(),
+  group: zGroupId,
+  completed: z.boolean(),
+});
+
 export const zSession = zSessionV1.extend({
   // Campos de v2 aceptados solo para que los backups históricos sigan importando.
   // La interfaz actual ya no los crea ni los utiliza.
   checkin: zCheckin.nullable().optional(),
   setLogs: z.record(z.string(), z.array(zSetEntry)).optional(),
+  exerciseLog: z.array(zExerciseLogEntry).optional(),
 });
 
 // El modo de un ejercicio concreto solo puede ser peso/sinpeso; 'mix' es un modo de sesión.
@@ -129,6 +139,7 @@ export type SessionV1 = z.infer<typeof zSessionV1>;
 export type Session = z.infer<typeof zSession>;
 export type Checkin = z.infer<typeof zCheckin>;
 export type SetEntry = z.infer<typeof zSetEntry>;
+export type ExerciseLogEntry = z.infer<typeof zExerciseLogEntry>;
 export type CustomExercise = z.infer<typeof zCustomExercise>;
 export type Plan = z.infer<typeof zPlan>;
 export type Meta = z.infer<typeof zMeta>;

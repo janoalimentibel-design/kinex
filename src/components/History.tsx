@@ -100,7 +100,13 @@ export default function History({ ctx }: { ctx: Ctx }) {
       <div>
         {saved.length ? saved.map((s) => {
           const date = new Date(s.date);
-          const exs = buildExerciseList(s, allEx, data.sessions);
+          const exs = s.exerciseLog ?? buildExerciseList(s, allEx, data.sessions).map((entry) => ({
+            id: entry.id,
+            name: allEx[entry.id]?.name ?? entry.id,
+            group: entry.group,
+            completed: Boolean(s.completed[entry.id]),
+          }));
+          const completed = exs.filter((exercise) => exercise.completed);
           return (
             <div className="hcard" key={s.date}>
               <div className="hd">{date.getDate()} {MES[date.getMonth()]}<small>{DIAS[date.getDay()]}</small></div>
@@ -110,11 +116,19 @@ export default function History({ ctx }: { ctx: Ctx }) {
                     <span key={i} className="gtag" style={{ background: colorOf(g), fontSize: 10 }}>{GROUPS[g].label}</span>
                   ))}
                 </div>
-                <div className="hrow"><b>{FORMATS[s.format].name}</b> · {s.mode} · {exs.length} ejercicios</div>
+                <div className="hrow"><b>{FORMATS[s.format].name}</b> · {s.mode} · {completed.length} de {exs.length} ejercicios hechos</div>
                 <div className="hrow">
                   Lumbar {s.metrics?.lumbarBefore ?? '-'}→{s.metrics?.lumbarAfter ?? '-'} · Rodilla {s.metrics?.knee ?? '-'} · Energía {s.metrics?.energy ?? '-'}
                 </div>
                 {s.metrics?.notes && <div className="hrow">“{s.metrics.notes}”</div>}
+                <details className="history-exercises">
+                  <summary>Ver ejercicios registrados</summary>
+                  {completed.length ? (
+                    <ul>
+                      {completed.map((exercise) => <li key={exercise.id}>✓ {exercise.name}</li>)}
+                    </ul>
+                  ) : <div className="hrow">No se marcaron ejercicios en esta sesión.</div>}
+                </details>
               </div>
             </div>
           );

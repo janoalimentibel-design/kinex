@@ -39,8 +39,19 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
   const days = weekDays();
   const format = FORMATS[session.format];
 
-  const toggleDone = (id: string) =>
-    ctx.patchSession({ completed: { ...session.completed, [id]: !session.completed[id] } });
+  const toggleDone = (id: string) => {
+    const completed = { ...session.completed, [id]: !session.completed[id] };
+    const source = session.exerciseLog ?? list.map((entry) => ({
+      id: entry.id,
+      name: allEx[entry.id]?.name ?? entry.id,
+      group: entry.group,
+      completed: Boolean(session.completed[entry.id]),
+    }));
+    ctx.patchSession({
+      completed,
+      exerciseLog: source.map((item) => item.id === id ? { ...item, completed: Boolean(completed[id]) } : item),
+    });
+  };
 
   const groupsInOrder = session.groups.filter((v, i, a) => a.indexOf(v) === i);
 

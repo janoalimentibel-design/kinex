@@ -135,9 +135,16 @@ function SaveSessionSheet({ ctx }: { ctx: Ctx }) {
   const score = (v: string) => Math.min(10, Math.max(0, Math.round(Number(v) || 0)));
 
   const save = () => {
+    const exerciseLog = buildExerciseList(ctx.session, ctx.allEx, ctx.data.sessions).map((entry) => ({
+      id: entry.id,
+      name: ctx.allEx[entry.id]?.name ?? entry.id,
+      group: entry.group,
+      completed: Boolean(ctx.session.completed[entry.id]),
+    }));
     ctx.patchSession({
       metrics: { lumbarBefore: score(lumbarBefore), lumbarAfter: score(lumbarAfter), knee: score(knee), energy, notes: notes.trim() },
       saved: true,
+      exerciseLog,
     });
     ctx.setModal(null);
   };
