@@ -2,11 +2,9 @@
 import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
 import type { GroupId, Mode } from '../db/schema';
-import { computeAdjustments, progressionHint, type Adjustments } from '../logic/engine';
 import { buildExerciseList, isoDate, restSeconds, type SessionEntry } from '../logic/session';
 import { colorOf, hasImage, PhaseBlock } from './media';
 import { IconCaret, IconCheck } from './icons';
-import SetLogger from './SetLogger';
 import type { Ctx } from './types';
 
 function weekDays(): Date[] {
@@ -33,8 +31,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
   const [openEx, setOpenEx] = useState<Record<string, boolean>>({});
   useEffect(() => setOpenEx({}), [curDate]);
 
-  const adjustments = computeAdjustments(session, data.sessions);
-  const list = buildExerciseList(session, allEx, data.sessions, new Date(), adjustments.allow);
+  const list = buildExerciseList(session, allEx, data.sessions);
   const done = list.filter((x) => session.completed[x.id]).length;
   const pct = list.length ? Math.round((done / list.length) * 100) : 0;
   const d = new Date(curDate);
@@ -99,22 +96,6 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
             <span><b>{session.groups.length}</b> grupos</span>
           </div>
         </div>
-
-        {session.checkin ? (
-          <div className="checkin-chip" onClick={() => ctx.setModal({ type: 'checkin' })}>
-            <span className="ck-dot"></span>
-            Check-in: lumbar <b>{session.checkin.lumbar}</b> · rodilla <b>{session.checkin.knee}</b> · energía <b>{session.checkin.energy}</b> · ~<b>{session.checkin.timeMinutes} min</b>
-          </div>
-        ) : (
-          <div className="checkin-cta">
-            <button className="btn btn-ghost" onClick={() => ctx.setModal({ type: 'checkin' })}>◇ Check-in del día</button>
-          </div>
-        )}
-        {adjustments.reasons.length > 0 && (
-          <div className="care-note">
-            {adjustments.reasons.map((r, i) => <div key={i}>{r}</div>)}
-          </div>
-        )}
 
         <div className="segwrap">
           <div className="seglabel">Formato</div>
@@ -181,7 +162,6 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
                     key={entry.id}
                     ctx={ctx}
                     entry={entry}
-                    adjustments={adjustments}
                     open={Boolean(openEx[entry.id])}
                     toggleOpen={() => setOpenEx((o) => ({ ...o, [entry.id]: !o[entry.id] }))}
                     toggleDone={() => toggleDone(entry.id)}
@@ -196,10 +176,9 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
   );
 }
 
-function ExerciseCard({ ctx, entry, adjustments, open, toggleOpen, toggleDone }: {
+function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
   ctx: Ctx;
   entry: SessionEntry;
-  adjustments: Adjustments;
   open: boolean;
   toggleOpen: () => void;
   toggleDone: () => void;
@@ -221,7 +200,6 @@ function ExerciseCard({ ctx, entry, adjustments, open, toggleOpen, toggleDone }:
   const replaceWith = (targetId: string) =>
     ctx.patchSession({ replacements: { ...session.replacements, [origId]: targetId }, saved: false });
   const links = PROGRESSIONS[entry.id];
-  const hint = progressionHint(entry.id, session, ctx.data.sessions, allEx);
 
   return (
     <div className={`ex ${done ? 'done' : ''} ${open ? 'open' : ''}`}>
@@ -250,7 +228,6 @@ function ExerciseCard({ ctx, entry, adjustments, open, toggleOpen, toggleDone }:
             <div className="stat"><div className="v">{e.reps}</div><div className="k">Reps</div></div>
             <div className="stat"><div className="v">{e.rest}</div><div className="k">Descanso</div></div>
           </div>
-          <SetLogger ctx={ctx} id={entry.id} exercise={e} />
           <button className="btn btn-soft rest-start" onClick={() => ctx.startRest(e.name, restSeconds(e.rest))}>
             ▶ Descanso {e.rest}
           </button>
@@ -267,11 +244,6 @@ function ExerciseCard({ ctx, entry, adjustments, open, toggleOpen, toggleDone }:
             <br /><br />
             <b>Tags:</b> {e.tags.join(' · ')}
           </div>
-          {hint && (
-            <div className="prog-hint" onClick={() => replaceWith(hint.targetId)}>
-              ✦ Última vez RPE {hint.avgRpe.toFixed(1)} — {hint.type === 'harder' ? 'podés probar la progresión' : 'considerá la regresión'}: <b>{allEx[hint.targetId].name}</b>
-            </div>
-          )}
           <div className="card-actions">
             <button className="btn btn-soft" onClick={() => ctx.setModal({ type: 'replace', origId, group: e.group as GroupId })}>Cambiar</button>
             {links?.easier && allEx[links.easier] && (
@@ -279,7 +251,7 @@ function ExerciseCard({ ctx, entry, adjustments, open, toggleOpen, toggleDone }:
             )}
             {links?.harder && allEx[links.harder] && (
               <button className="btn btn-soft prog-btn" onClick={() => replaceWith(links.harder!)}>
-                ↑ {allEx[links.harder].name}{adjustments.risky(allEx[links.harder]) ? ' ⚠' : ''}
+                ↑ {allEx[links.harder].name}
               </button>
             )}
             {entry.src === 'extra' && <button className="btn btn-danger" onClick={removeExtra}>Quitar</button>}

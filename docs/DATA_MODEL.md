@@ -4,13 +4,15 @@ Estado: **aprobado e implementado** (`src/db/`; tests en `tests/`)
 Fecha: 2026-07-05
 Base analizada: código real de A2.8 (`src/storage.js`, `src/app.js`, `src/data/exercises.js`)
 
+> Estado de interfaz actual: el check-in y el registro por serie/RPE fueron retirados. Los campos v2 se siguen aceptando únicamente para importar backups históricos; las sesiones nuevas no los crean ni los consultan.
+
 ## 1. Principios de diseño
 
 1. **Los datos del usuario valen más que la arquitectura.** Ninguna migración destruye la fuente original.
 2. **Los valores de los enums no cambian jamás** (`pierna`, `espalda`, `peso`, `sinpeso`, `mix`, `base`, `ext`, `long`, `Inicial`, `Progresivo`, `Avanzado`). Solo se renombran *campos*. Así la migración es un mapeo puro de nombres, sin reinterpretación semántica.
 3. **`localStorage` legacy es solo-lectura.** La app nueva lo lee una vez para migrar y nunca lo escribe ni lo borra. A2.8 congelada sigue funcionando intacta.
 4. **Todo backup viejo importa para siempre.** Un JSON exportado por A2.6/A2.7/A2.8 (sin `schemaVersion`) se detecta como v0 y pasa por la misma función de migración que el `localStorage`.
-5. **El catálogo de 81 ejercicios vive en código, no en la base.** Solo lo que crea el usuario (sesiones, ejercicios personalizados, plan) se persiste.
+5. **El catálogo de 132 ejercicios vive en código, no en la base.** Solo lo que crea el usuario (sesiones, ejercicios personalizados, plan) se persiste.
 
 ## 2. Formato actual (v0) — tal como existe hoy
 

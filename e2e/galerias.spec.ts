@@ -11,6 +11,12 @@ const GALLERIES: [string, string][] = [
   ['Dead Bug', 'dead-bug'],
   ['Bird Dog', 'bird-dog'],
   ['Wall Sit', 'wall-sit'],
+  ['Balance a una pierna', 'balance-una-pierna'],
+  ['Extensión de cuádriceps en máquina', 'extension-cuadriceps'],
+  ['Gemelos en máquina', 'gemelos-maquina'],
+  ['Active Hang', 'active-hang'],
+  ['Band Lat Pulldown', 'band-lat-pulldown'],
+  ['Band Pull-Apart', 'band-pull-apart-espalda'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;

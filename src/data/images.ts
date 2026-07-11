@@ -56,4 +56,52 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/wall-sit/final.webp',
     },
   },
+  balance_1: {
+    thumb: './assets/exercises/balance-una-pierna/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/balance-una-pierna/inicio.webp',
+      Medio: './assets/exercises/balance-una-pierna/medio.webp',
+      Final: './assets/exercises/balance-una-pierna/final.webp',
+    },
+  },
+  leg_ext: {
+    thumb: './assets/exercises/extension-cuadriceps/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/extension-cuadriceps/inicio.webp',
+      Medio: './assets/exercises/extension-cuadriceps/medio.webp',
+      Final: './assets/exercises/extension-cuadriceps/final.webp',
+    },
+  },
+  calf_machine: {
+    thumb: './assets/exercises/gemelos-maquina/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/gemelos-maquina/inicio.webp',
+      Medio: './assets/exercises/gemelos-maquina/medio.webp',
+      Final: './assets/exercises/gemelos-maquina/final.webp',
+    },
+  },
+  active_hang: {
+    thumb: './assets/exercises/active-hang/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/active-hang/inicio.webp',
+      Medio: './assets/exercises/active-hang/medio.webp',
+      Final: './assets/exercises/active-hang/final.webp',
+    },
+  },
+  band_pulldown: {
+    thumb: './assets/exercises/band-lat-pulldown/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/band-lat-pulldown/inicio.webp',
+      Medio: './assets/exercises/band-lat-pulldown/medio.webp',
+      Final: './assets/exercises/band-lat-pulldown/final.webp',
+    },
+  },
+  pull_apart_back: {
+    thumb: './assets/exercises/band-pull-apart-espalda/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/band-pull-apart-espalda/inicio.webp',
+      Medio: './assets/exercises/band-pull-apart-espalda/medio.webp',
+      Final: './assets/exercises/band-pull-apart-espalda/final.webp',
+    },
+  },
 };

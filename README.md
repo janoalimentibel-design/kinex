@@ -7,7 +7,7 @@ App personal mobile-first de entrenamiento: fuerza, control y movimiento. PWA in
 **App en producción:** https://janoalimentibel-design.github.io/kinex/
 (en el teléfono: abrir la URL → "Añadir a pantalla de inicio" → funciona sin conexión)
 
-Funcionalidades: sesiones por grupos/formato/modo, biblioteca de 81 ejercicios con fichas técnicas específicas, check-in diario que ajusta la sesión, registro por serie (reps/kg/RPE), temporizador de descanso, progresiones/regresiones enlazadas, motor de sugerencias explicado, historial con gráficos de lumbar/rodilla, calendario mensual y racha, plan semanal, export/import de backups (v0/v1/v2).
+Funcionalidades: sesiones por grupos/formato/modo, biblioteca de 132 ejercicios con fichas técnicas específicas, marcar cada ejercicio como hecho con un toque, temporizador de descanso, progresiones/regresiones manuales, historial con gráficos de lumbar/rodilla, calendario mensual y racha, plan semanal y export/import de backups (v0/v1/v2).
 
 **Referencia estable congelada:** `../KINEX_A2.8_Batch2_finalizado/` (no modificar).
 **Modelo de datos y migraciones:** `docs/DATA_MODEL.md`.

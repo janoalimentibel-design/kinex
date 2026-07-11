@@ -51,8 +51,10 @@ export const zSetEntry = z.object({
 });
 
 export const zSession = zSessionV1.extend({
-  checkin: zCheckin.nullable(),
-  setLogs: z.record(z.string(), z.array(zSetEntry)),
+  // Campos de v2 aceptados solo para que los backups históricos sigan importando.
+  // La interfaz actual ya no los crea ni los utiliza.
+  checkin: zCheckin.nullable().optional(),
+  setLogs: z.record(z.string(), z.array(zSetEntry)).optional(),
 });
 
 // El modo de un ejercicio concreto solo puede ser peso/sinpeso; 'mix' es un modo de sesión.

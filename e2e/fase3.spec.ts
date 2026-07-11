@@ -1,4 +1,4 @@
-// Fase 3 end-to-end: check-in diario, registro por serie y temporizador de descanso.
+// Flujo simple: marcar un ejercicio y descanso, sin check-in ni registro por serie.
 import { expect, test, type Page } from '@playwright/test';
 
 async function openApp(page: Page) {
@@ -10,47 +10,12 @@ test.beforeEach(({ page }) => {
   page.on('dialog', (dialog) => void dialog.accept());
 });
 
-test('check-in: sugiere formato por tiempo, muestra chip y aviso de molestia alta; persiste', async ({ page }) => {
+test('marcar un ejercicio como hecho persiste con un único toque', async ({ page }) => {
   await openApp(page);
-  await page.getByRole('button', { name: 'Check-in del día' }).click();
-
-  const sheet = page.locator('.sheet');
-  await sheet.locator('.field', { hasText: 'Lumbar hoy' }).locator('input').fill('5');
-  await sheet.locator('.field', { hasText: 'Tiempo disponible' }).locator('select').selectOption('45');
-  await expect(sheet).toContainText('Formato sugerido: Largo');
-  await page.getByRole('button', { name: 'Guardar check-in' }).click();
-
-  // formato aplicado + chip + nota de cuidado (lumbar 5 ≥ 4)
-  await expect(page.locator('.segment button.on', { hasText: 'Largo' })).toBeVisible();
-  await expect(page.locator('.checkin-chip')).toContainText('lumbar 5');
-  await expect(page.locator('.care-note')).toContainText('Lumbar 5/10');
-
-  await page.reload();
-  await expect(page.locator('.checkin-chip')).toContainText('lumbar 5');
-});
-
-test('registro por serie: completar todas las series marca el ejercicio y persiste', async ({ page }) => {
-  await openApp(page);
-  await page.locator('.ex .ex-head').first().click(); // abre la tarjeta
-
-  const card = page.locator('.ex.open');
-  const rows = card.locator('.setlog-row');
-  const count = await rows.count();
-  expect(count).toBeGreaterThanOrEqual(2);
-
-  for (let i = 0; i < count; i++) {
-    await rows.nth(i).locator('input').first().fill('10');
-    await rows.nth(i).locator('select').selectOption('8');
-    await rows.nth(i).locator('.setchk').click();
-  }
-
-  // todas las series hechas ⇒ ejercicio completado
+  await page.locator('.ex .chk').first().click();
   await expect(page.locator('.proglab')).toContainText('1 de 4');
   await expect(page.locator('.ex').first()).toHaveClass(/done/);
-
   await page.reload();
-  await page.locator('.ex .ex-head').first().click();
-  await expect(page.locator('.ex.open .setlog-row').first().locator('input').first()).toHaveValue('10');
   await expect(page.locator('.proglab')).toContainText('1 de 4');
 });
 

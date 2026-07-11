@@ -10,7 +10,6 @@ export type ModalState =
   | { type: 'addToGroup'; group: GroupId }
   | { type: 'replace'; origId: string; group: GroupId }
   | { type: 'saveSession' }
-  | { type: 'checkin' }
   | { type: 'libInfo'; id: string }
   | { type: 'addCustom' }
   | { type: 'summary'; text: string }

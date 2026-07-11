@@ -31,22 +31,6 @@
 .notice ul{margin:8px 0 8px 18px;color:var(--muted);font-size:12px}
 .notice .btn{margin-top:10px}
 
-/* Fase 3 — check-in */
-.checkin-cta{padding:0 14px;margin-bottom:10px}
-.checkin-cta .btn{width:100%}
-.checkin-chip{margin:0 14px 10px;padding:11px 14px;background:var(--card2);border:1px solid var(--line2);border-radius:var(--r);font-size:12.5px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.checkin-chip b{color:var(--txt)}
-.ck-dot{width:8px;height:8px;border-radius:50%;background:var(--neon);flex:none}
-.care-note{margin:0 14px 10px;padding:11px 14px;background:rgba(255,122,89,.08);border:1px solid rgba(255,122,89,.35);border-left:3px solid var(--warn);border-radius:var(--r);font-size:12.5px;color:var(--txt)}
-
-/* Fase 3 — registro por serie */
-.setlog-head,.setlog-row{display:grid;grid-template-columns:22px 1fr 1fr 72px 40px;gap:8px;align-items:center;margin-bottom:6px}
-.setlog-head{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px}
-.setlog-n{font-size:12px;color:var(--muted);text-align:center}
-.setlog-row input,.setlog-row select{width:100%;background:var(--card2);border:1px solid var(--line2);border-radius:8px;color:var(--txt);padding:8px 8px;font-size:14px;min-width:0}
-.setlog-row.done input,.setlog-row.done select{opacity:.55}
-.setchk{width:36px;height:36px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--muted2);font-size:15px}
-.setchk.on{background:var(--neon);border-color:var(--neon);color:#0a0c10;font-weight:700}
 .rest-start{width:100%;margin-bottom:12px}
 
 /* Fase 3 — temporizador de descanso */
@@ -91,10 +75,7 @@
 .ch-legend .sw.lumbar{background:var(--cool)}
 .ch-legend .sw.knee{background:var(--warn)}
 
-/* Fase 5 — progresiones y motor */
-.prog-hint{margin-bottom:12px;padding:10px 12px;background:rgba(198,242,78,.07);border:1px solid rgba(198,242,78,.3);border-radius:10px;font-size:12.5px;color:var(--muted);cursor:pointer}
-.prog-hint b{color:var(--neon)}
+/* Progresiones manuales */
 .prog-btn{font-size:12px}
 .card-actions{flex-wrap:wrap}
-.riskflag{color:var(--warn);font-size:11px;font-weight:600}
 .proglinks{display:flex;flex-direction:column;gap:8px}

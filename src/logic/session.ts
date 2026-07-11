@@ -43,8 +43,6 @@ export function createSession(date: string): Session {
     extras: [],
     saved: false,
     metrics: null,
-    checkin: null,
-    setLogs: {},
   };
 }
 
@@ -60,13 +58,6 @@ export function restSeconds(rest: string): number {
   if (!match) return 60;
   const value = Number(match[1]);
   return match[2] === 'min' ? value * 60 : value;
-}
-
-// Sugerencia de formato según el tiempo disponible del check-in.
-export function suggestedFormat(timeMinutes: number): Format {
-  if (timeMinutes <= 25) return 'base';
-  if (timeMinutes <= 35) return 'ext';
-  return 'long';
 }
 
 export function candidates(all: ExerciseMap, group: GroupId, mode: Mode, includeAdvanced = false): CatalogExercise[] {

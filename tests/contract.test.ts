@@ -22,12 +22,15 @@ test('formatos y grupos mantienen el contrato de A2.6', () => {
   expect(Object.keys(GROUPS)).toHaveLength(7);
 });
 
-test('el catálogo conserva los 81 ejercicios con la distribución de A2.8', () => {
+test('el catálogo incluye la base original y los ejercicios de fuerza solicitados', () => {
   const all = Object.values(CATALOG);
-  expect(all).toHaveLength(81);
+  expect(all).toHaveLength(132);
   const byGroup: Record<string, number> = {};
   for (const e of all) byGroup[e.group] = (byGroup[e.group] ?? 0) + 1;
-  expect(byGroup).toEqual({ pierna: 15, espalda: 12, pecho: 10, hombro: 10, bicep: 10, tricep: 10, core: 14 });
+  expect(byGroup).toEqual({ pierna: 34, espalda: 19, pecho: 15, hombro: 13, bicep: 15, tricep: 16, core: 20 });
+  for (const id of ['back_squat', 'romanian_deadlift', 'bench_press', 'dumbbell_curl', 'ab_wheel', 'rowing_erg']) {
+    expect(CATALOG[id], `falta ${id}`).toBeDefined();
+  }
 });
 
 test('ninguna ficha usa la plantilla genérica de cues heredada del prototipo', () => {
