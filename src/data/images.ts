@@ -160,4 +160,20 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/heel-taps/final.webp',
     },
   },
+  curl_band: {
+    thumb: './assets/exercises/curl-band/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/curl-band/inicio.webp',
+      Medio: './assets/exercises/curl-band/medio.webp',
+      Final: './assets/exercises/curl-band/final.webp',
+    },
+  },
+  pressdown_band: {
+    thumb: './assets/exercises/pressdown-band/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/pressdown-band/inicio.webp',
+      Medio: './assets/exercises/pressdown-band/medio.webp',
+      Final: './assets/exercises/pressdown-band/final.webp',
+    },
+  },
 };
