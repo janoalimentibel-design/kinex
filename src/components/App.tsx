@@ -50,7 +50,9 @@ export default function App() {
   if (!data) return <div className="boot">Cargando KINEX…</div>;
 
   const allEx = { ...CATALOG, ...data.custom };
-  const session = data.sessions[curDate] ?? createSession(curDate);
+  // Las sesiones aún no tocadas se generan considerando los grupos que ya
+  // elegiste en los días anteriores de la semana.
+  const session = data.sessions[curDate] ?? createSession(curDate, data.sessions);
 
   const putSession = (s: Session) => {
     setData((d) => (d ? { ...d, sessions: { ...d.sessions, [s.date]: s } } : d));
@@ -78,7 +80,8 @@ export default function App() {
       await replaceAll(db, v2, source === 'v0' ? 'backup-v0' : source === 'v1' ? 'backup-v1' : 'backup-v2');
       setData(toAppData(v2));
     },
-    startRest: (label, seconds) => setRest({ label, left: seconds, total: seconds }),
+    startRest: (label, seconds) => setRest({ label, left: seconds, total: seconds, kind: 'rest' }),
+    startTimer: (label, seconds) => setRest({ label, left: seconds, total: seconds, kind: 'work' }),
   };
 
   const savedCount = Object.values(data.sessions).filter((s) => s.saved).length;
@@ -100,7 +103,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.6</div>
+            <div className="version">v3.7</div>
           </div>
         </div>
       </div>

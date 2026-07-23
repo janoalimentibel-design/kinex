@@ -4,6 +4,7 @@ export interface RestState {
   label: string;
   left: number;
   total: number;
+  kind: 'rest' | 'work';
 }
 
 function fmt(seconds: number): string {
@@ -24,8 +25,8 @@ export default function RestTimer({ rest, onExtend, onClose }: {
       <div className="rt-bar" style={{ width: `${pct}%` }}></div>
       <div className="rt-row">
         <div className="rt-info">
-          <span className="rt-time">{finished ? '¡Listo!' : fmt(rest.left)}</span>
-          <span className="rt-label">{finished ? 'siguiente serie' : `descanso · ${rest.label}`}</span>
+          <span className="rt-time">{finished ? (rest.kind === 'work' ? '¡Tiempo!' : '¡Listo!') : fmt(rest.left)}</span>
+          <span className="rt-label">{finished ? (rest.kind === 'work' ? 'podés cambiar de lado o descansar' : 'siguiente serie') : `${rest.kind === 'work' ? 'trabajo' : 'descanso'} · ${rest.label}`}</span>
         </div>
         {!finished && <button className="rt-btn" onClick={onExtend}>+15s</button>}
         <button className="rt-btn" onClick={onClose}>✕</button>

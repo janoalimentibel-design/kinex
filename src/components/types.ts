@@ -30,4 +30,5 @@ export interface Ctx {
   putCustom(exercise: CustomExercise): void;
   importAll(data: V2Data, source: 'v0' | 'v1' | 'v2'): Promise<void>;
   startRest(label: string, seconds: number): void;
+  startTimer(label: string, seconds: number): void;
 }

@@ -21,6 +21,21 @@ function weekDays(): Date[] {
 
 const MODES: [Mode, string][] = [['peso', 'Con peso'], ['sinpeso', 'Sin peso'], ['mix', 'Mixto']];
 
+function workTimes(reps: string): number[] {
+  const range = reps.match(/(\d+)\s*[–-]\s*(\d+)\s*(min|s)/i);
+  if (range) {
+    const multiplier = range[3].toLowerCase() === 'min' ? 60 : 1;
+    return [Number(range[1]) * multiplier, Number(range[2]) * multiplier];
+  }
+  const single = reps.match(/(\d+)\s*(min|s)/i);
+  if (!single) return [];
+  return [Number(single[1]) * (single[2].toLowerCase() === 'min' ? 60 : 1)];
+}
+
+function timeLabel(seconds: number): string {
+  return seconds % 60 === 0 ? `${seconds / 60} min` : `${seconds}s`;
+}
+
 export default function Today({ ctx, notice, warnings, dismissNotice }: {
   ctx: Ctx;
   notice: string | null;
@@ -199,6 +214,7 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
   if (!e) return null;
   const done = session.completed[entry.id];
   const load = e.modes.includes('peso') && e.modes.includes('sinpeso') ? 'mixto' : e.modes.includes('peso') ? 'con peso' : 'sin peso';
+  const times = workTimes(e.reps);
 
   const removeExtra = () => {
     const completed = { ...session.completed };
@@ -236,9 +252,17 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
         <div className="ex-info">
           <div className="stats">
             <div className="stat"><div className="v">{e.sets}</div><div className="k">Series</div></div>
-            <div className="stat"><div className="v">{e.reps}</div><div className="k">Reps</div></div>
+            <div className="stat"><div className="v">{e.reps}</div><div className="k">{times.length ? 'Tiempo' : 'Reps'}</div></div>
             <div className="stat"><div className="v">{e.rest}</div><div className="k">Descanso</div></div>
           </div>
+          {times.length > 0 && (
+            <div className="work-timers">
+              <span>Tiempo de trabajo</span>
+              {times.map((seconds) => (
+                <button key={seconds} className="mini" onClick={() => ctx.startTimer(e.name, seconds)}>▶ {timeLabel(seconds)}</button>
+              ))}
+            </div>
+          )}
           <button className="btn btn-soft rest-start" onClick={() => ctx.startRest(e.name, restSeconds(e.rest))}>
             ▶ Descanso {e.rest}
           </button>

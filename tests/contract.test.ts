@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { expect, test } from 'vitest';
 import { CATALOG, FORMATS, GROUPS } from '../src/data/exercises';
 import { REAL_IMAGES } from '../src/data/images';
-import { buildExerciseList, createSession, isModeCompatible } from '../src/logic/session';
+import { buildExerciseList, createSession, isModeCompatible, suggestedGroups } from '../src/logic/session';
 
 test('las cuatro vistas y controles principales siguen presentes', () => {
   const sources = fs
@@ -24,11 +24,11 @@ test('formatos y grupos mantienen el contrato de A2.6', () => {
 
 test('el catálogo incluye la base original y los ejercicios de fuerza solicitados', () => {
   const all = Object.values(CATALOG);
-  expect(all).toHaveLength(132);
+  expect(all).toHaveLength(135);
   const byGroup: Record<string, number> = {};
   for (const e of all) byGroup[e.group] = (byGroup[e.group] ?? 0) + 1;
-  expect(byGroup).toEqual({ pierna: 34, espalda: 19, pecho: 15, hombro: 13, bicep: 15, tricep: 16, core: 20 });
-  for (const id of ['back_squat', 'romanian_deadlift', 'bench_press', 'dumbbell_curl', 'ab_wheel', 'rowing_erg']) {
+  expect(byGroup).toEqual({ pierna: 34, espalda: 19, pecho: 15, hombro: 13, bicep: 15, tricep: 16, core: 23 });
+  for (const id of ['back_squat', 'romanian_deadlift', 'bench_press', 'dumbbell_curl', 'ab_wheel', 'rowing_erg', 'reverse_crunch', 'russian_twist', 'bicycle_crunch']) {
     expect(CATALOG[id], `falta ${id}`).toBeDefined();
   }
 });
@@ -65,9 +65,18 @@ test('Base arma 4 ejercicios, Extendido 5 y Largo 6, sin avanzados automáticos'
   for (const entry of long) expect(CATALOG[entry.id].level).not.toBe('Avanzado');
 });
 
+test('Core propone un bloque mínimo de cuatro y los grupos anteriores reequilibran la semana', () => {
+  const session = { ...createSession('2026-07-07'), groups: ['pierna', 'core'] as ['pierna', 'core'] };
+  expect(buildExerciseList(session, CATALOG, {}).filter((entry) => entry.group === 'core')).toHaveLength(4);
+
+  const monday = { ...createSession('2026-07-06'), groups: ['pierna', 'core'] as ['pierna', 'core'] };
+  expect(suggestedGroups('2026-07-07', { '2026-07-06': monday })).not.toEqual(['pierna', 'core']);
+});
+
 test.each([
   ['Batch 1', ['pushup', 'pullup', 'step_bajo']],
   ['Batch 2', ['dead_bug', 'bird_dog', 'wall_sit']],
+  ['Batch Core', ['plank_short', 'side_plank', 'reverse_crunch']],
 ])('%s tiene tres assets externos distintos por ejercicio', (_batch, ids) => {
   for (const id of ids) {
     const phases = Object.values(REAL_IMAGES[id].phases);

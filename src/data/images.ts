@@ -104,4 +104,28 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/band-pull-apart-espalda/final.webp',
     },
   },
+  plank_short: {
+    thumb: './assets/exercises/plank-short/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/plank-short/inicio.webp',
+      Medio: './assets/exercises/plank-short/medio.webp',
+      Final: './assets/exercises/plank-short/final.webp',
+    },
+  },
+  side_plank: {
+    thumb: './assets/exercises/side-plank/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/side-plank/inicio.webp',
+      Medio: './assets/exercises/side-plank/medio.webp',
+      Final: './assets/exercises/side-plank/final.webp',
+    },
+  },
+  reverse_crunch: {
+    thumb: './assets/exercises/reverse-crunch/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/reverse-crunch/inicio.webp',
+      Medio: './assets/exercises/reverse-crunch/medio.webp',
+      Final: './assets/exercises/reverse-crunch/final.webp',
+    },
+  },
 };

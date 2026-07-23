@@ -1,13 +1,13 @@
-# KINEX A3 — app completa (v3.5.0)
+# KINEX A3 — app completa (v3.7.0)
 
 App personal mobile-first de entrenamiento: fuerza, control y movimiento. PWA instalable y 100% offline, con la UX y estética oscura/neón heredadas de A2.8 y compatibilidad total de datos.
 
-**Codex u otra IA: comenzar obligatoriamente por `START_HERE_CODEX.md`** (la única tarea pendiente son las imágenes de ejercicios; todo lo demás está terminado).
+**Codex u otra IA: comenzar obligatoriamente por `START_HERE_CODEX.md`.** Las prioridades vigentes son ampliar imágenes con revisión visual y responder los pedidos ingresados desde el Buzón para Codex.
 
 **App en producción:** https://janoalimentibel-design.github.io/kinex/
 (en el teléfono: abrir la URL → "Añadir a pantalla de inicio" → funciona sin conexión)
 
-Funcionalidades: sesiones por grupos/formato/modo, biblioteca de 132 ejercicios con fichas técnicas específicas, marcar cada ejercicio como hecho con un toque, temporizador de descanso, progresiones/regresiones manuales, historial con gráficos de lumbar/rodilla, calendario mensual y racha, plan semanal y export/import de backups (v0/v1/v2).
+Funcionalidades: sesiones por grupos/formato/modo, biblioteca de 135 ejercicios con fichas técnicas específicas, rotación de sugerencias por uso reciente, bloque mínimo de 4 ejercicios cuando se elige Core, temporizador de trabajo para ejercicios por tiempo, marcar cada ejercicio como hecho con un toque, historial con gráficos de lumbar/rodilla, plan semanal, Buzón para Codex mediante Issues de GitHub y export/import de backups (v0/v1/v2).
 
 **Referencia estable congelada:** `../KINEX_A2.8_Batch2_finalizado/` (no modificar).
 **Modelo de datos y migraciones:** `docs/DATA_MODEL.md`.
@@ -47,7 +47,7 @@ Cada push a `main` corre tests + chequeo de assets y despliega a GitHub Pages.
 src/
 ├── main.tsx            entrada
 ├── styles.css          estética oscura/neón heredada de A2.8
-├── data/               catálogo de 81 ejercicios + mapa de imágenes (código, no DB)
+├── data/               catálogo de 135 ejercicios + mapa de imágenes (código, no DB)
 ├── db/                 schema Zod, Dexie, migración v0→v1, backups, bootstrap
 ├── logic/              lógica pura de sesiones (portada 1:1 de A2.8)
 └── components/         las cuatro vistas + sheets
