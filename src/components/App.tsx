@@ -78,8 +78,8 @@ export default function App() {
       void db.customExercises.put(exercise);
     },
     importAll: async (v2: V2Data, source) => {
-      await replaceAll(db, v2, source === 'v0' ? 'backup-v0' : source === 'v1' ? 'backup-v1' : 'backup-v2');
-      setData(toAppData(v2));
+      const hydrated = await replaceAll(db, v2, source === 'v0' ? 'backup-v0' : source === 'v1' ? 'backup-v1' : 'backup-v2');
+      setData(toAppData(hydrated));
     },
     startRest: (label, seconds) => setRest({ label, left: seconds, total: seconds, kind: 'rest' }),
     startTimer: (label, seconds) => setRest({ label, left: seconds, total: seconds, kind: 'work' }),
@@ -105,7 +105,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.8</div>
+            <div className="version">v3.9</div>
           </div>
         </div>
       </div>

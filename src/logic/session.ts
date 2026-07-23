@@ -190,3 +190,31 @@ export function buildExerciseList(
     return { id: replacement, group: all[replacement]?.group ?? entry.group, src: 'reemplazo', from: entry.id };
   });
 }
+
+// Selector congelado de v3.6 y anteriores. Solo se usa para reconstruir la
+// foto fija de sesiones antiguas que no tenían exerciseLog. No debe usarse
+// para sugerencias nuevas: esas sí rotan según el historial reciente.
+export function buildLegacyExerciseList(session: Session, all: ExerciseMap, sessions: Record<string, Session>): SessionEntry[] {
+  const format = FORMATS[session.format as Format] ?? FORMATS.base;
+  const entries: SessionEntry[] = [];
+  for (const group of session.groups) {
+    for (const exercise of candidates(all, group, session.mode, false).slice(0, format.perGroup)) {
+      entries.push({ id: exercise.id, group, src: 'auto' });
+    }
+  }
+  if (format.extraOne && session.groups.length === 2) {
+    const target = extendedTargetGroup(session, sessions, new Date(`${session.date}T12:00:00`));
+    const already = entries.map((entry) => entry.id);
+    const extra = candidates(all, target, session.mode, false).find((exercise) => !already.includes(exercise.id));
+    if (extra) entries.push({ id: extra.id, group: target, src: 'extra-auto' });
+  }
+  for (const id of session.extras) {
+    const exercise = all[id];
+    if (exercise && session.groups.includes(exercise.group)) entries.push({ id, group: exercise.group, src: 'extra' });
+  }
+  return entries.map((entry) => {
+    const replacement = session.replacements[entry.id];
+    if (!replacement) return entry;
+    return { id: replacement, group: all[replacement]?.group ?? entry.group, src: 'reemplazo', from: entry.id };
+  });
+}
