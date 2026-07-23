@@ -1,4 +1,4 @@
-# KINEX A3 — app completa (v3.7.0)
+# KINEX A3 — app completa (v3.8.0)
 
 App personal mobile-first de entrenamiento: fuerza, control y movimiento. PWA instalable y 100% offline, con la UX y estética oscura/neón heredadas de A2.8 y compatibilidad total de datos.
 
@@ -7,7 +7,7 @@ App personal mobile-first de entrenamiento: fuerza, control y movimiento. PWA in
 **App en producción:** https://janoalimentibel-design.github.io/kinex/
 (en el teléfono: abrir la URL → "Añadir a pantalla de inicio" → funciona sin conexión)
 
-Funcionalidades: sesiones por grupos/formato/modo, biblioteca de 135 ejercicios con fichas técnicas específicas, rotación de sugerencias por uso reciente, bloque mínimo de 4 ejercicios cuando se elige Core, temporizador de trabajo para ejercicios por tiempo, marcar cada ejercicio como hecho con un toque, historial con gráficos de lumbar/rodilla, plan semanal, Buzón para Codex mediante Issues de GitHub y export/import de backups (v0/v1/v2).
+Funcionalidades: sesiones por grupos/formato/modo, biblioteca de 135 ejercicios con fichas técnicas específicas, rotación de sugerencias por uso reciente, bloque mínimo de 4 ejercicios cuando se elige Core, temporizador de trabajo para ejercicios por tiempo, marcar cada ejercicio como hecho con un toque, historial con gráficos de lumbar/rodilla, plan semanal, pestaña visible de Pedidos para Codex mediante Issues de GitHub y export/import de backups (v0/v1/v2).
 
 **Referencia estable congelada:** `../KINEX_A2.8_Batch2_finalizado/` (no modificar).
 **Modelo de datos y migraciones:** `docs/DATA_MODEL.md`.

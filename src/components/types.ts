@@ -3,7 +3,7 @@ import type { AppData } from '../db/bootstrap';
 import type { CustomExercise, GroupId, Plan, Session, V2Data } from '../db/schema';
 import type { ExerciseMap } from '../logic/session';
 
-export type View = 'today' | 'lib' | 'hist' | 'plan';
+export type View = 'today' | 'lib' | 'hist' | 'plan' | 'requests';
 
 export type ModalState =
   | { type: 'combo' }

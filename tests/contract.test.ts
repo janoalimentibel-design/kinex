@@ -5,13 +5,13 @@ import { CATALOG, FORMATS, GROUPS } from '../src/data/exercises';
 import { REAL_IMAGES } from '../src/data/images';
 import { buildExerciseList, createSession, isModeCompatible, suggestedGroups } from '../src/logic/session';
 
-test('las cuatro vistas y controles principales siguen presentes', () => {
+test('las vistas y controles principales siguen presentes', () => {
   const sources = fs
     .readdirSync(new URL('../src/components', import.meta.url))
     .map((f) => fs.readFileSync(new URL('../src/components/' + f, import.meta.url), 'utf8'))
     .join('\n');
-  for (const id of ['view-today', 'view-lib', 'view-hist', 'view-plan']) expect(sources).toContain(id);
-  for (const label of ['Marcar hecha', 'Exportar backup', 'Importar', 'Copiar resumen']) expect(sources).toContain(label);
+  for (const id of ['view-today', 'view-lib', 'view-hist', 'view-plan', 'view-requests']) expect(sources).toContain(id);
+  for (const label of ['Marcar hecha', 'Exportar backup', 'Importar', 'Copiar resumen', 'Enviar a GitHub']) expect(sources).toContain(label);
 });
 
 test('formatos y grupos mantienen el contrato de A2.6', () => {

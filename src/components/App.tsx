@@ -7,6 +7,7 @@ import { createSession, isoDate } from '../logic/session';
 import History from './History';
 import Library from './Library';
 import PlanView from './PlanView';
+import Requests from './Requests';
 import RestTimer, { type RestState } from './RestTimer';
 import { Sheet } from './sheets';
 import Today from './Today';
@@ -90,6 +91,7 @@ export default function App() {
     ['lib', '▥', 'Biblioteca'],
     ['hist', '↗', 'Historial'],
     ['plan', '☰', 'Plan'],
+    ['requests', '✎', 'Pedidos'],
   ];
 
   return (
@@ -103,7 +105,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.7</div>
+            <div className="version">v3.8</div>
           </div>
         </div>
       </div>
@@ -119,6 +121,9 @@ export default function App() {
       </div>
       <div className={`view ${view === 'plan' ? 'show' : ''}`} id="view-plan">
         <PlanView ctx={ctx} />
+      </div>
+      <div className={`view ${view === 'requests' ? 'show' : ''}`} id="view-requests">
+        <Requests ctx={ctx} />
       </div>
 
       {rest && (
