@@ -128,4 +128,36 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/reverse-crunch/final.webp',
     },
   },
+  face_pull: {
+    thumb: './assets/exercises/face-pull/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/face-pull/inicio.webp',
+      Medio: './assets/exercises/face-pull/medio.webp',
+      Final: './assets/exercises/face-pull/final.webp',
+    },
+  },
+  band_sh_press: {
+    thumb: './assets/exercises/band-sh-press/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/band-sh-press/inicio.webp',
+      Medio: './assets/exercises/band-sh-press/medio.webp',
+      Final: './assets/exercises/band-sh-press/final.webp',
+    },
+  },
+  pallof: {
+    thumb: './assets/exercises/pallof/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/pallof/inicio.webp',
+      Medio: './assets/exercises/pallof/medio.webp',
+      Final: './assets/exercises/pallof/final.webp',
+    },
+  },
+  heel_taps: {
+    thumb: './assets/exercises/heel-taps/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/heel-taps/inicio.webp',
+      Medio: './assets/exercises/heel-taps/medio.webp',
+      Final: './assets/exercises/heel-taps/final.webp',
+    },
+  },
 };
