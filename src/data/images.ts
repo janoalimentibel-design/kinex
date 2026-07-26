@@ -5,6 +5,8 @@
 export interface ExerciseImages {
   thumb: string;
   phases: { Inicio: string; Medio: string; Final: string };
+  /** Los isométricos muestran una postura útil, no tres fotogramas artificiales. */
+  display?: 'sequence' | 'hold';
 }
 
 export const REAL_IMAGES: Record<string, ExerciseImages> = {
@@ -81,6 +83,7 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   active_hang: {
+    display: 'hold',
     thumb: './assets/exercises/active-hang/thumb.webp',
     phases: {
       Inicio: './assets/exercises/active-hang/inicio.webp',
@@ -105,6 +108,7 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   plank_short: {
+    display: 'hold',
     thumb: './assets/exercises/plank-short/thumb.webp',
     phases: {
       Inicio: './assets/exercises/plank-short/inicio.webp',
@@ -113,6 +117,7 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   side_plank: {
+    display: 'hold',
     thumb: './assets/exercises/side-plank/thumb.webp',
     phases: {
       Inicio: './assets/exercises/side-plank/inicio.webp',
@@ -174,6 +179,22 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Inicio: './assets/exercises/pressdown-band/inicio.webp',
       Medio: './assets/exercises/pressdown-band/medio.webp',
       Final: './assets/exercises/pressdown-band/final.webp',
+    },
+  },
+  back_squat: {
+    thumb: './assets/exercises/back-squat/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/back-squat/inicio.webp',
+      Medio: './assets/exercises/back-squat/medio.webp',
+      Final: './assets/exercises/back-squat/final.webp',
+    },
+  },
+  hip_thrust: {
+    thumb: './assets/exercises/hip-thrust/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/hip-thrust/inicio.webp',
+      Medio: './assets/exercises/hip-thrust/medio.webp',
+      Final: './assets/exercises/hip-thrust/final.webp',
     },
   },
 };

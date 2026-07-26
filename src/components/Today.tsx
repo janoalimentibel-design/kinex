@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
 import type { GroupId, Mode } from '../db/schema';
 import { buildExerciseList, isoDate, restSeconds, type SessionEntry } from '../logic/session';
-import { colorOf, hasImage, PhaseBlock } from './media';
+import { colorOf, hasImage, isHoldImage, PhaseBlock } from './media';
 import { IconCaret, IconCheck } from './icons';
 import type { Ctx } from './types';
 
@@ -246,8 +246,10 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
         <IconCaret />
       </div>
       <div className="ex-body">
-        <div className="phases">
-          {(['Inicio', 'Medio', 'Final'] as const).map((p) => <PhaseBlock key={p} id={entry.id} exercise={e} label={p} />)}
+        <div className={`phases ${isHoldImage(entry.id) ? 'hold-phases' : ''}`}>
+          {isHoldImage(entry.id)
+            ? <PhaseBlock id={entry.id} exercise={e} label="Posición" />
+            : (['Inicio', 'Medio', 'Final'] as const).map((p) => <PhaseBlock key={p} id={entry.id} exercise={e} label={p} />)}
         </div>
         <div className="ex-info">
           <div className="stats">

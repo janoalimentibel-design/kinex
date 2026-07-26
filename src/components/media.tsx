@@ -11,8 +11,14 @@ export function hasImage(id: string): boolean {
   return Boolean(REAL_IMAGES[id]);
 }
 
-export function PhaseBlock({ id, exercise, label }: { id: string; exercise: CatalogExercise; label: 'Inicio' | 'Medio' | 'Final' }) {
-  const src = REAL_IMAGES[id]?.phases[label];
+export function isHoldImage(id: string): boolean {
+  return REAL_IMAGES[id]?.display === 'hold';
+}
+
+type ImageLabel = 'Inicio' | 'Medio' | 'Final' | 'Posición';
+
+export function PhaseBlock({ id, exercise, label }: { id: string; exercise: CatalogExercise; label: ImageLabel }) {
+  const src = REAL_IMAGES[id]?.phases[label === 'Posición' ? 'Inicio' : label];
   if (src) {
     return (
       <div className="phase">
@@ -52,18 +58,19 @@ export function LibThumb({ id, exercise }: { id: string; exercise: CatalogExerci
 export function GalleryBlock({ id, exercise }: { id: string; exercise: CatalogExercise }) {
   const batch = REAL_IMAGES[id];
   if (!batch) return null;
+  const labels: ImageLabel[] = batch.display === 'hold' ? ['Posición'] : ['Inicio', 'Medio', 'Final'];
   return (
     <div className="block">
-      <div className="bt"><span className="bd"></span>Fotos del movimiento</div>
-      <div className="lib-gallery">
-        {(['Inicio', 'Medio', 'Final'] as const).map((label) => (
+      <div className="bt"><span className="bd"></span>{batch.display === 'hold' ? 'Postura del ejercicio' : 'Fotos del movimiento'}</div>
+      <div className={`lib-gallery ${batch.display === 'hold' ? 'hold-gallery' : ''}`}>
+        {labels.map((label) => (
           <div className="shot" key={label}>
-            <img src={batch.phases[label]} alt={`${exercise.name} ${label}`} loading="lazy" />
+            <img src={batch.phases[label === 'Posición' ? 'Inicio' : label]} alt={`${exercise.name} ${label}`} loading="lazy" />
             <span className="phase-lab-inline">{label}</span>
           </div>
         ))}
       </div>
-      <div className="batch-note">Fotos limpias integradas.</div>
+      <div className="batch-note">{batch.display === 'hold' ? 'Ejercicio isométrico: mantené esta posición con técnica.' : 'Secuencia del movimiento integrada.'}</div>
     </div>
   );
 }
