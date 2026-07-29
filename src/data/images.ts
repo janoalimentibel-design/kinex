@@ -381,4 +381,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/lying-leg-curl/final.webp',
     },
   },
+  front_squat: {
+    thumb: './assets/exercises/front-squat/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/front-squat/inicio.webp',
+      Medio: './assets/exercises/front-squat/medio.webp',
+      Final: './assets/exercises/front-squat/final.webp',
+    },
+  },
 };
