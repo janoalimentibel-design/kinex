@@ -109,28 +109,28 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
   },
   plank_short: {
     display: 'hold',
-    thumb: './assets/exercises/plank-short/thumb.webp',
+    thumb: './assets/exercises/plank-full-v2/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/plank-short/inicio.webp',
-      Medio: './assets/exercises/plank-short/medio.webp',
-      Final: './assets/exercises/plank-short/final.webp',
+      Inicio: './assets/exercises/plank-full-v2/inicio.webp',
+      Medio: './assets/exercises/plank-full-v2/medio.webp',
+      Final: './assets/exercises/plank-full-v2/final.webp',
     },
   },
   side_plank: {
     display: 'hold',
-    thumb: './assets/exercises/side-plank/thumb.webp',
+    thumb: './assets/exercises/side-plank-full-v2/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/side-plank/inicio.webp',
-      Medio: './assets/exercises/side-plank/medio.webp',
-      Final: './assets/exercises/side-plank/final.webp',
+      Inicio: './assets/exercises/side-plank-full-v2/inicio.webp',
+      Medio: './assets/exercises/side-plank-full-v2/medio.webp',
+      Final: './assets/exercises/side-plank-full-v2/final.webp',
     },
   },
   reverse_crunch: {
-    thumb: './assets/exercises/reverse-crunch/thumb.webp',
+    thumb: './assets/exercises/reverse-crunch-v2/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/reverse-crunch/inicio.webp',
-      Medio: './assets/exercises/reverse-crunch/medio.webp',
-      Final: './assets/exercises/reverse-crunch/final.webp',
+      Inicio: './assets/exercises/reverse-crunch-v2/inicio.webp',
+      Medio: './assets/exercises/reverse-crunch-v2/medio.webp',
+      Final: './assets/exercises/reverse-crunch-v2/final.webp',
     },
   },
   face_pull: {
@@ -291,6 +291,22 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Inicio: './assets/exercises/crunch/inicio.webp',
       Medio: './assets/exercises/crunch/medio.webp',
       Final: './assets/exercises/crunch/final.webp',
+    },
+  },
+  russian_twist: {
+    thumb: './assets/exercises/russian-twist/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/russian-twist/inicio.webp',
+      Medio: './assets/exercises/russian-twist/medio.webp',
+      Final: './assets/exercises/russian-twist/final.webp',
+    },
+  },
+  bicycle_crunch: {
+    thumb: './assets/exercises/bicycle-crunch/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/bicycle-crunch/inicio.webp',
+      Medio: './assets/exercises/bicycle-crunch/medio.webp',
+      Final: './assets/exercises/bicycle-crunch/final.webp',
     },
   },
 };
