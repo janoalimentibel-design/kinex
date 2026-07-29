@@ -357,4 +357,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/seated-row-machine/final.webp',
     },
   },
+  pec_deck: {
+    thumb: './assets/exercises/pec-deck/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/pec-deck/inicio.webp',
+      Medio: './assets/exercises/pec-deck/medio.webp',
+      Final: './assets/exercises/pec-deck/final.webp',
+    },
+  },
 };
