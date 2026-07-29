@@ -461,4 +461,28 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/cable-glute-kickback/final.webp',
     },
   },
+  glute_bridge: {
+    thumb: './assets/exercises/glute-bridge/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/glute-bridge/inicio.webp',
+      Medio: './assets/exercises/glute-bridge/medio.webp',
+      Final: './assets/exercises/glute-bridge/final.webp',
+    },
+  },
+  cable_low_row: {
+    thumb: './assets/exercises/cable-low-row/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/cable-low-row/inicio.webp',
+      Medio: './assets/exercises/cable-low-row/medio.webp',
+      Final: './assets/exercises/cable-low-row/final.webp',
+    },
+  },
+  french_press: {
+    thumb: './assets/exercises/french-press/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/french-press/inicio.webp',
+      Medio: './assets/exercises/french-press/medio.webp',
+      Final: './assets/exercises/french-press/final.webp',
+    },
+  },
 };
