@@ -325,4 +325,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/burpee/final.webp',
     },
   },
+  jumping_jacks: {
+    thumb: './assets/exercises/jumping-jacks/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/jumping-jacks/inicio.webp',
+      Medio: './assets/exercises/jumping-jacks/medio.webp',
+      Final: './assets/exercises/jumping-jacks/final.webp',
+    },
+  },
 };
