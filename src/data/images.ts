@@ -429,4 +429,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/dumbbell-curl/final.webp',
     },
   },
+  rope_pressdown: {
+    thumb: './assets/exercises/rope-pressdown/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/rope-pressdown/inicio.webp',
+      Medio: './assets/exercises/rope-pressdown/medio.webp',
+      Final: './assets/exercises/rope-pressdown/final.webp',
+    },
+  },
 };
