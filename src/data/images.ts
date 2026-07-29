@@ -397,4 +397,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/hack-squat/final.webp',
     },
   },
+  cable_crossover: {
+    thumb: './assets/exercises/cable-crossover/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/cable-crossover/inicio.webp',
+      Medio: './assets/exercises/cable-crossover/medio.webp',
+      Final: './assets/exercises/cable-crossover/final.webp',
+    },
+  },
 };
