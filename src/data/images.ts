@@ -405,4 +405,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/cable-crossover/final.webp',
     },
   },
+  barbell_military_press: {
+    thumb: './assets/exercises/barbell-military-press/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/barbell-military-press/inicio.webp',
+      Medio: './assets/exercises/barbell-military-press/medio.webp',
+      Final: './assets/exercises/barbell-military-press/final.webp',
+    },
+  },
 };
