@@ -341,4 +341,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/jump-rope/final.webp',
     },
   },
+  lat_pulldown_chest: {
+    thumb: './assets/exercises/lat-pulldown-chest/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/lat-pulldown-chest/inicio.webp',
+      Medio: './assets/exercises/lat-pulldown-chest/medio.webp',
+      Final: './assets/exercises/lat-pulldown-chest/final.webp',
+    },
+  },
 };
