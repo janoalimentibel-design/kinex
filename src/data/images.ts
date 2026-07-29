@@ -389,4 +389,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/front-squat/final.webp',
     },
   },
+  hack_squat: {
+    thumb: './assets/exercises/hack-squat/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/hack-squat/inicio.webp',
+      Medio: './assets/exercises/hack-squat/medio.webp',
+      Final: './assets/exercises/hack-squat/final.webp',
+    },
+  },
 };
