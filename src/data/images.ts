@@ -421,4 +421,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/lateral-raise-db/final.webp',
     },
   },
+  dumbbell_curl: {
+    thumb: './assets/exercises/dumbbell-curl/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/dumbbell-curl/inicio.webp',
+      Medio: './assets/exercises/dumbbell-curl/medio.webp',
+      Final: './assets/exercises/dumbbell-curl/final.webp',
+    },
+  },
 };
