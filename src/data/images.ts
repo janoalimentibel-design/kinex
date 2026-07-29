@@ -413,4 +413,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/barbell-military-press/final.webp',
     },
   },
+  lateral_raise_db: {
+    thumb: './assets/exercises/lateral-raise-db/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/lateral-raise-db/inicio.webp',
+      Medio: './assets/exercises/lateral-raise-db/medio.webp',
+      Final: './assets/exercises/lateral-raise-db/final.webp',
+    },
+  },
 };
