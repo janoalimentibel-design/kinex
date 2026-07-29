@@ -365,4 +365,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/pec-deck/final.webp',
     },
   },
+  seated_leg_curl: {
+    thumb: './assets/exercises/seated-leg-curl/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/seated-leg-curl/inicio.webp',
+      Medio: './assets/exercises/seated-leg-curl/medio.webp',
+      Final: './assets/exercises/seated-leg-curl/final.webp',
+    },
+  },
 };
