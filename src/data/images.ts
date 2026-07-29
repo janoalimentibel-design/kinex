@@ -349,4 +349,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/lat-pulldown-chest/final.webp',
     },
   },
+  seated_row_machine: {
+    thumb: './assets/exercises/seated-row-machine/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/seated-row-machine/inicio.webp',
+      Medio: './assets/exercises/seated-row-machine/medio.webp',
+      Final: './assets/exercises/seated-row-machine/final.webp',
+    },
+  },
 };
