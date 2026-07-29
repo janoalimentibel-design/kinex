@@ -317,4 +317,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/mountain-climber/final.webp',
     },
   },
+  burpee: {
+    thumb: './assets/exercises/burpee/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/burpee/inicio.webp',
+      Medio: './assets/exercises/burpee/medio.webp',
+      Final: './assets/exercises/burpee/final.webp',
+    },
+  },
 };
