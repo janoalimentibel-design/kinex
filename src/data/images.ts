@@ -437,4 +437,28 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/rope-pressdown/final.webp',
     },
   },
+  hammer_curl_db: {
+    thumb: './assets/exercises/hammer-curl-db/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/hammer-curl-db/inicio.webp',
+      Medio: './assets/exercises/hammer-curl-db/medio.webp',
+      Final: './assets/exercises/hammer-curl-db/final.webp',
+    },
+  },
+  bench_triceps_dip: {
+    thumb: './assets/exercises/bench-triceps-dip/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/bench-triceps-dip/inicio.webp',
+      Medio: './assets/exercises/bench-triceps-dip/medio.webp',
+      Final: './assets/exercises/bench-triceps-dip/final.webp',
+    },
+  },
+  cable_glute_kickback: {
+    thumb: './assets/exercises/cable-glute-kickback/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/cable-glute-kickback/inicio.webp',
+      Medio: './assets/exercises/cable-glute-kickback/medio.webp',
+      Final: './assets/exercises/cable-glute-kickback/final.webp',
+    },
+  },
 };
