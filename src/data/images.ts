@@ -285,4 +285,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/dumbbell-fly/final.webp',
     },
   },
+  crunch: {
+    thumb: './assets/exercises/crunch/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/crunch/inicio.webp',
+      Medio: './assets/exercises/crunch/medio.webp',
+      Final: './assets/exercises/crunch/final.webp',
+    },
+  },
 };
