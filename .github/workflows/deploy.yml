@@ -23,7 +23,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # npm install tolera un lockfile regenerado por la interfaz web de GitHub.
+      - run: npm install --ignore-scripts
       - run: npm test
       - run: npm run check:assets
       - run: npm run build
