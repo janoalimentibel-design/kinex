@@ -373,4 +373,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/seated-leg-curl/final.webp',
     },
   },
+  lying_leg_curl: {
+    thumb: './assets/exercises/lying-leg-curl/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/lying-leg-curl/inicio.webp',
+      Medio: './assets/exercises/lying-leg-curl/medio.webp',
+      Final: './assets/exercises/lying-leg-curl/final.webp',
+    },
+  },
 };
