@@ -485,4 +485,36 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/french-press/final.webp',
     },
   },
+  barbell_curl: {
+    thumb: './assets/exercises/barbell-curl/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/barbell-curl/inicio.webp',
+      Medio: './assets/exercises/barbell-curl/medio.webp',
+      Final: './assets/exercises/barbell-curl/final.webp',
+    },
+  },
+  cable_curl: {
+    thumb: './assets/exercises/cable-curl/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/cable-curl/inicio.webp',
+      Medio: './assets/exercises/cable-curl/medio.webp',
+      Final: './assets/exercises/cable-curl/final.webp',
+    },
+  },
+  preacher_curl: {
+    thumb: './assets/exercises/preacher-curl/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/preacher-curl/inicio.webp',
+      Medio: './assets/exercises/preacher-curl/medio.webp',
+      Final: './assets/exercises/preacher-curl/final.webp',
+    },
+  },
+  overhead_triceps_db: {
+    thumb: './assets/exercises/overhead-triceps-db/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/overhead-triceps-db/inicio.webp',
+      Medio: './assets/exercises/overhead-triceps-db/medio.webp',
+      Final: './assets/exercises/overhead-triceps-db/final.webp',
+    },
+  },
 };
