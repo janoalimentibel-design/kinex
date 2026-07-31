@@ -517,4 +517,36 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/overhead-triceps-db/final.webp',
     },
   },
+  sumo_deadlift: {
+    thumb: './assets/exercises/sumo-deadlift/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/sumo-deadlift/inicio.webp',
+      Medio: './assets/exercises/sumo-deadlift/medio.webp',
+      Final: './assets/exercises/sumo-deadlift/final.webp',
+    },
+  },
+  good_morning: {
+    thumb: './assets/exercises/good-morning/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/good-morning/inicio.webp',
+      Medio: './assets/exercises/good-morning/medio.webp',
+      Final: './assets/exercises/good-morning/final.webp',
+    },
+  },
+  hip_abduction_machine: {
+    thumb: './assets/exercises/hip-abduction-machine/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/hip-abduction-machine/inicio.webp',
+      Medio: './assets/exercises/hip-abduction-machine/medio.webp',
+      Final: './assets/exercises/hip-abduction-machine/final.webp',
+    },
+  },
+  dumbbell_lunge: {
+    thumb: './assets/exercises/dumbbell-lunge/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/dumbbell-lunge/inicio.webp',
+      Medio: './assets/exercises/dumbbell-lunge/medio.webp',
+      Final: './assets/exercises/dumbbell-lunge/final.webp',
+    },
+  },
 };
