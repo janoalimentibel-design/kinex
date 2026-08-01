@@ -1,12 +1,14 @@
 // Vista Plan — port de renderPlan/copyWeeklySummary de A2.8.
 import { FORMATS, GROUPS } from '../data/exercises';
 import type { Plan } from '../db/schema';
+import { nextSessionSuggestion } from '../logic/session';
 import type { Ctx } from './types';
 
 export default function PlanView({ ctx }: { ctx: Ctx }) {
   const { data } = ctx;
   const plan = data.plan;
   const sessions = Object.values(data.sessions).filter((s) => s.saved);
+  const suggestion = nextSessionSuggestion(ctx.curDate, data.sessions, plan);
 
   const set = (patch: Partial<Plan>) => ctx.putPlan({ ...plan, ...patch });
 
@@ -39,6 +41,27 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
     } else {
       ctx.setModal({ type: 'summary', text: txt });
     }
+  };
+
+  const applySuggestion = () => {
+    ctx.patchSession({ groups: suggestion.groups, saved: false });
+    ctx.setView('today');
+  };
+
+  const prepareFestivalWeek = () => {
+    const festivalPlan: Plan = {
+      ...plan,
+      week: 'Semana festival',
+      focus: 'Resistencia de pie',
+      secondary: 'Piernas + aeróbico',
+      objective: 'Llegar al festival con piernas frescas y tolerar dos días de muchas horas de pie.',
+      rule: 'Intensidad moderada; no buscar agujetas ni cargas máximas esta semana.',
+      notes: 'Alternar caminata, bicicleta o elíptico con fuerza controlada de piernas y core.',
+    };
+    const festivalSuggestion = nextSessionSuggestion(ctx.curDate, data.sessions, festivalPlan);
+    ctx.putPlan(festivalPlan);
+    ctx.patchSession({ groups: festivalSuggestion.groups, saved: false });
+    ctx.setView('today');
   };
 
   return (
@@ -77,6 +100,15 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
           <div className="field">
             <label>Notas del plan</label>
             <textarea value={plan.notes} onChange={(e) => set({ notes: e.target.value })} />
+          </div>
+        </div>
+        <div className="suggestion-card">
+          <div className="t">Sugerencia para {ctx.curDate}</div>
+          <h3>{suggestion.groups.map((group) => GROUPS[group].label).join(' + ')}</h3>
+          <p>{suggestion.reason}</p>
+          <div className="suggestion-actions">
+            <button className="btn btn-primary" onClick={applySuggestion}>Aplicar a este día</button>
+            <button className="btn btn-soft" onClick={prepareFestivalWeek}>Preparar semana festival</button>
           </div>
         </div>
         <div className="wkvol">

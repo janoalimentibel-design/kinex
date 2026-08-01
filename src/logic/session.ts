@@ -2,8 +2,8 @@
 // Mismas reglas: 2 grupos por sesión, candidatos ordenados por nivel y nombre,
 // avanzados excluidos de la selección automática, extra del Extendido al grupo
 // menos trabajado en los últimos 7 días.
-import { COMBOS, FORMATS } from '../data/exercises';
-import type { CatalogExercise, Format, GroupId, Mode, Session } from '../db/schema';
+import { COMBOS, ENDURANCE_COMBOS, FORMATS, GROUPS } from '../data/exercises';
+import type { CatalogExercise, Format, GroupId, Mode, Plan, Session } from '../db/schema';
 
 export type ExerciseMap = Record<string, CatalogExercise>;
 
@@ -26,8 +26,23 @@ export function levelScore(level: CatalogExercise['level']): number {
   return level === 'Inicial' ? 1 : level === 'Progresivo' ? 2 : 3;
 }
 
-export function suggestedGroups(date: string, sessions: Record<string, Session> = {}): [GroupId, GroupId] {
-  const preferredIndex = (new Date(date).getDay() + 1) % COMBOS.length;
+export interface NextSessionSuggestion {
+  groups: [GroupId, GroupId];
+  reason: string;
+}
+
+// El texto del Plan tiene consecuencias reales: estas palabras activan una semana
+// de resistencia, útil cuando el objetivo es caminar, viajar o pasar mucho tiempo de pie.
+export function hasEnduranceFocus(plan?: Plan): boolean {
+  if (!plan) return false;
+  return /aer[oó]bic|resisten|festival|muchas horas|estar de pie|caminar|viaje|viajar/i.test(
+    [plan.focus, plan.secondary, plan.objective, plan.rule, plan.notes].join(' '),
+  );
+}
+
+export function suggestedGroups(date: string, sessions: Record<string, Session> = {}, plan?: Plan): [GroupId, GroupId] {
+  const pool = hasEnduranceFocus(plan) ? ENDURANCE_COMBOS : COMBOS;
+  const preferredIndex = (new Date(date).getDay() + 1) % pool.length;
   const target = new Date(`${date}T12:00:00`);
   const groupLoad = new Map<GroupId, number>();
 
@@ -41,24 +56,38 @@ export function suggestedGroups(date: string, sessions: Record<string, Session> 
     for (const group of session.groups) groupLoad.set(group, (groupLoad.get(group) ?? 0) + 1);
   }
 
-  const ranked = COMBOS.map((combo, index) => {
+  const ranked = pool.map((combo, index) => {
     const used = (groupLoad.get(combo[0]) ?? 0) + (groupLoad.get(combo[1]) ?? 0);
     const samePair = Object.entries(sessions).some(([otherDate, session]) => {
       const diff = (target.getTime() - new Date(`${otherDate}T12:00:00`).getTime()) / 864e5;
       return diff > 0 && diff <= 7 && session.groups.includes(combo[0]) && session.groups.includes(combo[1]);
     });
     // Se conserva una preferencia semanal estable solo como desempate.
-    const weeklyDistance = (index - preferredIndex + COMBOS.length) % COMBOS.length;
+    const weeklyDistance = (index - preferredIndex + pool.length) % pool.length;
     return { combo, score: used * 10 + (samePair ? 5 : 0) + weeklyDistance / 100 };
   });
   const best = ranked.sort((a, b) => a.score - b.score)[0].combo;
   return [best[0], best[1]];
 }
 
-export function createSession(date: string, sessions: Record<string, Session> = {}): Session {
+export function nextSessionSuggestion(date: string, sessions: Record<string, Session> = {}, plan?: Plan): NextSessionSuggestion {
+  const groups = suggestedGroups(date, sessions, plan);
+  const names = groups.map((group) => GROUPS[group].label).join(' + ');
+  const saved = Object.values(sessions).filter((session) => session.saved).length;
+  return {
+    groups,
+    reason: hasEnduranceFocus(plan)
+      ? `El objetivo semanal pide resistencia: propone ${names} y evita repetir los grupos ya registrados.`
+      : saved
+        ? `Se apoya en tus ${saved} sesiones guardadas y evita repetir el foco de los últimos 7 días.`
+        : `Es una combinación inicial equilibrada. Al guardar entrenamientos, la siguiente sugerencia rota según tu historial.`,
+  };
+}
+
+export function createSession(date: string, sessions: Record<string, Session> = {}, plan?: Plan): Session {
   return {
     date,
-    groups: suggestedGroups(date, sessions),
+    groups: suggestedGroups(date, sessions, plan),
     mode: 'mix',
     format: 'base',
     extraTarget: 'auto',

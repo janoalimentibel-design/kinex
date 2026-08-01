@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { expect, test } from 'vitest';
 import { CATALOG, FORMATS, GROUPS } from '../src/data/exercises';
 import { REAL_IMAGES } from '../src/data/images';
-import { buildExerciseList, createSession, isModeCompatible, suggestedGroups } from '../src/logic/session';
+import { buildExerciseList, createSession, isModeCompatible, nextSessionSuggestion, suggestedGroups } from '../src/logic/session';
 
 test('las vistas y controles principales siguen presentes', () => {
   const sources = fs
@@ -19,18 +19,25 @@ test('formatos y grupos mantienen el contrato de A2.6', () => {
   expect(FORMATS.base.perGroup).toBe(2);
   expect(FORMATS.ext.extraOne).toBe(true);
   expect(FORMATS.long.perGroup).toBe(3);
-  expect(Object.keys(GROUPS)).toHaveLength(7);
+  expect(Object.keys(GROUPS)).toHaveLength(8);
 });
 
 test('el catálogo incluye la base original y los ejercicios de fuerza solicitados', () => {
   const all = Object.values(CATALOG);
-  expect(all).toHaveLength(135);
+  expect(all).toHaveLength(138);
   const byGroup: Record<string, number> = {};
   for (const e of all) byGroup[e.group] = (byGroup[e.group] ?? 0) + 1;
-  expect(byGroup).toEqual({ pierna: 34, espalda: 19, pecho: 15, hombro: 13, bicep: 15, tricep: 16, core: 23 });
+  expect(byGroup).toEqual({ pierna: 33, espalda: 19, pecho: 15, hombro: 13, bicep: 15, tricep: 16, core: 20, aerobico: 7 });
   for (const id of ['back_squat', 'romanian_deadlift', 'bench_press', 'dumbbell_curl', 'ab_wheel', 'rowing_erg', 'reverse_crunch', 'russian_twist', 'bicycle_crunch']) {
     expect(CATALOG[id], `falta ${id}`).toBeDefined();
   }
+});
+
+test('un objetivo de resistencia convierte el plan en una sugerencia aeróbica visible', () => {
+  const plan = { week: 'Festival', focus: 'Resistencia de pie', secondary: 'Aeróbico', objective: 'Festival dos días', rule: '', notes: '' };
+  const suggestion = nextSessionSuggestion('2026-08-03', {}, plan);
+  expect(suggestion.groups).toContain('aerobico');
+  expect(suggestion.reason).toContain('resistencia');
 });
 
 test('ninguna ficha usa la plantilla genérica de cues heredada del prototipo', () => {

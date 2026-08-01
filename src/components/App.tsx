@@ -53,7 +53,7 @@ export default function App() {
   const allEx = { ...CATALOG, ...data.custom };
   // Las sesiones aún no tocadas se generan considerando los grupos que ya
   // elegiste en los días anteriores de la semana.
-  const session = data.sessions[curDate] ?? createSession(curDate, data.sessions);
+  const session = data.sessions[curDate] ?? createSession(curDate, data.sessions, data.plan);
 
   const putSession = (s: Session) => {
     setData((d) => (d ? { ...d, sessions: { ...d.sessions, [s.date]: s } } : d));
@@ -105,7 +105,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.19</div>
+            <div className="version">v3.20</div>
           </div>
         </div>
       </div>

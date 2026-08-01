@@ -2,7 +2,7 @@
 // Regla de oro: los VALORES de los enums nunca cambian (vienen de v0); solo los nombres de campos.
 import { z } from 'zod';
 
-export const GROUP_IDS = ['pierna', 'espalda', 'pecho', 'hombro', 'bicep', 'tricep', 'core'] as const;
+export const GROUP_IDS = ['pierna', 'espalda', 'pecho', 'hombro', 'bicep', 'tricep', 'core', 'aerobico'] as const;
 
 export const zGroupId = z.enum(GROUP_IDS);
 export const zMode = z.enum(['peso', 'sinpeso', 'mix']);
