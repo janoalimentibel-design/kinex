@@ -110,6 +110,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
       <div>
         <div className="dayhead">
           <div className="dlabel">{`${DIAS[d.getDay()]} ${d.getDate()} ${MES[d.getMonth()]} · ${data.plan.week || 'Semana 1'} · ${data.plan.focus || 'Fuerza'}`}</div>
+          {session.programTitle && <div className="program-title">{session.programTitle}</div>}
           <div className="focus">
             Sesión{' '}
             {session.groups.map((g, i) => (

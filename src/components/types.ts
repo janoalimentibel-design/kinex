@@ -26,6 +26,7 @@ export interface Ctx {
   setView(view: View): void;
   setModal(modal: ModalState): void;
   patchSession(patch: Partial<Session>): void;
+  putSessions(sessions: Session[]): void;
   putPlan(plan: Plan): void;
   putCustom(exercise: CustomExercise): void;
   importAll(data: V2Data, source: 'v0' | 'v1' | 'v2'): Promise<void>;

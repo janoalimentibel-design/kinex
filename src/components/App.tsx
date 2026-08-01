@@ -69,6 +69,10 @@ export default function App() {
     setView,
     setModal,
     patchSession: (patch) => putSession({ ...session, ...patch }),
+    putSessions: (sessions: Session[]) => {
+      setData((d) => (d ? { ...d, sessions: { ...d.sessions, ...Object.fromEntries(sessions.map((s) => [s.date, s])) } } : d));
+      void db.sessions.bulkPut(sessions);
+    },
     putPlan: (plan: Plan) => {
       setData((d) => (d ? { ...d, plan } : d));
       void db.kv.put({ key: 'plan', value: plan });
@@ -105,7 +109,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.20</div>
+            <div className="version">v3.21</div>
           </div>
         </div>
       </div>

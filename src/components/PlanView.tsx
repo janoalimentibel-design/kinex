@@ -1,7 +1,7 @@
 // Vista Plan — port de renderPlan/copyWeeklySummary de A2.8.
 import { FORMATS, GROUPS } from '../data/exercises';
-import type { Plan } from '../db/schema';
-import { nextSessionSuggestion } from '../logic/session';
+import type { GroupId, Plan, Session } from '../db/schema';
+import { createSession, nextSessionSuggestion } from '../logic/session';
 import type { Ctx } from './types';
 
 export default function PlanView({ ctx }: { ctx: Ctx }) {
@@ -9,6 +9,9 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
   const plan = data.plan;
   const sessions = Object.values(data.sessions).filter((s) => s.saved);
   const suggestion = nextSessionSuggestion(ctx.curDate, data.sessions, plan);
+  const festivalSessions = Object.values(data.sessions)
+    .filter((session) => session.programTitle?.startsWith('Festival'))
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   const set = (patch: Partial<Plan>) => ctx.putPlan({ ...plan, ...patch });
 
@@ -58,10 +61,39 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       rule: 'Intensidad moderada; no buscar agujetas ni cargas máximas esta semana.',
       notes: 'Alternar caminata, bicicleta o elíptico con fuerza controlada de piernas y core.',
     };
-    const festivalSuggestion = nextSessionSuggestion(ctx.curDate, data.sessions, festivalPlan);
+
+    // Siempre carga la semana que empieza el lunes siguiente. Así no toca una
+    // sesión ya guardada ni cambia el historial real del usuario.
+    const from = new Date(`${ctx.curDate}T12:00:00`);
+    const daysToMonday = ((8 - from.getDay()) % 7) || 7;
+    const monday = new Date(from);
+    monday.setDate(from.getDate() + daysToMonday);
+    const dateAt = (offset: number) => {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + offset);
+      return date.toISOString().slice(0, 10);
+    };
+    const routine: Array<{ offset: number; title: string; groups: [GroupId, GroupId]; mode: Session['mode']; programmed: string[] }> = [
+      { offset: 0, title: 'Festival · base de piernas y capacidad', groups: ['pierna', 'aerobico'], mode: 'mix', programmed: ['sit_to_stand', 'calf_machine', 'caminata_inclinada'] },
+      { offset: 2, title: 'Festival · postura y core sin fatigar piernas', groups: ['espalda', 'core'], mode: 'mix', programmed: ['cable_low_row', 'lat_pulldown_chest', 'plank_short', 'reverse_crunch'] },
+      { offset: 4, title: 'Festival · activación suave pre fin de semana', groups: ['core', 'aerobico'], mode: 'sinpeso', programmed: ['dead_bug', 'side_plank', 'bicicleta_estatica'] },
+    ];
+    const scheduled = routine.map((item) => {
+      const date = dateAt(item.offset);
+      const existing = data.sessions[date];
+      if (existing?.saved) return existing; // el historial realizado nunca se pisa
+      return {
+        ...createSession(date, data.sessions, festivalPlan),
+        date,
+        groups: item.groups,
+        mode: item.mode,
+        format: 'base' as const,
+        programmed: item.programmed,
+        programTitle: item.title,
+      };
+    });
     ctx.putPlan(festivalPlan);
-    ctx.patchSession({ groups: festivalSuggestion.groups, saved: false });
-    ctx.setView('today');
+    ctx.putSessions(scheduled);
   };
 
   return (
@@ -108,9 +140,22 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
           <p>{suggestion.reason}</p>
           <div className="suggestion-actions">
             <button className="btn btn-primary" onClick={applySuggestion}>Aplicar a este día</button>
-            <button className="btn btn-soft" onClick={prepareFestivalWeek}>Preparar semana festival</button>
+            <button className="btn btn-soft" onClick={prepareFestivalWeek}>Cargar rutina festival</button>
           </div>
         </div>
+        {festivalSessions.length > 0 && (
+          <div className="festival-routine">
+            <div className="t">Rutina festival cargada</div>
+            <p>Semana previa: capacidad de piernas, postura y activación; no se modifica tu historial realizado.</p>
+            {festivalSessions.map((session) => (
+              <button key={session.date} className="routine-session" onClick={() => { ctx.setCurDate(session.date); ctx.setView('today'); }}>
+                <span><b>{session.date}</b><small>{session.programTitle}</small></span>
+                <span>{session.programmed?.map((id) => ctx.allEx[id]?.name ?? id).join(' · ')}</span>
+                <i>Abrir ›</i>
+              </button>
+            ))}
+          </div>
+        )}
         <div className="wkvol">
           <div className="t">Estado de esta versión</div>
           <div className="hrow"><b>{sessions.length}</b> sesiones guardadas</div>

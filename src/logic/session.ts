@@ -194,6 +194,15 @@ export function buildExerciseList(
   now: Date = new Date(),
   allow: (e: CatalogExercise) => boolean = () => true, // filtro del motor (engine.ts) sobre la selección automática
 ): SessionEntry[] {
+  // Una rutina cargada desde Plan es explícita: no se reemplaza por el selector
+  // automático al reabrirla. Si el usuario cambia los grupos, se muestran solo
+  // los ejercicios que siguen correspondiendo a esos grupos.
+  if (session.programmed?.length) {
+    return session.programmed
+      .map((id) => all[id])
+      .filter((exercise): exercise is CatalogExercise => Boolean(exercise) && session.groups.includes(exercise.group))
+      .map((exercise) => ({ id: exercise.id, group: exercise.group, src: 'auto' as const }));
+  }
   const format = FORMATS[session.format as Format] ?? FORMATS.base;
   const entries: SessionEntry[] = [];
   for (const group of session.groups) {

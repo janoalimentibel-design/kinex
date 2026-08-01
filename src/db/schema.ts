@@ -65,6 +65,10 @@ export const zSession = zSessionV1.extend({
   checkin: zCheckin.nullable().optional(),
   setLogs: z.record(z.string(), z.array(zSetEntry)).optional(),
   exerciseLog: z.array(zExerciseLogEntry).optional(),
+  // Una rutina cargada desde Plan puede fijar sus ejercicios antes de realizarla.
+  // Al guardarse, exerciseLog mantiene la foto histórica igual que en una sesión libre.
+  programmed: z.array(z.string()).optional(),
+  programTitle: z.string().optional(),
 });
 
 // El modo de un ejercicio concreto solo puede ser peso/sinpeso; 'mix' es un modo de sesión.
