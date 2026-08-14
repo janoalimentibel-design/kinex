@@ -9,8 +9,8 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
   const plan = data.plan;
   const sessions = Object.values(data.sessions).filter((s) => s.saved);
   const suggestion = nextSessionSuggestion(ctx.curDate, data.sessions, plan);
-  const festivalSessions = Object.values(data.sessions)
-    .filter((session) => session.programTitle?.startsWith('Festival'))
+  const returnSessions = Object.values(data.sessions)
+    .filter((session) => session.programTitle?.startsWith('Vuelta'))
     .sort((a, b) => a.date.localeCompare(b.date));
 
   const set = (patch: Partial<Plan>) => ctx.putPlan({ ...plan, ...patch });
@@ -51,15 +51,15 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
     ctx.setView('today');
   };
 
-  const prepareFestivalWeek = () => {
-    const festivalPlan: Plan = {
+  const loadReturnWeek = () => {
+    const returnPlan: Plan = {
       ...plan,
-      week: 'Semana festival',
-      focus: 'Resistencia de pie',
-      secondary: 'Piernas + aeróbico',
-      objective: 'Llegar al festival con piernas frescas y tolerar dos días de muchas horas de pie.',
-      rule: 'Intensidad moderada; no buscar agujetas ni cargas máximas esta semana.',
-      notes: 'Alternar caminata, bicicleta o elíptico con fuerza controlada de piernas y core.',
+      week: 'Semana de vuelta',
+      focus: 'Fuerza base',
+      secondary: 'Técnica + aeróbico suave',
+      objective: 'Volver al ritmo con tres sesiones completas, sin buscar máximos ni terminar destruido.',
+      rule: 'Dejá 2–3 repeticiones en reserva y bajá intensidad si aparece molestia.',
+      notes: 'Tres días alternados: piernas + core, espalda + bíceps y empuje + aeróbico suave.',
     };
 
     // Siempre carga la semana que empieza el lunes siguiente. Así no toca una
@@ -74,16 +74,16 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       return date.toISOString().slice(0, 10);
     };
     const routine: Array<{ offset: number; title: string; groups: [GroupId, GroupId]; mode: Session['mode']; programmed: string[] }> = [
-      { offset: 0, title: 'Festival · base de piernas y capacidad', groups: ['pierna', 'aerobico'], mode: 'mix', programmed: ['sit_to_stand', 'calf_machine', 'caminata_inclinada'] },
-      { offset: 2, title: 'Festival · postura y core sin fatigar piernas', groups: ['espalda', 'core'], mode: 'mix', programmed: ['cable_low_row', 'lat_pulldown_chest', 'plank_short', 'reverse_crunch'] },
-      { offset: 4, title: 'Festival · activación suave pre fin de semana', groups: ['core', 'aerobico'], mode: 'sinpeso', programmed: ['dead_bug', 'side_plank', 'bicicleta_estatica'] },
+      { offset: 0, title: 'Vuelta · piernas y core de base', groups: ['pierna', 'core'], mode: 'mix', programmed: ['sit_to_stand', 'leg_ext', 'dead_bug', 'plank_short'] },
+      { offset: 2, title: 'Vuelta · espalda y bíceps controlados', groups: ['espalda', 'bicep'], mode: 'mix', programmed: ['band_row', 'lat_pulldown_chest', 'dumbbell_curl', 'hammer_curl_db'] },
+      { offset: 4, title: 'Vuelta · empuje y aeróbico suave', groups: ['pecho', 'aerobico'], mode: 'mix', programmed: ['incline_pushup', 'pec_deck', 'caminata_inclinada'] },
     ];
     const scheduled = routine.map((item) => {
       const date = dateAt(item.offset);
       const existing = data.sessions[date];
       if (existing?.saved) return existing; // el historial realizado nunca se pisa
       return {
-        ...createSession(date, data.sessions, festivalPlan),
+        ...createSession(date, data.sessions, returnPlan),
         date,
         groups: item.groups,
         mode: item.mode,
@@ -92,7 +92,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
         programTitle: item.title,
       };
     });
-    ctx.putPlan(festivalPlan);
+    ctx.putPlan(returnPlan);
     ctx.putSessions(scheduled);
   };
 
@@ -140,14 +140,14 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
           <p>{suggestion.reason}</p>
           <div className="suggestion-actions">
             <button className="btn btn-primary" onClick={applySuggestion}>Aplicar a este día</button>
-            <button className="btn btn-soft" onClick={prepareFestivalWeek}>Cargar rutina festival</button>
+            <button className="btn btn-soft" onClick={loadReturnWeek}>Cargar semana de vuelta</button>
           </div>
         </div>
-        {festivalSessions.length > 0 && (
+        {returnSessions.length > 0 && (
           <div className="festival-routine">
-            <div className="t">Rutina festival cargada</div>
-            <p>Semana previa: capacidad de piernas, postura y activación; no se modifica tu historial realizado.</p>
-            {festivalSessions.map((session) => (
+            <div className="t">Semana de vuelta cargada</div>
+            <p>Tres sesiones alternadas para retomar sin sobrecargarte. No modifica tu historial realizado.</p>
+            {returnSessions.map((session) => (
               <button key={session.date} className="routine-session" onClick={() => { ctx.setCurDate(session.date); ctx.setView('today'); }}>
                 <span><b>{session.date}</b><small>{session.programTitle}</small></span>
                 <span>{session.programmed?.map((id) => ctx.allEx[id]?.name ?? id).join(' · ')}</span>

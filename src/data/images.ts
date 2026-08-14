@@ -549,4 +549,36 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/dumbbell-lunge/final.webp',
     },
   },
+  sit_to_stand: {
+    thumb: './assets/exercises/sit-to-stand/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/sit-to-stand/inicio.webp',
+      Medio: './assets/exercises/sit-to-stand/medio.webp',
+      Final: './assets/exercises/sit-to-stand/final.webp',
+    },
+  },
+  band_row: {
+    thumb: './assets/exercises/band-row/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/band-row/inicio.webp',
+      Medio: './assets/exercises/band-row/medio.webp',
+      Final: './assets/exercises/band-row/final.webp',
+    },
+  },
+  incline_pushup: {
+    thumb: './assets/exercises/incline-pushup/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/incline-pushup/inicio.webp',
+      Medio: './assets/exercises/incline-pushup/medio.webp',
+      Final: './assets/exercises/incline-pushup/final.webp',
+    },
+  },
+  caminata_inclinada: {
+    thumb: './assets/exercises/caminata-inclinada/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/caminata-inclinada/inicio.webp',
+      Medio: './assets/exercises/caminata-inclinada/medio.webp',
+      Final: './assets/exercises/caminata-inclinada/final.webp',
+    },
+  },
 };

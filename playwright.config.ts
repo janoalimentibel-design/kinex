@@ -10,7 +10,9 @@ export default defineConfig({
     viewport: { width: 390, height: 844 },
   },
   webServer: {
-    command: 'npm run preview -- --port 4380 --strictPort',
+    // Fuerza IPv4: baseURL usa 127.0.0.1 y, en algunos entornos, Vite resuelve
+    // localhost solo a ::1, dejando las pruebas sin servidor aunque haya arrancado.
+    command: 'npm run preview -- --host 127.0.0.1 --port 4380 --strictPort',
     port: 4380,
     reuseExistingServer: true,
   },

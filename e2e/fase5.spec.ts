@@ -18,8 +18,13 @@ test.beforeEach(({ page }) => {
 test('botón de progresión reemplaza el ejercicio por su variante más difícil', async ({ page }) => {
   await openApp(page);
   await setGroups(page, 'Pecho + Tríceps');
-  await page.locator('.ex .ex-head').first().click(); // Flexiones
-  await expect(page.locator('.ex.open .nm').first()).toHaveText('Flexiones');
+  // La selección automática rota según el historial; agregamos Flexiones para
+  // probar la progresión sin depender del primer ejercicio sugerido del día.
+  await page.locator('.grp-head', { hasText: 'Pecho' }).getByRole('button', { name: '+ ejercicio' }).click();
+  await page.locator('.swap-item').filter({ has: page.locator('.nm', { hasText: /^Flexiones$/ }) }).click();
+  const pushup = page.locator('.ex').filter({ has: page.locator('.nm', { hasText: /^Flexiones$/ }) });
+  await pushup.locator('.ex-head').click();
+  await expect(page.locator('.ex.open .nm', { hasText: 'Flexiones' })).toBeVisible();
 
   await page.locator('.ex.open .prog-btn', { hasText: 'Push-Up con pausa' }).click();
   await expect(page.locator('.ex .nm', { hasText: 'Push-Up con pausa' })).toBeVisible();

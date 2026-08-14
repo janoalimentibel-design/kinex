@@ -4,7 +4,7 @@
 import { mkdirSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 
-const GALLERIES: [string, string][] = [
+const GALLERIES: [string, string, number?][] = [
   ['Flexiones', 'flexiones'],
   ['Dominadas estrictas', 'dominadas'],
   ['Step-Up bajo', 'step-up-bajo'],
@@ -14,15 +14,19 @@ const GALLERIES: [string, string][] = [
   ['Balance a una pierna', 'balance-una-pierna'],
   ['Extensión de cuádriceps en máquina', 'extension-cuadriceps'],
   ['Gemelos en máquina', 'gemelos-maquina'],
-  ['Active Hang', 'active-hang'],
+  ['Active Hang', 'active-hang', 1],
   ['Band Lat Pulldown', 'band-lat-pulldown'],
   ['Band Pull-Apart', 'band-pull-apart-espalda'],
+  ['Sit-to-Stand', 'sit-to-stand'],
+  ['Remo con banda', 'band-row'],
+  ['Flexiones inclinadas', 'incline-pushup'],
+  ['Caminata en cinta con inclinación', 'caminata-inclinada'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;
 mkdirSync(OUT, { recursive: true });
 
-for (const [name, slug] of GALLERIES) {
+for (const [name, slug, expectedShots = 3] of GALLERIES) {
   test(`galería de ${name}: 3 fases cargadas y captura guardada`, async ({ page }) => {
     await page.goto('/');
     await page.locator('.nav button', { hasText: 'Biblioteca' }).click();
@@ -30,8 +34,8 @@ for (const [name, slug] of GALLERIES) {
     await page.locator('.libcard', { hasText: name }).first().click();
 
     const shots = page.locator('.lib-gallery .shot img');
-    await expect(shots).toHaveCount(3);
-    for (let i = 0; i < 3; i++) {
+    await expect(shots).toHaveCount(expectedShots);
+    for (let i = 0; i < expectedShots; i++) {
       await expect(shots.nth(i)).toBeVisible();
       const loaded = await shots.nth(i).evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0);
       expect(loaded, `${name}: la fase ${i + 1} no cargó`).toBe(true);
