@@ -581,4 +581,44 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/caminata-inclinada/final.webp',
     },
   },
+  one_arm_row: {
+    thumb: './assets/exercises/one-arm-row/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/one-arm-row/inicio.webp',
+      Medio: './assets/exercises/one-arm-row/medio.webp',
+      Final: './assets/exercises/one-arm-row/final.webp',
+    },
+  },
+  knee_pushup: {
+    thumb: './assets/exercises/knee-pushup/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/knee-pushup/inicio.webp',
+      Medio: './assets/exercises/knee-pushup/medio.webp',
+      Final: './assets/exercises/knee-pushup/final.webp',
+    },
+  },
+  bicicleta_estatica: {
+    thumb: './assets/exercises/bicicleta-estatica/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/bicicleta-estatica/inicio.webp',
+      Medio: './assets/exercises/bicicleta-estatica/medio.webp',
+      Final: './assets/exercises/bicicleta-estatica/final.webp',
+    },
+  },
+  lunge_back_assist: {
+    thumb: './assets/exercises/lunge-back-assist/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/lunge-back-assist/inicio.webp',
+      Medio: './assets/exercises/lunge-back-assist/medio.webp',
+      Final: './assets/exercises/lunge-back-assist/final.webp',
+    },
+  },
+  band_press: {
+    thumb: './assets/exercises/band-press/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/band-press/inicio.webp',
+      Medio: './assets/exercises/band-press/medio.webp',
+      Final: './assets/exercises/band-press/final.webp',
+    },
+  },
 };

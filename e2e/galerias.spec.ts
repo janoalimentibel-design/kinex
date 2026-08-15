@@ -1,4 +1,4 @@
-// Verificación visual de las 6 galerías en viewport móvil: abre cada detalle,
+// Verificación visual de las galerías en viewport móvil: abre cada detalle,
 // comprueba que las 3 fases cargan de verdad (naturalWidth > 0) y guarda la
 // captura en verification/a3-fase2/ como evidencia.
 import { mkdirSync } from 'node:fs';
@@ -21,6 +21,11 @@ const GALLERIES: [string, string, number?][] = [
   ['Remo con banda', 'band-row'],
   ['Flexiones inclinadas', 'incline-pushup'],
   ['Caminata en cinta con inclinación', 'caminata-inclinada'],
+  ['Remo unilateral con banda', 'one-arm-row'],
+  ['Flexiones con rodillas', 'knee-pushup'],
+  ['Bicicleta estática', 'bicicleta-estatica'],
+  ['Estocada hacia atrás asistida', 'lunge-back-assist'],
+  ['Press con banda', 'band-press'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;
@@ -37,8 +42,10 @@ for (const [name, slug, expectedShots = 3] of GALLERIES) {
     await expect(shots).toHaveCount(expectedShots);
     for (let i = 0; i < expectedShots; i++) {
       await expect(shots.nth(i)).toBeVisible();
-      const loaded = await shots.nth(i).evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0);
-      expect(loaded, `${name}: la fase ${i + 1} no cargó`).toBe(true);
+      await expect.poll(
+        () => shots.nth(i).evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0),
+        { message: `${name}: la fase ${i + 1} no cargó` },
+      ).toBe(true);
     }
     await page.locator('.sheet').screenshot({ path: `${OUT}${slug}.png` });
   });
