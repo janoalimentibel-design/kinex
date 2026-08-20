@@ -29,10 +29,10 @@ test.beforeEach(({ page }) => {
 
 test('sesión completa: checks, guardar métricas, historial y persistencia tras recarga', async ({ page }) => {
   await openApp(page);
-  await expect(page.locator('.proglab')).toContainText('0 de 6');
+  await expect(page.locator('.proglab')).toHaveText(/^0 de \d+ ejercicios/);
 
   await page.locator('.ex .chk').first().click();
-  await expect(page.locator('.proglab')).toContainText('1 de 6');
+  await expect(page.locator('.proglab')).toHaveText(/^1 de \d+ ejercicios/);
 
   await page.getByRole('button', { name: 'Marcar hecha' }).click();
   const sheet = page.locator('.sheet');
@@ -122,6 +122,6 @@ test('la app funciona offline gracias al service worker', async ({ page, context
   await context.setOffline(true);
   await page.reload();
   await expect(page.locator('.logo')).toBeVisible();
-  await expect(page.locator('.proglab')).toContainText('de 6');
+  await expect(page.locator('.proglab')).toHaveText(/^0 de \d+ ejercicios/);
   await context.setOffline(false);
 });

@@ -13,10 +13,10 @@ test.beforeEach(({ page }) => {
 test('marcar un ejercicio como hecho persiste con un único toque', async ({ page }) => {
   await openApp(page);
   await page.locator('.ex .chk').first().click();
-  await expect(page.locator('.proglab')).toContainText('1 de 6');
+  await expect(page.locator('.proglab')).toHaveText(/^1 de \d+ ejercicios/);
   await expect(page.locator('.ex').first()).toHaveClass(/done/);
   await page.reload();
-  await expect(page.locator('.proglab')).toContainText('1 de 6');
+  await expect(page.locator('.proglab')).toHaveText(/^1 de \d+ ejercicios/);
 });
 
 test('temporizador de descanso: aparece, cuenta hacia atrás, se extiende y se cierra', async ({ page }) => {

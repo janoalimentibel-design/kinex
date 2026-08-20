@@ -621,4 +621,44 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/band-press/final.webp',
     },
   },
+  barbell_row: {
+    thumb: './assets/exercises/barbell-row/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/barbell-row/inicio.webp',
+      Medio: './assets/exercises/barbell-row/medio.webp',
+      Final: './assets/exercises/barbell-row/final.webp',
+    },
+  },
+  cable_pullover: {
+    thumb: './assets/exercises/cable-pullover/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/cable-pullover/inicio.webp',
+      Medio: './assets/exercises/cable-pullover/medio.webp',
+      Final: './assets/exercises/cable-pullover/final.webp',
+    },
+  },
+  straight_bar_pressdown: {
+    thumb: './assets/exercises/straight-bar-pressdown/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/straight-bar-pressdown/inicio.webp',
+      Medio: './assets/exercises/straight-bar-pressdown/medio.webp',
+      Final: './assets/exercises/straight-bar-pressdown/final.webp',
+    },
+  },
+  hanging_leg_raise: {
+    thumb: './assets/exercises/hanging-leg-raise/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/hanging-leg-raise/inicio.webp',
+      Medio: './assets/exercises/hanging-leg-raise/medio.webp',
+      Final: './assets/exercises/hanging-leg-raise/final.webp',
+    },
+  },
+  eliptico: {
+    thumb: './assets/exercises/eliptico/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/eliptico/inicio.webp',
+      Medio: './assets/exercises/eliptico/medio.webp',
+      Final: './assets/exercises/eliptico/final.webp',
+    },
+  },
 };

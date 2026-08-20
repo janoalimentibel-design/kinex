@@ -26,6 +26,11 @@ const GALLERIES: [string, string, number?][] = [
   ['Bicicleta estática', 'bicicleta-estatica'],
   ['Estocada hacia atrás asistida', 'lunge-back-assist'],
   ['Press con banda', 'band-press'],
+  ['Remo con barra T', 'barbell-row'],
+  ['Pullover en polea alta', 'cable-pullover'],
+  ['Jalón de tríceps con barra recta', 'straight-bar-pressdown'],
+  ['Elevación de piernas colgado', 'hanging-leg-raise'],
+  ['Elíptico', 'eliptico'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;
