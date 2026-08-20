@@ -31,6 +31,11 @@ const GALLERIES: [string, string, number?][] = [
   ['Jalón de tríceps con barra recta', 'straight-bar-pressdown'],
   ['Elevación de piernas colgado', 'hanging-leg-raise'],
   ['Elíptico', 'eliptico'],
+  ['Step-Up medio', 'step-medio'],
+  ['Pike Push-Up', 'pike'],
+  ['Rueda abdominal (Ab Wheel)', 'ab-wheel'],
+  ['Remo en máquina (ergómetro)', 'rowing-erg'],
+  ['Fondos en paralelas', 'parallel-dips'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;

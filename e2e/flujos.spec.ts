@@ -68,6 +68,21 @@ test('el aeróbico se registra como sesión separada y no como foco automático'
   await expect(page.locator('.proglab')).toHaveText(/^0 de 2 ejercicios/);
 });
 
+test('próxima semana rota fuerza y ejercicios desde el historial sin aeróbico automático', async ({ page }) => {
+  await openApp(page);
+  // Deja una sesión real para que el generador tenga historial que considerar.
+  await page.locator('.ex .chk').first().click();
+  await page.getByRole('button', { name: 'Marcar hecha' }).click();
+  await page.getByRole('button', { name: 'Guardar sesión' }).click();
+
+  await nav(page, 'Plan');
+  await page.getByRole('button', { name: 'Crear próxima semana' }).click();
+  const routine = page.locator('.festival-routine');
+  await expect(routine).toContainText('Próxima semana cargada');
+  await expect(routine.locator('.routine-session')).toHaveCount(3);
+  await expect(routine).not.toContainText('Aeróbico');
+});
+
 test('ejercicio personalizado: se crea y aparece en la Biblioteca', async ({ page }) => {
   await openApp(page);
   await nav(page, 'Biblioteca');

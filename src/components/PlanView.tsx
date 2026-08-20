@@ -1,7 +1,7 @@
 // Vista Plan — port de renderPlan/copyWeeklySummary de A2.8.
 import { FORMATS, GROUPS } from '../data/exercises';
-import type { GroupId, Plan, Session } from '../db/schema';
-import { createSession, nextSessionSuggestion } from '../logic/session';
+import type { Plan, Session } from '../db/schema';
+import { buildExerciseList, createSession, nextSessionSuggestion } from '../logic/session';
 import type { Ctx } from './types';
 
 export default function PlanView({ ctx }: { ctx: Ctx }) {
@@ -9,8 +9,8 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
   const plan = data.plan;
   const sessions = Object.values(data.sessions).filter((s) => s.saved);
   const suggestion = nextSessionSuggestion(ctx.curDate, data.sessions, plan);
-  const returnSessions = Object.values(data.sessions)
-    .filter((session) => session.programTitle?.startsWith('Vuelta'))
+  const scheduledSessions = Object.values(data.sessions)
+    .filter((session) => session.programTitle?.startsWith('Próxima semana'))
     .sort((a, b) => a.date.localeCompare(b.date));
 
   const set = (patch: Partial<Plan>) => ctx.putPlan({ ...plan, ...patch });
@@ -51,19 +51,19 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
     ctx.setView('today');
   };
 
-  const loadReturnWeek = () => {
-    const returnPlan: Plan = {
+  const loadNextWeek = () => {
+    const nextPlan: Plan = {
       ...plan,
-      week: 'Semana de vuelta',
-      focus: 'Fuerza base',
-      secondary: 'Técnica + movilidad',
-      objective: 'Volver al ritmo con tres sesiones completas, sin buscar máximos ni terminar destruido.',
-      rule: 'Dejá 2–3 repeticiones en reserva y bajá intensidad si aparece molestia.',
-      notes: 'Tres días alternados: piernas + core, espalda + bíceps y empuje + hombros. El aeróbico cotidiano va por separado.',
+      week: 'Próxima semana',
+      focus: plan.focus || 'Fuerza base',
+      secondary: plan.secondary || 'Técnica + movilidad',
+      objective: plan.objective || 'Tres sesiones de fuerza distribuidas según el historial reciente.',
+      notes: `${plan.notes ? `${plan.notes.trim()} ` : ''}La selección evita grupos y ejercicios recientes. El aeróbico cotidiano va por separado.`,
     };
 
-    // Siempre carga la semana que empieza el lunes siguiente. Así no toca una
-    // sesión ya guardada ni cambia el historial real del usuario.
+    // Carga tres días alternados de la semana siguiente. Cada día se calcula
+    // con las sesiones guardadas y las programadas antes, para rotar focos.
+    // Nunca pisa una sesión que el usuario ya guardó en su historial.
     const from = new Date(`${ctx.curDate}T12:00:00`);
     const daysToMonday = ((8 - from.getDay()) % 7) || 7;
     const monday = new Date(from);
@@ -73,26 +73,35 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       date.setDate(monday.getDate() + offset);
       return date.toISOString().slice(0, 10);
     };
-    const routine: Array<{ offset: number; title: string; groups: [GroupId, GroupId]; mode: Session['mode']; programmed: string[] }> = [
-      { offset: 0, title: 'Vuelta · piernas y core de base', groups: ['pierna', 'core'], mode: 'mix', programmed: ['sit_to_stand', 'leg_ext', 'dead_bug', 'plank_short'] },
-      { offset: 2, title: 'Vuelta · espalda y bíceps controlados', groups: ['espalda', 'bicep'], mode: 'mix', programmed: ['band_row', 'lat_pulldown_chest', 'dumbbell_curl', 'hammer_curl_db'] },
-      { offset: 4, title: 'Vuelta · empuje y hombros', groups: ['pecho', 'hombro'], mode: 'mix', programmed: ['incline_pushup', 'pec_deck', 'lateral_raise_db'] },
-    ];
-    const scheduled = routine.map((item) => {
-      const date = dateAt(item.offset);
+    const drafts: Record<string, Session> = {};
+    const scheduled = [0, 2, 4].map((offset) => {
+      const date = dateAt(offset);
       const existing = data.sessions[date];
-      if (existing?.saved) return existing; // el historial realizado nunca se pisa
-      return {
-        ...createSession(date, data.sessions, returnPlan),
+      // No toca una sesión hecha ni una rutina futura que ya dejaste armada.
+      if (existing?.saved || existing?.programmed?.length) {
+        drafts[date] = existing;
+        return existing;
+      }
+      const visibleHistory = { ...data.sessions, ...drafts };
+      const session = createSession(date, visibleHistory, nextPlan);
+      // Para esta selección, las sesiones ya programadas cuentan como uso: así
+      // la semana no repite el mismo ejercicio en sus tres días aunque todavía
+      // no se hayan marcado como realizadas.
+      const historyForExercises = Object.fromEntries(
+        Object.entries(visibleHistory).map(([key, value]) => [key, { ...value, saved: true }]),
+      );
+      const programmed = buildExerciseList(session, ctx.allEx, historyForExercises).map((entry) => entry.id);
+      const planned: Session = {
+        ...session,
         date,
-        groups: item.groups,
-        mode: item.mode,
         format: 'base' as const,
-        programmed: item.programmed,
-        programTitle: item.title,
+        programmed,
+        programTitle: `Próxima semana · ${session.groups.map((group) => GROUPS[group].label).join(' + ')}`,
       };
+      drafts[date] = planned;
+      return planned;
     });
-    ctx.putPlan(returnPlan);
+    ctx.putPlan(nextPlan);
     ctx.putSessions(scheduled);
   };
 
@@ -140,14 +149,14 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
           <p>{suggestion.reason}</p>
           <div className="suggestion-actions">
             <button className="btn btn-primary" onClick={applySuggestion}>Aplicar a este día</button>
-            <button className="btn btn-soft" onClick={loadReturnWeek}>Cargar semana de vuelta</button>
+            <button className="btn btn-soft" onClick={loadNextWeek}>Crear próxima semana</button>
           </div>
         </div>
-        {returnSessions.length > 0 && (
+        {scheduledSessions.length > 0 && (
           <div className="festival-routine">
-            <div className="t">Semana de vuelta cargada</div>
-            <p>Tres sesiones alternadas para retomar sin sobrecargarte. No modifica tu historial realizado.</p>
-            {returnSessions.map((session) => (
+            <div className="t">Próxima semana cargada</div>
+            <p>Tres sesiones alternadas armadas desde tu historial. No modifica sesiones ya realizadas.</p>
+            {scheduledSessions.map((session) => (
               <button key={session.date} className="routine-session" onClick={() => { ctx.setCurDate(session.date); ctx.setView('today'); }}>
                 <span><b>{session.date}</b><small>{session.programTitle}</small></span>
                 <span>{session.programmed?.map((id) => ctx.allEx[id]?.name ?? id).join(' · ')}</span>

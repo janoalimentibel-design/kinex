@@ -661,4 +661,44 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/eliptico/final.webp',
     },
   },
+  step_medio: {
+    thumb: './assets/exercises/step-medio/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/step-medio/inicio.webp',
+      Medio: './assets/exercises/step-medio/medio.webp',
+      Final: './assets/exercises/step-medio/final.webp',
+    },
+  },
+  pike: {
+    thumb: './assets/exercises/pike/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/pike/inicio.webp',
+      Medio: './assets/exercises/pike/medio.webp',
+      Final: './assets/exercises/pike/final.webp',
+    },
+  },
+  ab_wheel: {
+    thumb: './assets/exercises/ab-wheel/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/ab-wheel/inicio.webp',
+      Medio: './assets/exercises/ab-wheel/medio.webp',
+      Final: './assets/exercises/ab-wheel/final.webp',
+    },
+  },
+  rowing_erg: {
+    thumb: './assets/exercises/rowing-erg/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/rowing-erg/inicio.webp',
+      Medio: './assets/exercises/rowing-erg/medio.webp',
+      Final: './assets/exercises/rowing-erg/final.webp',
+    },
+  },
+  parallel_dips: {
+    thumb: './assets/exercises/parallel-dips/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/parallel-dips/inicio.webp',
+      Medio: './assets/exercises/parallel-dips/medio.webp',
+      Final: './assets/exercises/parallel-dips/final.webp',
+    },
+  },
 };
