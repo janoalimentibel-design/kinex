@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { expect, test } from 'vitest';
 import { CATALOG, FORMATS, GROUPS } from '../src/data/exercises';
 import { REAL_IMAGES } from '../src/data/images';
+import type { GroupId } from '../src/db/schema';
 import { buildExerciseList, createSession, isModeCompatible, nextSessionSuggestion, suggestedGroups } from '../src/logic/session';
 
 test('las vistas y controles principales siguen presentes', () => {
@@ -33,11 +34,11 @@ test('el catálogo incluye la base original y los ejercicios de fuerza solicitad
   }
 });
 
-test('un objetivo de resistencia convierte el plan en una sugerencia aeróbica visible', () => {
+test('el aeróbico diario no convierte la sugerencia de fuerza en una sesión aeróbica', () => {
   const plan = { week: 'Festival', focus: 'Resistencia de pie', secondary: 'Aeróbico', objective: 'Festival dos días', rule: '', notes: '' };
   const suggestion = nextSessionSuggestion('2026-08-03', {}, plan);
-  expect(suggestion.groups).toContain('aerobico');
-  expect(suggestion.reason).toContain('resistencia');
+  expect(suggestion.groups).not.toContain('aerobico');
+  expect(suggestion.reason).toContain('aparte');
 });
 
 test('ninguna ficha usa la plantilla genérica de cues heredada del prototipo', () => {
@@ -55,6 +56,12 @@ test('la sesión inicial conserva modo mixto y dos grupos', () => {
   expect(session.mode).toBe('mix');
   expect(session.format).toBe('base');
   expect(session.groups).toHaveLength(2);
+});
+
+test('una sesión aeróbica sola se puede registrar sin agregar otro grupo', () => {
+  const session = { ...createSession('2026-06-27'), groups: ['aerobico'] as GroupId[] };
+  expect(buildExerciseList(session, CATALOG, {})).toHaveLength(2);
+  expect(buildExerciseList(session, CATALOG, {}).every((entry) => entry.group === 'aerobico')).toBe(true);
 });
 
 test('compatibilidad de modo respeta peso, sinpeso y mixto', () => {

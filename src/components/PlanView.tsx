@@ -56,10 +56,10 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       ...plan,
       week: 'Semana de vuelta',
       focus: 'Fuerza base',
-      secondary: 'Técnica + aeróbico suave',
+      secondary: 'Técnica + movilidad',
       objective: 'Volver al ritmo con tres sesiones completas, sin buscar máximos ni terminar destruido.',
       rule: 'Dejá 2–3 repeticiones en reserva y bajá intensidad si aparece molestia.',
-      notes: 'Tres días alternados: piernas + core, espalda + bíceps y empuje + aeróbico suave.',
+      notes: 'Tres días alternados: piernas + core, espalda + bíceps y empuje + hombros. El aeróbico cotidiano va por separado.',
     };
 
     // Siempre carga la semana que empieza el lunes siguiente. Así no toca una
@@ -76,7 +76,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
     const routine: Array<{ offset: number; title: string; groups: [GroupId, GroupId]; mode: Session['mode']; programmed: string[] }> = [
       { offset: 0, title: 'Vuelta · piernas y core de base', groups: ['pierna', 'core'], mode: 'mix', programmed: ['sit_to_stand', 'leg_ext', 'dead_bug', 'plank_short'] },
       { offset: 2, title: 'Vuelta · espalda y bíceps controlados', groups: ['espalda', 'bicep'], mode: 'mix', programmed: ['band_row', 'lat_pulldown_chest', 'dumbbell_curl', 'hammer_curl_db'] },
-      { offset: 4, title: 'Vuelta · empuje y aeróbico suave', groups: ['pecho', 'aerobico'], mode: 'mix', programmed: ['incline_pushup', 'pec_deck', 'caminata_inclinada'] },
+      { offset: 4, title: 'Vuelta · empuje y hombros', groups: ['pecho', 'hombro'], mode: 'mix', programmed: ['incline_pushup', 'pec_deck', 'lateral_raise_db'] },
     ];
     const scheduled = routine.map((item) => {
       const date = dateAt(item.offset);

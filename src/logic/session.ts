@@ -2,7 +2,7 @@
 // Mismas reglas: 2 grupos por sesión, candidatos ordenados por nivel y nombre,
 // avanzados excluidos de la selección automática, extra del Extendido al grupo
 // menos trabajado en los últimos 7 días.
-import { COMBOS, ENDURANCE_COMBOS, FORMATS, GROUPS } from '../data/exercises';
+import { COMBOS, FORMATS } from '../data/exercises';
 import type { CatalogExercise, Format, GroupId, Mode, Plan, Session } from '../db/schema';
 
 export type ExerciseMap = Record<string, CatalogExercise>;
@@ -31,17 +31,10 @@ export interface NextSessionSuggestion {
   reason: string;
 }
 
-// El texto del Plan tiene consecuencias reales: estas palabras activan una semana
-// de resistencia, útil cuando el objetivo es caminar, viajar o pasar mucho tiempo de pie.
-export function hasEnduranceFocus(plan?: Plan): boolean {
-  if (!plan) return false;
-  return /aer[oó]bic|resisten|festival|muchas horas|estar de pie|caminar|viaje|viajar/i.test(
-    [plan.focus, plan.secondary, plan.objective, plan.rule, plan.notes].join(' '),
-  );
-}
-
-export function suggestedGroups(date: string, sessions: Record<string, Session> = {}, plan?: Plan): [GroupId, GroupId] {
-  const pool = hasEnduranceFocus(plan) ? ENDURANCE_COMBOS : COMBOS;
+export function suggestedGroups(date: string, sessions: Record<string, Session> = {}, _plan?: Plan): [GroupId, GroupId] {
+  // El cardio cotidiano del usuario no debe secuestrar la sesión de fuerza.
+  // Aeróbico se registra únicamente cuando el usuario lo elige como sesión aparte.
+  const pool = COMBOS;
   const preferredIndex = (new Date(date).getDay() + 1) % pool.length;
   const target = new Date(`${date}T12:00:00`);
   const groupLoad = new Map<GroupId, number>();
@@ -72,15 +65,12 @@ export function suggestedGroups(date: string, sessions: Record<string, Session> 
 
 export function nextSessionSuggestion(date: string, sessions: Record<string, Session> = {}, plan?: Plan): NextSessionSuggestion {
   const groups = suggestedGroups(date, sessions, plan);
-  const names = groups.map((group) => GROUPS[group].label).join(' + ');
   const saved = Object.values(sessions).filter((session) => session.saved).length;
   return {
     groups,
-    reason: hasEnduranceFocus(plan)
-      ? `El objetivo semanal pide resistencia: propone ${names} y evita repetir los grupos ya registrados.`
-      : saved
-        ? `Se apoya en tus ${saved} sesiones guardadas y evita repetir el foco de los últimos 7 días.`
-        : `Es una combinación inicial equilibrada. Al guardar entrenamientos, la siguiente sugerencia rota según tu historial.`,
+    reason: saved
+      ? `Se apoya en tus ${saved} sesiones guardadas y evita repetir el foco de los últimos 7 días. El aeróbico va aparte si hoy querés registrarlo.`
+      : `Es una combinación inicial equilibrada. Al guardar entrenamientos, la siguiente sugerencia rota según tu historial. El aeróbico va aparte si hoy querés registrarlo.`,
   };
 }
 
@@ -182,8 +172,8 @@ export function recentGroupCount(sessions: Record<string, Session>, group: Group
 
 export function extendedTargetGroup(session: Session, sessions: Record<string, Session>, now: Date = new Date()): GroupId {
   if (session.extraTarget === 'g1') return session.groups[0];
-  if (session.extraTarget === 'g2') return session.groups[1];
-  const [a, b] = session.groups;
+  if (session.extraTarget === 'g2' && session.groups[1]) return session.groups[1];
+  const [a, b = a] = session.groups;
   return recentGroupCount(sessions, a, now) <= recentGroupCount(sessions, b, now) ? a : b;
 }
 

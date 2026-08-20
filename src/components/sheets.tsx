@@ -31,7 +31,7 @@ function ComboSheet({ ctx }: { ctx: Ctx }) {
       return [...next, g];
     });
 
-  const apply = (groups: [GroupId, GroupId]) => {
+  const apply = (groups: GroupId[]) => {
     ctx.patchSession({ groups, completed: {}, replacements: {}, extras: [], saved: false });
     ctx.setModal(null);
   };
@@ -42,7 +42,7 @@ function ComboSheet({ ctx }: { ctx: Ctx }) {
     <>
       <div className="grip"></div>
       <h3>Cambiar grupos</h3>
-      <div className="sh-sub">Elegí 2 grupos para esta sesión.</div>
+      <div className="sh-sub">Elegí 2 grupos para fuerza, o Aeróbico solo para registrarlo aparte.</div>
       <div className="grpchips">
         {(Object.entries(GROUPS) as [GroupId, (typeof GROUPS)[GroupId]][]).map(([k, g]) => (
           <div key={k} className={`grpchip ${picked.includes(k) ? 'on' : ''}`} onClick={() => toggle(k)}>{g.label}</div>
@@ -51,7 +51,8 @@ function ComboSheet({ ctx }: { ctx: Ctx }) {
       <button
         className="btn btn-primary"
         onClick={() => {
-          if (picked.length !== 2) { alert('Elegí 2 grupos.'); return; }
+          if (picked.length === 1 && picked[0] === 'aerobico') { apply(['aerobico']); return; }
+          if (picked.length !== 2) { alert('Elegí 2 grupos, o solo Aeróbico.'); return; }
           apply([picked[0], picked[1]]);
         }}
       >
@@ -67,6 +68,13 @@ function ComboSheet({ ctx }: { ctx: Ctx }) {
           <div className="si-add">usar →</div>
         </div>
       ))}
+      <div className="swap-item" onClick={() => apply(['aerobico'])}>
+        <div className="si-n">
+          <div className="nm">Aeróbico solo</div>
+          <div className="mt">Bici, caminata, elíptico o remo · registrar aparte</div>
+        </div>
+        <div className="si-add">usar →</div>
+      </div>
     </>
   );
 }

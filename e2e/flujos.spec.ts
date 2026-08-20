@@ -60,6 +60,14 @@ test('cambiar grupos por combinación rápida rearma la sesión', async ({ page 
   await expect(page.locator('.proglab')).toContainText('0 de 4');
 });
 
+test('el aeróbico se registra como sesión separada y no como foco automático', async ({ page }) => {
+  await openApp(page);
+  await page.getByRole('button', { name: 'Cambiar grupos' }).click();
+  await page.locator('.swap-item', { hasText: 'Aeróbico solo' }).click();
+  await expect(page.locator('.focus')).toHaveText(/Aeróbico/);
+  await expect(page.locator('.proglab')).toHaveText(/^0 de 2 ejercicios/);
+});
+
 test('ejercicio personalizado: se crea y aparece en la Biblioteca', async ({ page }) => {
   await openApp(page);
   await nav(page, 'Biblioteca');

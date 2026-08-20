@@ -60,6 +60,9 @@ export const zExerciseLogEntry = z.object({
 });
 
 export const zSession = zSessionV1.extend({
+  // Las sesiones nuevas pueden ser de un único grupo para registrar cardio solo.
+  // Las importaciones v1 se siguen validando con la tupla histórica de dos grupos.
+  groups: z.array(zGroupId).min(1).max(2),
   // Campos de v2 aceptados solo para que los backups históricos sigan importando.
   // La interfaz actual ya no los crea ni los utiliza.
   checkin: zCheckin.nullable().optional(),
