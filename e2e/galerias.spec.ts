@@ -36,6 +36,12 @@ const GALLERIES: [string, string, number?][] = [
   ['Rueda abdominal (Ab Wheel)', 'ab-wheel'],
   ['Remo en máquina (ergómetro)', 'rowing-erg'],
   ['Fondos en paralelas', 'parallel-dips'],
+  ['Estocada estática corta', 'lunge-static'],
+  ['Dominadas asistidas con banda', 'pullup-band'],
+  ['Shoulder Taps', 'shoulder-taps'],
+  ['Rotación externa con banda', 'external-rotation'],
+  ['Curl martillo con banda', 'hammer-band'],
+  ['Extensión overhead con banda', 'overhead-triceps'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;

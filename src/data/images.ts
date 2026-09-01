@@ -701,4 +701,52 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/parallel-dips/final.webp',
     },
   },
+  lunge_static: {
+    thumb: './assets/exercises/lunge-static/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/lunge-static/inicio.webp',
+      Medio: './assets/exercises/lunge-static/medio.webp',
+      Final: './assets/exercises/lunge-static/final.webp',
+    },
+  },
+  pullup_band: {
+    thumb: './assets/exercises/pullup-band/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/pullup-band/inicio.webp',
+      Medio: './assets/exercises/pullup-band/medio.webp',
+      Final: './assets/exercises/pullup-band/final.webp',
+    },
+  },
+  shoulder_taps: {
+    thumb: './assets/exercises/shoulder-taps/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/shoulder-taps/inicio.webp',
+      Medio: './assets/exercises/shoulder-taps/medio.webp',
+      Final: './assets/exercises/shoulder-taps/final.webp',
+    },
+  },
+  external_rot: {
+    thumb: './assets/exercises/external-rotation/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/external-rotation/inicio.webp',
+      Medio: './assets/exercises/external-rotation/medio.webp',
+      Final: './assets/exercises/external-rotation/final.webp',
+    },
+  },
+  hammer_band: {
+    thumb: './assets/exercises/hammer-band/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/hammer-band/inicio.webp',
+      Medio: './assets/exercises/hammer-band/medio.webp',
+      Final: './assets/exercises/hammer-band/final.webp',
+    },
+  },
+  overhead_tri: {
+    thumb: './assets/exercises/overhead-triceps/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/overhead-triceps/inicio.webp',
+      Medio: './assets/exercises/overhead-triceps/medio.webp',
+      Final: './assets/exercises/overhead-triceps/final.webp',
+    },
+  },
 };
