@@ -79,6 +79,15 @@ test('Base arma 4 ejercicios, Extendido 5 y Largo 6, sin avanzados automáticos'
   for (const entry of long) expect(CATALOG[entry.id].level).not.toBe('Avanzado');
 });
 
+test('la dominada asistida con banda queda disponible, pero no se sugiere automáticamente', () => {
+  for (let day = 1; day <= 31; day++) {
+    const date = `2026-08-${String(day).padStart(2, '0')}`;
+    const session = { ...createSession(date), groups: ['espalda', 'pecho'] as ['espalda', 'pecho'] };
+    expect(buildExerciseList(session, CATALOG, {}).map((entry) => entry.id)).not.toContain('pullup_band');
+  }
+  expect(CATALOG.pullup_band).toBeDefined();
+});
+
 test('Core propone un bloque mínimo de cuatro y los grupos anteriores reequilibran la semana', () => {
   const session = { ...createSession('2026-07-07'), groups: ['pierna', 'core'] as ['pierna', 'core'] };
   expect(buildExerciseList(session, CATALOG, {}).filter((entry) => entry.group === 'core')).toHaveLength(4);

@@ -749,4 +749,52 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/overhead-triceps/final.webp',
     },
   },
+  lunge_lateral: {
+    thumb: './assets/exercises/lunge-lateral/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/lunge-lateral/inicio.webp',
+      Medio: './assets/exercises/lunge-lateral/medio.webp',
+      Final: './assets/exercises/lunge-lateral/final.webp',
+    },
+  },
+  band_close_press: {
+    thumb: './assets/exercises/band-close-press/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/band-close-press/inicio.webp',
+      Medio: './assets/exercises/band-close-press/medio.webp',
+      Final: './assets/exercises/band-close-press/final.webp',
+    },
+  },
+  wall_angels: {
+    thumb: './assets/exercises/wall-angels/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/wall-angels/inicio.webp',
+      Medio: './assets/exercises/wall-angels/medio.webp',
+      Final: './assets/exercises/wall-angels/final.webp',
+    },
+  },
+  lat_raise_band: {
+    thumb: './assets/exercises/lateral-raise-band/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/lateral-raise-band/inicio.webp',
+      Medio: './assets/exercises/lateral-raise-band/medio.webp',
+      Final: './assets/exercises/lateral-raise-band/final.webp',
+    },
+  },
+  tri_ext_band: {
+    thumb: './assets/exercises/triceps-extension-band/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/triceps-extension-band/inicio.webp',
+      Medio: './assets/exercises/triceps-extension-band/medio.webp',
+      Final: './assets/exercises/triceps-extension-band/final.webp',
+    },
+  },
+  kickback_band: {
+    thumb: './assets/exercises/kickback-band/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/kickback-band/inicio.webp',
+      Medio: './assets/exercises/kickback-band/medio.webp',
+      Final: './assets/exercises/kickback-band/final.webp',
+    },
+  },
 };

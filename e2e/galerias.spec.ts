@@ -42,6 +42,12 @@ const GALLERIES: [string, string, number?][] = [
   ['Rotación externa con banda', 'external-rotation'],
   ['Curl martillo con banda', 'hammer-band'],
   ['Extensión overhead con banda', 'overhead-triceps'],
+  ['Estocada lateral', 'lunge-lateral'],
+  ['Press cerrado con banda', 'band-close-press'],
+  ['Wall Angels', 'wall-angels'],
+  ['Elevación lateral con banda', 'lateral-raise-band'],
+  ['Extensión de tríceps con banda', 'triceps-extension-band'],
+  ['Kickback con banda', 'kickback-band'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;

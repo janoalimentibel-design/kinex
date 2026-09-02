@@ -7,6 +7,10 @@ import type { CatalogExercise, Format, GroupId, Mode, Plan, Session } from '../d
 
 export type ExerciseMap = Record<string, CatalogExercise>;
 
+// Preferencia personal: la versión con banda queda disponible en Biblioteca
+// como adaptación manual, pero no vuelve a entrar en una rutina sugerida.
+const AUTOMATIC_EXERCISE_EXCLUSIONS = new Set(['pullup_band']);
+
 export interface SessionEntry {
   id: string;
   group: GroupId;
@@ -144,6 +148,7 @@ function automaticExercises(
   const target = new Date(`${date}T12:00:00`);
   return candidates(all, group, mode, false)
     .filter(allow)
+    .filter((e) => !AUTOMATIC_EXERCISE_EXCLUSIONS.has(e.id))
     .filter((e) => !excluded.includes(e.id))
     .map((exercise) => {
       const usage = exerciseUsage(sessions, exercise.id, date);
