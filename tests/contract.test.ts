@@ -88,6 +88,15 @@ test('la dominada asistida con banda queda disponible, pero no se sugiere autom�
   expect(CATALOG.pullup_band).toBeDefined();
 });
 
+test('las prioridades semanales incluyen dominada estricta y las dos máquinas de pierna', () => {
+  const back = { ...createSession('2026-08-03'), groups: ['espalda', 'pecho'] as ['espalda', 'pecho'] };
+  expect(buildExerciseList(back, CATALOG, {}).map((entry) => entry.id)).toContain('pullup');
+
+  const legs = { ...createSession('2026-08-03'), groups: ['pierna', 'core'] as ['pierna', 'core'] };
+  const legIds = buildExerciseList(legs, CATALOG, {}).filter((entry) => entry.group === 'pierna').map((entry) => entry.id);
+  expect(legIds).toEqual(expect.arrayContaining(['leg_ext', 'lying_leg_curl']));
+});
+
 test('Core propone un bloque mínimo de cuatro y los grupos anteriores reequilibran la semana', () => {
   const session = { ...createSession('2026-07-07'), groups: ['pierna', 'core'] as ['pierna', 'core'] };
   expect(buildExerciseList(session, CATALOG, {}).filter((entry) => entry.group === 'core')).toHaveLength(4);

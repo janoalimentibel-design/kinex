@@ -48,6 +48,12 @@ const GALLERIES: [string, string, number?][] = [
   ['Elevación lateral con banda', 'lateral-raise-band'],
   ['Extensión de tríceps con banda', 'triceps-extension-band'],
   ['Kickback con banda', 'kickback-band'],
+  ['Terminal Knee Extension con banda', 'tke'],
+  ['Estocada caminando', 'lunge-walk'],
+  ['Face Pull', 'face-pull-h'],
+  ['Y-T-W', 'ytw'],
+  ['McGill Curl-Up', 'mcgill'],
+  ['Remo supino con banda', 'supine-row-band'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;

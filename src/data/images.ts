@@ -797,4 +797,52 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/kickback-band/final.webp',
     },
   },
+  tke: {
+    thumb: './assets/exercises/tke/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/tke/inicio.webp',
+      Medio: './assets/exercises/tke/medio.webp',
+      Final: './assets/exercises/tke/final.webp',
+    },
+  },
+  lunge_walk: {
+    thumb: './assets/exercises/lunge-walk/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/lunge-walk/inicio.webp',
+      Medio: './assets/exercises/lunge-walk/medio.webp',
+      Final: './assets/exercises/lunge-walk/final.webp',
+    },
+  },
+  face_pull_h: {
+    thumb: './assets/exercises/face-pull-h/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/face-pull-h/inicio.webp',
+      Medio: './assets/exercises/face-pull-h/medio.webp',
+      Final: './assets/exercises/face-pull-h/final.webp',
+    },
+  },
+  ytw: {
+    thumb: './assets/exercises/ytw/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/ytw/inicio.webp',
+      Medio: './assets/exercises/ytw/medio.webp',
+      Final: './assets/exercises/ytw/final.webp',
+    },
+  },
+  mcgill: {
+    thumb: './assets/exercises/mcgill/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/mcgill/inicio.webp',
+      Medio: './assets/exercises/mcgill/medio.webp',
+      Final: './assets/exercises/mcgill/final.webp',
+    },
+  },
+  supine_row_band: {
+    thumb: './assets/exercises/supine-row-band/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/supine-row-band/inicio.webp',
+      Medio: './assets/exercises/supine-row-band/medio.webp',
+      Final: './assets/exercises/supine-row-band/final.webp',
+    },
+  },
 };

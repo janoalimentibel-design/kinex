@@ -11,6 +11,14 @@ export type ExerciseMap = Record<string, CatalogExercise>;
 // como adaptación manual, pero no vuelve a entrar en una rutina sugerida.
 const AUTOMATIC_EXERCISE_EXCLUSIONS = new Set(['pullup_band']);
 
+// Prioridades semanales personalizadas. Solo se fuerzan cuando el modo de la
+// sesión admite el ejercicio; así una sesión explícitamente sin peso no recibe
+// una máquina y una sesión solo con peso no recibe una dominada estricta.
+const WEEKLY_GROUP_PRIORITIES: Partial<Record<GroupId, string[]>> = {
+  espalda: ['pullup'],
+  pierna: ['leg_ext', 'lying_leg_curl'],
+};
+
 export interface SessionEntry {
   id: string;
   group: GroupId;
@@ -119,15 +127,36 @@ function hash(text: string): number {
   return value;
 }
 
+function sessionUsesExercise(session: Session, id: string): boolean {
+  return Boolean(
+    session.programmed?.includes(id)
+    || session.exerciseLog?.some((item) => item.id === id)
+    || Object.values(session.replacements).includes(id)
+    || session.extras.includes(id)
+    || session.completed[id],
+  );
+}
+
+function weekStart(date: string): string {
+  const value = new Date(`${date}T12:00:00`);
+  const daysSinceMonday = (value.getDay() + 6) % 7;
+  value.setDate(value.getDate() - daysSinceMonday);
+  return isoDate(value);
+}
+
+function usedEarlierThisWeek(sessions: Record<string, Session>, id: string, beforeDate: string): boolean {
+  const start = weekStart(beforeDate);
+  return Object.entries(sessions).some(([date, session]) => (
+    date >= start && date < beforeDate && session.saved && sessionUsesExercise(session, id)
+  ));
+}
+
 function exerciseUsage(sessions: Record<string, Session>, id: string, beforeDate: string): { count: number; lastDate: string | null } {
   let count = 0;
   let lastDate: string | null = null;
   for (const [date, session] of Object.entries(sessions)) {
     if (!session.saved || date >= beforeDate) continue;
-    const used = session.exerciseLog?.some((item) => item.id === id)
-      ?? (Object.values(session.replacements).includes(id)
-        || session.extras.includes(id)
-        || Boolean(session.completed[id]));
+    const used = sessionUsesExercise(session, id);
     if (!used) continue;
     count++;
     if (lastDate === null || date > lastDate) lastDate = date;
@@ -146,10 +175,17 @@ function automaticExercises(
   excluded: string[] = [],
 ): CatalogExercise[] {
   const target = new Date(`${date}T12:00:00`);
-  return candidates(all, group, mode, false)
+  const priority = (WEEKLY_GROUP_PRIORITIES[group] ?? [])
+    .filter((id) => !usedEarlierThisWeek(sessions, id, date))
+    .map((id) => all[id])
+    .filter((exercise): exercise is CatalogExercise => Boolean(exercise))
+    .filter((exercise) => isModeCompatible(exercise, mode) && allow(exercise))
+    .filter((exercise) => !AUTOMATIC_EXERCISE_EXCLUSIONS.has(exercise.id))
+    .filter((exercise) => !excluded.includes(exercise.id));
+  const automatic = candidates(all, group, mode, false)
     .filter(allow)
     .filter((e) => !AUTOMATIC_EXERCISE_EXCLUSIONS.has(e.id))
-    .filter((e) => !excluded.includes(e.id))
+    .filter((e) => !excluded.includes(e.id) && !priority.some((forced) => forced.id === e.id))
     .map((exercise) => {
       const usage = exerciseUsage(sessions, exercise.id, date);
       const daysSince = usage.lastDate
@@ -161,8 +197,8 @@ function automaticExercises(
       return { exercise, score: usage.count * 1_000 + recencyPenalty + (hash(`${date}:${group}:${exercise.id}`) % 97) };
     })
     .sort((a, b) => a.score - b.score || a.exercise.name.localeCompare(b.exercise.name))
-    .slice(0, amount)
     .map(({ exercise }) => exercise);
+  return [...priority, ...automatic].slice(0, amount);
 }
 
 export function recentGroupCount(sessions: Record<string, Session>, group: GroupId, now: Date = new Date()): number {
