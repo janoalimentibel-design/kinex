@@ -845,4 +845,52 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/supine-row-band/final.webp',
     },
   },
+  scap_pull: {
+    thumb: './assets/exercises/scap-pull/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/scap-pull/inicio.webp',
+      Medio: './assets/exercises/scap-pull/medio.webp',
+      Final: './assets/exercises/scap-pull/final.webp',
+    },
+  },
+  pause_pushup: {
+    thumb: './assets/exercises/pause-pushup/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/pause-pushup/inicio.webp',
+      Medio: './assets/exercises/pause-pushup/medio.webp',
+      Final: './assets/exercises/pause-pushup/final.webp',
+    },
+  },
+  chinup: {
+    thumb: './assets/exercises/chinup/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/chinup/inicio.webp',
+      Medio: './assets/exercises/chinup/medio.webp',
+      Final: './assets/exercises/chinup/final.webp',
+    },
+  },
+  bear_hold: {
+    thumb: './assets/exercises/bear-hold/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/bear-hold/inicio.webp',
+      Medio: './assets/exercises/bear-hold/medio.webp',
+      Final: './assets/exercises/bear-hold/final.webp',
+    },
+  },
+  triceps_pushup: {
+    thumb: './assets/exercises/triceps-pushup/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/triceps-pushup/inicio.webp',
+      Medio: './assets/exercises/triceps-pushup/medio.webp',
+      Final: './assets/exercises/triceps-pushup/final.webp',
+    },
+  },
+  farmer: {
+    thumb: './assets/exercises/farmer-carry/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/farmer-carry/inicio.webp',
+      Medio: './assets/exercises/farmer-carry/medio.webp',
+      Final: './assets/exercises/farmer-carry/final.webp',
+    },
+  },
 };

@@ -54,6 +54,12 @@ const GALLERIES: [string, string, number?][] = [
   ['Y-T-W', 'ytw'],
   ['McGill Curl-Up', 'mcgill'],
   ['Remo supino con banda', 'supine-row-band'],
+  ['Dominada escapular', 'scap-pull'],
+  ['Push-Up con pausa', 'pause-pushup'],
+  ['Dominadas supinas (Chin-Ups)', 'chinup'],
+  ['Bear Hold', 'bear-hold'],
+  ['Flexiones de tríceps brazos pegados', 'triceps-pushup'],
+  ['Farmer Carry con mochila', 'farmer-carry'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;
