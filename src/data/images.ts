@@ -893,4 +893,53 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/farmer-carry/final.webp',
     },
   },
+  spanish_squat: {
+    thumb: './assets/exercises/spanish-squat/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/spanish-squat/inicio.webp',
+      Medio: './assets/exercises/spanish-squat/medio.webp',
+      Final: './assets/exercises/spanish-squat/final.webp',
+    },
+  },
+  dead_hang: {
+    display: 'hold',
+    thumb: './assets/exercises/dead-hang/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/dead-hang/inicio.webp',
+      Medio: './assets/exercises/dead-hang/medio.webp',
+      Final: './assets/exercises/dead-hang/final.webp',
+    },
+  },
+  scap_pushup: {
+    thumb: './assets/exercises/scap-pushup-v2/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/scap-pushup-v2/inicio.webp',
+      Medio: './assets/exercises/scap-pushup-v2/medio.webp',
+      Final: './assets/exercises/scap-pushup-v2/final.webp',
+    },
+  },
+  ecc_pushup: {
+    thumb: './assets/exercises/ecc-pushup/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/ecc-pushup/inicio.webp',
+      Medio: './assets/exercises/ecc-pushup/medio.webp',
+      Final: './assets/exercises/ecc-pushup/final.webp',
+    },
+  },
+  alt_curl_band: {
+    thumb: './assets/exercises/alt-curl-band/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/alt-curl-band/inicio.webp',
+      Medio: './assets/exercises/alt-curl-band/medio.webp',
+      Final: './assets/exercises/alt-curl-band/final.webp',
+    },
+  },
+  suitcase: {
+    thumb: './assets/exercises/suitcase-carry/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/suitcase-carry/inicio.webp',
+      Medio: './assets/exercises/suitcase-carry/medio.webp',
+      Final: './assets/exercises/suitcase-carry/final.webp',
+    },
+  },
 };

@@ -60,6 +60,12 @@ const GALLERIES: [string, string, number?][] = [
   ['Bear Hold', 'bear-hold'],
   ['Flexiones de tríceps brazos pegados', 'triceps-pushup'],
   ['Farmer Carry con mochila', 'farmer-carry'],
+  ['Spanish Squat isométrico', 'spanish-squat'],
+  ['Dead Hang', 'dead-hang', 1],
+  ['Scapular Push-Up', 'scap-pushup-v2'],
+  ['Flexión excéntrica controlada', 'ecc-pushup'],
+  ['Curl alterno con banda', 'alt-curl-band'],
+  ['Suitcase Carry', 'suitcase-carry'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;

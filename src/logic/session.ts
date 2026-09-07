@@ -48,24 +48,20 @@ export function suggestedGroups(date: string, sessions: Record<string, Session> 
   // Aeróbico se registra únicamente cuando el usuario lo elige como sesión aparte.
   const pool = COMBOS;
   const preferredIndex = (new Date(date).getDay() + 1) % pool.length;
-  const target = new Date(`${date}T12:00:00`);
+  const start = weekStart(date);
   const groupLoad = new Map<GroupId, number>();
 
-  // Una modificación de grupos hecha en un día anterior de la semana ya cuenta
-  // aunque todavía no se haya guardado la sesión. Así las sugerencias futuras
-  // se reequilibran inmediatamente en vez de repetir el mismo foco.
+  // Cuenta sólo la semana calendario en curso. Una modificación anterior —sin
+  // guardar todavía— también cuenta, para que el próximo día se reequilibre.
   for (const [otherDate, session] of Object.entries(sessions)) {
-    const day = new Date(`${otherDate}T12:00:00`);
-    const diff = (target.getTime() - day.getTime()) / 864e5;
-    if (diff <= 0 || diff > 7) continue;
+    if (otherDate < start || otherDate >= date) continue;
     for (const group of session.groups) groupLoad.set(group, (groupLoad.get(group) ?? 0) + 1);
   }
 
   const ranked = pool.map((combo, index) => {
     const used = (groupLoad.get(combo[0]) ?? 0) + (groupLoad.get(combo[1]) ?? 0);
     const samePair = Object.entries(sessions).some(([otherDate, session]) => {
-      const diff = (target.getTime() - new Date(`${otherDate}T12:00:00`).getTime()) / 864e5;
-      return diff > 0 && diff <= 7 && session.groups.includes(combo[0]) && session.groups.includes(combo[1]);
+      return otherDate >= start && otherDate < date && session.groups.includes(combo[0]) && session.groups.includes(combo[1]);
     });
     // Se conserva una preferencia semanal estable solo como desempate.
     const weeklyDistance = (index - preferredIndex + pool.length) % pool.length;
@@ -73,6 +69,28 @@ export function suggestedGroups(date: string, sessions: Record<string, Session> 
   });
   const best = ranked.sort((a, b) => a.score - b.score)[0].combo;
   return [best[0], best[1]];
+}
+
+// Cuatro sesiones dejan ocho espacios: es el mínimo para cubrir los siete
+// grupos de fuerza una vez por semana y repetir sólo un foco al final. El
+// cuarto acompañante de core se elige por menor carga reciente del historial.
+const WEEKLY_COVERAGE_BASE: [GroupId, GroupId][] = [
+  ['pierna', 'hombro'],
+  ['pecho', 'tricep'],
+  ['espalda', 'bicep'],
+];
+
+function groupUsageCount(sessions: Record<string, Session>, group: GroupId, beforeDate: string): number {
+  return Object.entries(sessions).reduce((count, [date, session]) => (
+    date < beforeDate && session.saved && session.groups.includes(group) ? count + 1 : count
+  ), 0);
+}
+
+export function weeklyCoveragePairs(sessions: Record<string, Session>, weekDate: string): [GroupId, GroupId][] {
+  const corePartner = (['pierna', 'espalda', 'pecho', 'hombro', 'bicep', 'tricep'] as GroupId[])
+    .map((group, index) => ({ group, count: groupUsageCount(sessions, group, weekDate), index }))
+    .sort((a, b) => a.count - b.count || a.index - b.index)[0].group;
+  return [...WEEKLY_COVERAGE_BASE, ['core', corePartner]];
 }
 
 export function nextSessionSuggestion(date: string, sessions: Record<string, Session> = {}, plan?: Plan): NextSessionSuggestion {

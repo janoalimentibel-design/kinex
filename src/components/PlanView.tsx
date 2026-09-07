@@ -1,7 +1,7 @@
 // Vista Plan — port de renderPlan/copyWeeklySummary de A2.8.
 import { FORMATS, GROUPS } from '../data/exercises';
 import type { Plan, Session } from '../db/schema';
-import { buildExerciseList, createSession, nextSessionSuggestion } from '../logic/session';
+import { buildExerciseList, createSession, nextSessionSuggestion, weeklyCoveragePairs } from '../logic/session';
 import type { Ctx } from './types';
 
 export default function PlanView({ ctx }: { ctx: Ctx }) {
@@ -57,12 +57,12 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       week: 'Próxima semana',
       focus: plan.focus || 'Fuerza base',
       secondary: plan.secondary || 'Técnica + movilidad',
-      objective: plan.objective || 'Tres sesiones de fuerza distribuidas según el historial reciente.',
-      notes: `${plan.notes ? `${plan.notes.trim()} ` : ''}La selección evita grupos y ejercicios recientes. El aeróbico cotidiano va por separado.`,
+      objective: plan.objective || 'Cuatro sesiones de fuerza que cubren todos los grupos durante la semana.',
+      notes: `${plan.notes ? `${plan.notes.trim()} ` : ''}La semana cubre todos los grupos de fuerza antes de repetir uno y rota ejercicios según el historial. El aeróbico cotidiano va por separado.`,
     };
 
-    // Carga tres días alternados de la semana siguiente. Cada día se calcula
-    // con las sesiones guardadas y las programadas antes, para rotar focos.
+    // Cuatro días repartidos (lun, mar, jue, sáb): cubren los siete grupos
+    // antes de repetir uno. Los ejercicios siguen rotando según el historial.
     // Nunca pisa una sesión que el usuario ya guardó en su historial.
     const from = new Date(`${ctx.curDate}T12:00:00`);
     const daysToMonday = ((8 - from.getDay()) % 7) || 7;
@@ -74,7 +74,8 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       return date.toISOString().slice(0, 10);
     };
     const drafts: Record<string, Session> = {};
-    const scheduled = [0, 2, 4].map((offset) => {
+    const coverage = weeklyCoveragePairs(data.sessions, dateAt(0));
+    const scheduled = [0, 1, 3, 5].map((offset, index) => {
       const date = dateAt(offset);
       const existing = data.sessions[date];
       // No toca una sesión hecha ni una rutina futura que ya dejaste armada.
@@ -83,7 +84,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
         return existing;
       }
       const visibleHistory = { ...data.sessions, ...drafts };
-      const session = createSession(date, visibleHistory, nextPlan);
+      const session = { ...createSession(date, visibleHistory, nextPlan), groups: coverage[index] };
       // Para esta selección, las sesiones ya programadas cuentan como uso: así
       // la semana no repite el mismo ejercicio en sus tres días aunque todavía
       // no se hayan marcado como realizadas.
@@ -149,13 +150,13 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
           <p>{suggestion.reason}</p>
           <div className="suggestion-actions">
             <button className="btn btn-primary" onClick={applySuggestion}>Aplicar a este día</button>
-            <button className="btn btn-soft" onClick={loadNextWeek}>Crear próxima semana</button>
+            <button className="btn btn-soft" onClick={loadNextWeek}>Organizar próxima semana</button>
           </div>
         </div>
         {scheduledSessions.length > 0 && (
           <div className="festival-routine">
             <div className="t">Próxima semana cargada</div>
-            <p>Tres sesiones alternadas armadas desde tu historial. No modifica sesiones ya realizadas.</p>
+            <p>Cuatro sesiones organizadas desde tu historial: todos los grupos aparecen antes de repetir uno. No modifica sesiones ya realizadas.</p>
             {scheduledSessions.map((session) => (
               <button key={session.date} className="routine-session" onClick={() => { ctx.setCurDate(session.date); ctx.setView('today'); }}>
                 <span><b>{session.date}</b><small>{session.programTitle}</small></span>

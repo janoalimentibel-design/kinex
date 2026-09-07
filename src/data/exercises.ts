@@ -22,7 +22,10 @@ export const FORMATS: Record<Format, { name: string; duration: string; perGroup:
   "long": { name: "Largo", duration: "40–50 min", perGroup: 3, extraOne: false, meta: "6 ejercicios + opcionales" },
 };
 
-export const COMBOS: [GroupId, GroupId][] = [["pierna","hombro"],["espalda","bicep"],["pecho","tricep"],["pierna","core"],["espalda","core"],["pecho","hombro"],["pierna","espalda"],["hombro","core"]];
+// Incluye alternativas cruzadas para poder terminar de cubrir la semana. Por
+// ejemplo, si espalda ya se trabajó y pecho + bíceps siguen pendientes, esa
+// combinación gana antes que volver a programar espalda.
+export const COMBOS: [GroupId, GroupId][] = [["pierna","hombro"],["espalda","bicep"],["pecho","tricep"],["pierna","core"],["espalda","core"],["pecho","hombro"],["pierna","espalda"],["hombro","core"],["pecho","bicep"],["espalda","tricep"]];
 
 // Se usa cuando el objetivo semanal pide tolerancia al esfuerzo, caminar o estar muchas horas de pie.
 export const ENDURANCE_COMBOS: [GroupId, GroupId][] = [["pierna", "aerobico"], ["core", "aerobico"], ["espalda", "aerobico"]];
