@@ -109,7 +109,16 @@ test('exportar backup y reimportarlo con vista previa restaura los datos', async
 
   await page.locator('input[type="file"]').setInputFiles(backupPath);
   await expect(page.locator('.sheet')).toContainText('1 sesiones');
+  // El contador ya vale 1 antes de importar. Esperar sólo ese contador permite
+  // terminar el test mientras dialog.accept sigue pendiente y cierra la página.
+  page.removeAllListeners('dialog');
+  const imported = page.waitForEvent('dialog').then(async (dialog) => {
+    expect(dialog.message()).toBe('Backup importado.');
+    await dialog.accept();
+  });
   await page.getByRole('button', { name: 'Reemplazar mis datos' }).click();
+  await imported;
+  await page.reload();
   await expect(page.locator('.streak .n')).toHaveText('1');
 });
 

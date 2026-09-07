@@ -4,7 +4,7 @@
 import { mkdirSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 
-const GALLERIES: [string, string, number?][] = [
+const GALLERIES: [string, string, number?, string?][] = [
   ['Flexiones', 'flexiones'],
   ['Dominadas estrictas', 'dominadas'],
   ['Step-Up bajo', 'step-up-bajo'],
@@ -66,16 +66,23 @@ const GALLERIES: [string, string, number?][] = [
   ['Flexión excéntrica controlada', 'ecc-pushup'],
   ['Curl alterno con banda', 'alt-curl-band'],
   ['Suitcase Carry', 'suitcase-carry'],
+  ['Curl corto alta repetición', 'short-curl'],
+  ['Extensión unilateral con banda', 'triceps-unilateral'],
+  ['Press cerrado con banda', 'close-band-triceps', 3, 'Tríceps'],
+  ['Flexión diamante regresada', 'diamond-regressed', 3, 'Pecho'],
+  ['Band Pull-Apart', 'pull-apart-shoulders', 3, 'Hombro'],
+  ['Jalón al pecho agarre supino', 'lat-pulldown-supine'],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;
 mkdirSync(OUT, { recursive: true });
 
-for (const [name, slug, expectedShots = 3] of GALLERIES) {
-  test(`galería de ${name}: 3 fases cargadas y captura guardada`, async ({ page }) => {
+for (const [name, slug, expectedShots = 3, group] of GALLERIES) {
+  test(`galería de ${name}${group ? ' · ' + group : ''}: fases cargadas y captura guardada`, async ({ page }) => {
     await page.goto('/');
     await page.locator('.nav button', { hasText: 'Biblioteca' }).click();
     await page.locator('.search').fill(name);
+    if (group) await page.locator('.filters').getByRole('button', { name: group, exact: true }).click();
     await page.locator('.libcard', { hasText: name }).first().click();
 
     const shots = page.locator('.lib-gallery .shot img');

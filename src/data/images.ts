@@ -942,4 +942,52 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Final: './assets/exercises/suitcase-carry/final.webp',
     },
   },
+  short_curl: {
+    thumb: './assets/exercises/short-curl/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/short-curl/inicio.webp',
+      Medio: './assets/exercises/short-curl/medio.webp',
+      Final: './assets/exercises/short-curl/final.webp',
+    },
+  },
+  tri_uni: {
+    thumb: './assets/exercises/triceps-unilateral/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/triceps-unilateral/inicio.webp',
+      Medio: './assets/exercises/triceps-unilateral/medio.webp',
+      Final: './assets/exercises/triceps-unilateral/final.webp',
+    },
+  },
+  close_band: {
+    thumb: './assets/exercises/close-band-triceps/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/close-band-triceps/inicio.webp',
+      Medio: './assets/exercises/close-band-triceps/medio.webp',
+      Final: './assets/exercises/close-band-triceps/final.webp',
+    },
+  },
+  diamond_reg: {
+    thumb: './assets/exercises/diamond-regressed/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/diamond-regressed/inicio.webp',
+      Medio: './assets/exercises/diamond-regressed/medio.webp',
+      Final: './assets/exercises/diamond-regressed/final.webp',
+    },
+  },
+  pull_apart_h: {
+    thumb: './assets/exercises/pull-apart-shoulders/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/pull-apart-shoulders/inicio.webp',
+      Medio: './assets/exercises/pull-apart-shoulders/medio.webp',
+      Final: './assets/exercises/pull-apart-shoulders/final.webp',
+    },
+  },
+  lat_pulldown_supine: {
+    thumb: './assets/exercises/lat-pulldown-supine/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/lat-pulldown-supine/inicio.webp',
+      Medio: './assets/exercises/lat-pulldown-supine/medio.webp',
+      Final: './assets/exercises/lat-pulldown-supine/final.webp',
+    },
+  },
 };

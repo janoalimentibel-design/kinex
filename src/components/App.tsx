@@ -109,7 +109,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.31</div>
+            <div className="version">v3.32</div>
           </div>
         </div>
       </div>
