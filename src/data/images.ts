@@ -10,6 +10,60 @@ export interface ExerciseImages {
 }
 
 export const REAL_IMAGES: Record<string, ExerciseImages> = {
+  top_hold: {
+    display: 'hold',
+    thumb: './assets/exercises/top-hold/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/top-hold/inicio.webp',
+      Medio: './assets/exercises/top-hold/medio.webp',
+      Final: './assets/exercises/top-hold/final.webp',
+    },
+  },
+  hollow_reg: {
+    display: 'hold',
+    thumb: './assets/exercises/hollow-regressed/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/hollow-regressed/inicio.webp',
+      Medio: './assets/exercises/hollow-regressed/medio.webp',
+      Final: './assets/exercises/hollow-regressed/final.webp',
+    },
+  },
+  bracing_90: {
+    display: 'hold',
+    thumb: './assets/exercises/bracing-90/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/bracing-90/inicio.webp',
+      Medio: './assets/exercises/bracing-90/medio.webp',
+      Final: './assets/exercises/bracing-90/final.webp',
+    },
+  },
+  curl_iso: {
+    display: 'hold',
+    thumb: './assets/exercises/curl-isometric/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/curl-isometric/inicio.webp',
+      Medio: './assets/exercises/curl-isometric/medio.webp',
+      Final: './assets/exercises/curl-isometric/final.webp',
+    },
+  },
+  supine_hang: {
+    display: 'hold',
+    thumb: './assets/exercises/supine-hang/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/supine-hang/inicio.webp',
+      Medio: './assets/exercises/supine-hang/medio.webp',
+      Final: './assets/exercises/supine-hang/final.webp',
+    },
+  },
+  towel_hold: {
+    display: 'hold',
+    thumb: './assets/exercises/towel-hold/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/towel-hold/inicio.webp',
+      Medio: './assets/exercises/towel-hold/medio.webp',
+      Final: './assets/exercises/towel-hold/final.webp',
+    },
+  },
   pushup: {
     thumb: './assets/exercises/pushup/thumb.webp',
     phases: {

@@ -5,6 +5,12 @@ import { mkdirSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 
 const GALLERIES: [string, string, number?, string?][] = [
+  ['Isométrico arriba de flexión', 'top-hold', 1],
+  ['Hollow Hold regresado', 'hollow-regressed', 1],
+  ['Respiración 90/90 + bracing', 'bracing-90', 1],
+  ['Curl isométrico con banda', 'curl-isometric', 1],
+  ['Hang supino', 'supine-hang', 1],
+  ['Toalla Hold / Grip Hold', 'towel-hold', 1],
   ['Flexiones', 'flexiones'],
   ['Dominadas estrictas', 'dominadas'],
   ['Step-Up bajo', 'step-up-bajo'],
