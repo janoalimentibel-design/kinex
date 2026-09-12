@@ -7,9 +7,96 @@ export interface ExerciseImages {
   phases: { Inicio: string; Medio: string; Final: string };
   /** Los isométricos muestran una postura útil, no tres fotogramas artificiales. */
   display?: 'sequence' | 'hold';
+  /** Solo las fases que aportan información; permite omitir intermedios redundantes. */
+  visiblePhases?: ('Inicio' | 'Medio' | 'Final')[];
+  note?: string;
 }
 
 export const REAL_IMAGES: Record<string, ExerciseImages> = {
+  tibialis: {
+    thumb: './assets/exercises/tibialis-v3/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/tibialis-v3/inicio.webp',
+      Medio: './assets/exercises/tibialis-v3/medio.webp',
+      Final: './assets/exercises/tibialis-v3/final.webp',
+    },
+  },
+  lat_pulldown_back: {
+    thumb: './assets/exercises/lat-pulldown-back/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/lat-pulldown-back/inicio.webp',
+      Medio: './assets/exercises/lat-pulldown-back/medio.webp',
+      Final: './assets/exercises/lat-pulldown-back/final.webp',
+    },
+  },
+  serratus: {
+    visiblePhases: ['Inicio', 'Final'],
+    note: 'Movimiento corto de escápulas: codos estirados; empujá el piso para separar los omóplatos.',
+    thumb: './assets/exercises/serratus-pushup/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/serratus-pushup/inicio.webp',
+      Medio: './assets/exercises/serratus-pushup/medio.webp',
+      Final: './assets/exercises/serratus-pushup/final.webp',
+    },
+  },
+  chin_assist: {
+    thumb: './assets/exercises/chinup-assisted/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/chinup-assisted/inicio.webp',
+      Medio: './assets/exercises/chinup-assisted/medio.webp',
+      Final: './assets/exercises/chinup-assisted/final.webp',
+    },
+  },
+  chin_iso: {
+    display: 'hold',
+    thumb: './assets/exercises/chinup-isometric/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/chinup-isometric/inicio.webp',
+      Medio: './assets/exercises/chinup-isometric/medio.webp',
+      Final: './assets/exercises/chinup-isometric/final.webp',
+    },
+  },
+  diamond_tri: {
+    thumb: './assets/exercises/diamond-triceps/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/diamond-triceps/inicio.webp',
+      Medio: './assets/exercises/diamond-triceps/medio.webp',
+      Final: './assets/exercises/diamond-triceps/final.webp',
+    },
+  },
+  tri_iso: {
+    display: 'hold',
+    thumb: './assets/exercises/triceps-isometric/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/triceps-isometric/inicio.webp',
+      Medio: './assets/exercises/triceps-isometric/medio.webp',
+      Final: './assets/exercises/triceps-isometric/final.webp',
+    },
+  },
+  dips_assist: {
+    thumb: './assets/exercises/dips-assisted/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/dips-assisted/inicio.webp',
+      Medio: './assets/exercises/dips-assisted/medio.webp',
+      Final: './assets/exercises/dips-assisted/final.webp',
+    },
+  },
+  rot_expl: {
+    thumb: './assets/exercises/rotations-explosive/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/rotations-explosive/inicio.webp',
+      Medio: './assets/exercises/rotations-explosive/medio.webp',
+      Final: './assets/exercises/rotations-explosive/final.webp',
+    },
+  },
+  sissy_squat: {
+    thumb: './assets/exercises/sissy-squat/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/sissy-squat/inicio.webp',
+      Medio: './assets/exercises/sissy-squat/medio.webp',
+      Final: './assets/exercises/sissy-squat/final.webp',
+    },
+  },
   top_hold: {
     display: 'hold',
     thumb: './assets/exercises/top-hold/thumb.webp',

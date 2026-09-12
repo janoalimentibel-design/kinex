@@ -17,6 +17,11 @@ export function isHoldImage(id: string): boolean {
 
 type ImageLabel = 'Inicio' | 'Medio' | 'Final' | 'Posición';
 
+export function imageLabels(id: string): ImageLabel[] {
+  const batch = REAL_IMAGES[id];
+  return batch?.display === 'hold' ? ['Posición'] : batch?.visiblePhases ?? ['Inicio', 'Medio', 'Final'];
+}
+
 export function PhaseBlock({ id, exercise, label }: { id: string; exercise: CatalogExercise; label: ImageLabel }) {
   const src = REAL_IMAGES[id]?.phases[label === 'Posición' ? 'Inicio' : label];
   if (src) {
@@ -58,11 +63,11 @@ export function LibThumb({ id, exercise }: { id: string; exercise: CatalogExerci
 export function GalleryBlock({ id, exercise }: { id: string; exercise: CatalogExercise }) {
   const batch = REAL_IMAGES[id];
   if (!batch) return null;
-  const labels: ImageLabel[] = batch.display === 'hold' ? ['Posición'] : ['Inicio', 'Medio', 'Final'];
+  const labels = imageLabels(id);
   return (
     <div className="block">
       <div className="bt"><span className="bd"></span>{batch.display === 'hold' ? 'Postura del ejercicio' : 'Fotos del movimiento'}</div>
-      <div className={`lib-gallery ${batch.display === 'hold' ? 'hold-gallery' : ''}`}>
+      <div className={`lib-gallery ${batch.display === 'hold' ? 'hold-gallery' : labels.length === 2 ? 'two-phase-gallery' : ''}`}>
         {labels.map((label) => (
           <div className="shot" key={label}>
             <img src={batch.phases[label === 'Posición' ? 'Inicio' : label]} alt={`${exercise.name} ${label}`} loading="lazy" />
@@ -70,7 +75,7 @@ export function GalleryBlock({ id, exercise }: { id: string; exercise: CatalogEx
           </div>
         ))}
       </div>
-      <div className="batch-note">{batch.display === 'hold' ? 'Ejercicio isométrico: mantené esta posición con técnica.' : 'Secuencia del movimiento integrada.'}</div>
+      <div className="batch-note">{batch.note ?? (batch.display === 'hold' ? 'Ejercicio isométrico: mantené esta posición con técnica.' : 'Secuencia del movimiento integrada.')}</div>
     </div>
   );
 }

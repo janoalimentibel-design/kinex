@@ -5,6 +5,16 @@ import { mkdirSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 
 const GALLERIES: [string, string, number?, string?][] = [
+  ['Tibialis Raise', 'tibialis-v3', 3],
+  ['Polea alta tras nuca / a la espalda', 'lat-pulldown-back', 3],
+  ['Serratus Push-Up', 'serratus-pushup', 2],
+  ['Chin-Up asistida', 'chinup-assisted', 3],
+  ['Chin-Up isométrica', 'chinup-isometric', 1],
+  ['Flexión diamante regresada', 'diamond-triceps', 3, 'Tríceps'],
+  ['Isométrico de extensión', 'triceps-isometric', 1],
+  ['Fondos asistidos', 'dips-assisted', 3],
+  ['Rotaciones explosivas', 'rotations-explosive', 3],
+  ['Sentadilla Sissy', 'sissy-squat', 3],
   ['Isométrico arriba de flexión', 'top-hold', 1],
   ['Hollow Hold regresado', 'hollow-regressed', 1],
   ['Respiración 90/90 + bracing', 'bracing-90', 1],

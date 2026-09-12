@@ -1,18 +1,18 @@
 # Roadmap de imágenes — hacia las 138 fichas con imágenes
 
-Estado v3.33: **128 de 138 fichas con imágenes; faltan 10**.
+Estado v3.34: **138 de 138 fichas con imágenes; faltan 0**.
 Este conteo mide cobertura de fichas, no una nueva auditoría técnica de todas
 las imágenes históricas. Los isométricos configurados como postura muestran
 una imagen; las secuencias de movimiento muestran tres.
 
-Lote v3.33: isométrico arriba de flexión, Hollow Hold regresado,
-respiración 90/90 + bracing, curl isométrico con banda, Hang supino
-y Toalla Hold / Grip Hold.
-Prompts y originales: [IMAGENES_V3_33.md](IMAGENES_V3_33.md).
+Lote v3.34: tibiales, jalón tras nuca, Serratus Push-Up, Chin-Up asistida,
+Chin-Up isométrica, flexión diamante (tríceps), extensión isométrica,
+fondos asistidos, rotaciones y Sissy.
+Prompts y originales: [IMAGENES_V3_34.md](IMAGENES_V3_34.md).
 
-Pendientes por ID: `tibialis`, `lat_pulldown_back`, `serratus`,
-`chin_assist`, `chin_iso`, `diamond_tri`, `tri_iso`, `dips_assist`,
-`rot_expl`, `sissy_squat`.
+Sin fichas pendientes de primera imagen. Serrato muestra Inicio y Final;
+los isométricos muestran una postura. Esto cierra cobertura, no los pedidos
+de planificación ni una auditoría nueva de todas las imágenes históricas.
 
 El detalle de priorización siguiente conserva el contexto histórico del roadmap.
 
