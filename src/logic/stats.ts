@@ -1,6 +1,7 @@
 // Estadísticas derivadas del historial — funciones puras sobre fechas YYYY-MM-DD.
 // Todo en UTC para ser coherente con isoDate() (que usa toISOString).
 import type { Session } from '../db/schema';
+import { hasActivity } from './activity';
 
 export function mondayOf(date: string): string {
   const d = new Date(date + 'T00:00:00Z');
@@ -16,7 +17,7 @@ export function addDays(date: string, days: number): string {
 }
 
 function savedDates(sessions: Record<string, Session>): string[] {
-  return Object.values(sessions).filter((s) => s.saved).map((s) => s.date).sort();
+  return Object.values(sessions).filter(hasActivity).map((s) => s.date).sort();
 }
 
 // Racha: semanas consecutivas (lunes a domingo) con al menos una sesión guardada,

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
 import type { GroupId, Mode } from '../db/schema';
 import { buildExerciseList, isoDate, restSeconds, type SessionEntry } from '../logic/session';
+import { activityLog, hasActivity } from '../logic/activity';
 import { colorOf, hasImage, isHoldImage, imageLabels, PhaseBlock } from './media';
 import { IconCaret, IconCheck } from './icons';
 import type { Ctx } from './types';
@@ -56,12 +57,10 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
 
   const toggleDone = (id: string) => {
     const completed = { ...session.completed, [id]: !session.completed[id] };
-    const source = session.exerciseLog ?? list.map((entry) => ({
-      id: entry.id,
-      name: allEx[entry.id]?.name ?? entry.id,
-      group: entry.group,
-      completed: Boolean(session.completed[entry.id]),
-    }));
+    const source = activityLog({ ...session, completed }, allEx);
+    for (const entry of list) if (!source.some((item) => item.id === entry.id)) {
+      source.push({ id: entry.id, name: allEx[entry.id]?.name ?? entry.id, group: entry.group, completed: Boolean(completed[entry.id]) });
+    }
     ctx.patchSession({
       completed,
       exerciseLog: source.map((item) => item.id === id ? { ...item, completed: Boolean(completed[id]) } : item),
@@ -84,7 +83,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
             return (
               <div
                 key={di}
-                className={`day ${di === curDate ? 'active' : ''} ${s?.saved ? 'trained' : ''} ${di === today ? 'today' : ''}`}
+                className={`day ${di === curDate ? 'active' : ''} ${s && hasActivity(s) ? 'trained' : ''} ${di === today ? 'today' : ''}`}
                 onClick={() => ctx.setCurDate(di)}
               >
                 <div className="dn">{DIAS[day.getDay()]}</div>
@@ -118,7 +117,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
             ))}
           </div>
           <div className="meta">
-            <span>⏱ <b>{format.duration}</b></span>
+            <span>⏱ <b>{session.programmed?.length ? 'A tu ritmo' : format.duration}</b></span>
             <span>◎ <b>{list.length} ejercicios</b></span>
             <span><b>{session.groups.length}</b> grupos</span>
           </div>

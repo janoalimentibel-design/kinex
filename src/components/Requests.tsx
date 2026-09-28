@@ -3,7 +3,7 @@ import type { Ctx } from './types';
 
 export default function Requests({ ctx }: { ctx: Ctx }) {
   const { plan } = ctx.data;
-  const sessions = Object.values(ctx.data.sessions).filter((session) => session.saved);
+  const sessions = Object.values(ctx.data.sessions).filter((session) => session.saved || Object.values(session.completed).some(Boolean));
   const [request, setRequest] = useState(() => localStorage.getItem('kinex-codex-draft') ?? '');
 
   const updateRequest = (value: string) => {

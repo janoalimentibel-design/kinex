@@ -4,6 +4,8 @@ import { bootstrap, replaceAll, toAppData, type AppData } from '../db/bootstrap'
 import { db } from '../db/instance';
 import type { CustomExercise, Plan, Session, V2Data } from '../db/schema';
 import { createSession, isoDate } from '../logic/session';
+import { hasActivity } from '../logic/activity';
+import { applyPublishedRoutine } from '../logic/publishedRoutine';
 import History from './History';
 import Library from './Library';
 import PlanView from './PlanView';
@@ -20,6 +22,7 @@ export default function App() {
   const [data, setData] = useState<AppData | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [storageError, setStorageError] = useState<string | null>(null);
   const [view, setView] = useState<View>('today');
   const [curDate, setCurDate] = useState(() => isoDate(new Date()));
   const [modal, setModal] = useState<ModalState>(null);
@@ -40,7 +43,16 @@ export default function App() {
   }, [rest]);
 
   useEffect(() => {
-    bootPromise ??= bootstrap(db);
+    bootPromise ??= bootstrap(db).then(async (result) => {
+      const updated = applyPublishedRoutine(result.data, isoDate(new Date()));
+      if (updated !== result.data) {
+        await db.transaction('rw', db.sessions, db.kv, async () => {
+          await db.sessions.bulkPut(Object.values(updated.sessions).filter((s) => s !== result.data.sessions[s.date]));
+          await db.kv.put({ key: 'plan', value: updated.plan });
+        });
+      }
+      return { ...result, data: updated };
+    });
     void bootPromise.then((result) => {
       setData(result.data);
       setNotice(result.migrationNotice);
@@ -56,8 +68,11 @@ export default function App() {
   const session = data.sessions[curDate] ?? createSession(curDate, data.sessions, data.plan);
 
   const putSession = (s: Session) => {
-    setData((d) => (d ? { ...d, sessions: { ...d.sessions, [s.date]: s } } : d));
-    void db.sessions.put(s);
+    // A visible check confirms a completed disk write, not only React state.
+    void db.sessions.put(s).then(() => {
+      setData((d) => (d ? { ...d, sessions: { ...d.sessions, [s.date]: s } } : d));
+      setStorageError(null);
+    }).catch(() => setStorageError('No se pudo guardar el cambio en este dispositivo. No cierres la app; liberá espacio y volvé a intentarlo.'));
   };
 
   const ctx: Ctx = {
@@ -83,13 +98,21 @@ export default function App() {
     },
     importAll: async (v2: V2Data, source) => {
       const hydrated = await replaceAll(db, v2, source === 'v0' ? 'backup-v0' : source === 'v1' ? 'backup-v1' : 'backup-v2');
-      setData(toAppData(hydrated));
+      const imported = toAppData(hydrated);
+      const updated = applyPublishedRoutine(imported, isoDate(new Date()));
+      if (updated !== imported) {
+        await db.transaction('rw', db.sessions, db.kv, async () => {
+          await db.sessions.bulkPut(Object.values(updated.sessions).filter((s) => s !== imported.sessions[s.date]));
+          await db.kv.put({ key: 'plan', value: updated.plan });
+        });
+      }
+      setData(updated);
     },
     startRest: (label, seconds) => setRest({ label, left: seconds, total: seconds, kind: 'rest' }),
     startTimer: (label, seconds) => setRest({ label, left: seconds, total: seconds, kind: 'work' }),
   };
 
-  const savedCount = Object.values(data.sessions).filter((s) => s.saved).length;
+  const savedCount = Object.values(data.sessions).filter(hasActivity).length;
   const tabs: [View, string, string][] = [
     ['today', '⌂', 'Hoy'],
     ['lib', '▥', 'Biblioteca'],
@@ -109,11 +132,12 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.34</div>
+            <div className="version">v3.35</div>
           </div>
         </div>
       </div>
 
+      {storageError && <div className="notice" role="alert">{storageError}</div>}
       <div className={`view ${view === 'today' ? 'show' : ''}`} id="view-today">
         <Today ctx={ctx} notice={notice} warnings={warnings} dismissNotice={() => setNotice(null)} />
       </div>

@@ -72,6 +72,7 @@ export const zSession = zSessionV1.extend({
   // Al guardarse, exerciseLog mantiene la foto histórica igual que en una sesión libre.
   programmed: z.array(z.string()).optional(),
   programTitle: z.string().optional(),
+  planner: z.object({ source: z.literal('adaptive'), week: z.string(), locked: z.boolean().optional() }).optional(),
 });
 
 // El modo de un ejercicio concreto solo puede ser peso/sinpeso; 'mix' es un modo de sesión.
@@ -99,6 +100,9 @@ export const zPlan = z.object({
   objective: z.string(),
   rule: z.string(),
   notes: z.string(),
+  autoWeekly: z.boolean().optional(),
+  reviewedWeek: z.string().optional(),
+  routineRevision: z.string().optional(),
 });
 
 export const zMeta = z.object({

@@ -4,12 +4,13 @@
 // menos trabajado en los últimos 7 días.
 import { COMBOS, FORMATS } from '../data/exercises';
 import type { CatalogExercise, Format, GroupId, Mode, Plan, Session } from '../db/schema';
+import { activityGroups, activityLog, completedIds, hasActivity } from './activity';
 
 export type ExerciseMap = Record<string, CatalogExercise>;
 
 // Preferencia personal: la versión con banda queda disponible en Biblioteca
 // como adaptación manual, pero no vuelve a entrar en una rutina sugerida.
-const AUTOMATIC_EXERCISE_EXCLUSIONS = new Set(['pullup_band']);
+const AUTOMATIC_EXERCISE_EXCLUSIONS = new Set(['pullup_band', 'chin_assist']);
 
 // Prioridades semanales personalizadas. Solo se fuerzan cuando el modo de la
 // sesión admite el ejercicio; así una sesión explícitamente sin peso no recibe
@@ -27,7 +28,7 @@ export interface SessionEntry {
 }
 
 export function isoDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
 }
 
 export function isModeCompatible(exercise: CatalogExercise, mode: Mode): boolean {
@@ -82,7 +83,7 @@ const WEEKLY_COVERAGE_BASE: [GroupId, GroupId][] = [
 
 function groupUsageCount(sessions: Record<string, Session>, group: GroupId, beforeDate: string): number {
   return Object.entries(sessions).reduce((count, [date, session]) => (
-    date < beforeDate && session.saved && session.groups.includes(group) ? count + 1 : count
+    date < beforeDate && hasActivity(session) && activityGroups(session).includes(group) ? count + 1 : count
   ), 0);
 }
 
@@ -95,11 +96,11 @@ export function weeklyCoveragePairs(sessions: Record<string, Session>, weekDate:
 
 export function nextSessionSuggestion(date: string, sessions: Record<string, Session> = {}, plan?: Plan): NextSessionSuggestion {
   const groups = suggestedGroups(date, sessions, plan);
-  const saved = Object.values(sessions).filter((session) => session.saved).length;
+  const saved = Object.values(sessions).filter(hasActivity).length;
   return {
     groups,
     reason: saved
-      ? `Se apoya en tus ${saved} sesiones guardadas y evita repetir el foco de los últimos 7 días. El aeróbico va aparte si hoy querés registrarlo.`
+      ? `Considera tus ${saved} sesiones con actividad registrada. Los ejercicios tildados cuentan sin guardar un formulario. El aeróbico va aparte si hoy querés registrarlo.`
       : `Es una combinación inicial equilibrada. Al guardar entrenamientos, la siguiente sugerencia rota según tu historial. El aeróbico va aparte si hoy querés registrarlo.`,
   };
 }
@@ -146,13 +147,7 @@ function hash(text: string): number {
 }
 
 function sessionUsesExercise(session: Session, id: string): boolean {
-  return Boolean(
-    session.programmed?.includes(id)
-    || session.exerciseLog?.some((item) => item.id === id)
-    || Object.values(session.replacements).includes(id)
-    || session.extras.includes(id)
-    || session.completed[id],
-  );
+  return completedIds(session).includes(id);
 }
 
 function weekStart(date: string): string {
@@ -165,7 +160,7 @@ function weekStart(date: string): string {
 function usedEarlierThisWeek(sessions: Record<string, Session>, id: string, beforeDate: string): boolean {
   const start = weekStart(beforeDate);
   return Object.entries(sessions).some(([date, session]) => (
-    date >= start && date < beforeDate && session.saved && sessionUsesExercise(session, id)
+    date >= start && date < beforeDate && hasActivity(session) && sessionUsesExercise(session, id)
   ));
 }
 
@@ -173,7 +168,7 @@ function exerciseUsage(sessions: Record<string, Session>, id: string, beforeDate
   let count = 0;
   let lastDate: string | null = null;
   for (const [date, session] of Object.entries(sessions)) {
-    if (!session.saved || date >= beforeDate) continue;
+    if (!hasActivity(session) || date >= beforeDate) continue;
     const used = sessionUsesExercise(session, id);
     if (!used) continue;
     count++;
@@ -222,9 +217,9 @@ function automaticExercises(
 export function recentGroupCount(sessions: Record<string, Session>, group: GroupId, now: Date = new Date()): number {
   let count = 0;
   for (const [date, session] of Object.entries(sessions)) {
-    if (!session.saved) continue;
+    if (!hasActivity(session)) continue;
     const diff = (now.getTime() - new Date(date).getTime()) / 864e5;
-    if (diff <= 7 && diff >= -1 && session.groups.includes(group)) count++;
+    if (diff <= 7 && diff >= -1 && activityGroups(session).includes(group)) count++;
   }
   return count;
 }
@@ -243,14 +238,26 @@ export function buildExerciseList(
   now: Date = new Date(),
   allow: (e: CatalogExercise) => boolean = () => true, // filtro del motor (engine.ts) sobre la selección automática
 ): SessionEntry[] {
+  // Historical views use the recorded exercises, never today's random selector.
+  if (session.date < isoDate(now) && hasActivity(session) && (session.exerciseLog?.length || completedIds(session).length)) {
+    return activityLog(session, all).map((e) => ({ id: e.id, group: e.group, src: 'auto' as const }));
+  }
   // Una rutina cargada desde Plan es explícita: no se reemplaza por el selector
   // automático al reabrirla. Si el usuario cambia los grupos, se muestran solo
   // los ejercicios que siguen correspondiendo a esos grupos.
   if (session.programmed?.length) {
-    return session.programmed
+    const planned = session.programmed
       .map((id) => all[id])
       .filter((exercise): exercise is CatalogExercise => Boolean(exercise) && session.groups.includes(exercise.group))
       .map((exercise) => ({ id: exercise.id, group: exercise.group, src: 'auto' as const }));
+    const entries: SessionEntry[] = [...planned, ...session.extras
+      .filter((id) => all[id] && session.groups.includes(all[id].group))
+      .map((id) => ({ id, group: all[id].group, src: 'extra' as const }))];
+    return entries.map((entry): SessionEntry => {
+      const replacement = session.replacements[entry.id];
+      return replacement && all[replacement]
+        ? { id: replacement, group: all[replacement].group, src: 'reemplazo', from: entry.id } : entry;
+    }).filter((entry, i, list) => list.findIndex((other) => other.id === entry.id) === i);
   }
   const format = FORMATS[session.format as Format] ?? FORMATS.base;
   const entries: SessionEntry[] = [];

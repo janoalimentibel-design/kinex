@@ -6,6 +6,7 @@ import { parseBackup, serializeBackup, BackupError } from '../db/backup';
 import { toExportData } from '../db/bootstrap';
 import { buildExerciseList, isoDate } from '../logic/session';
 import { metricSeries, sessionsPerWeek, weeklyStreak } from '../logic/stats';
+import { activityGroups, activityLog, hasActivity } from '../logic/activity';
 import Calendar from './Calendar';
 import { MetricLines, WeekBars } from './charts';
 import { colorOf } from './media';
@@ -16,7 +17,7 @@ export default function History({ ctx }: { ctx: Ctx }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const saved = Object.values(data.sessions)
-    .filter((s) => s.saved)
+    .filter(hasActivity)
     .sort((a, b) => b.date.localeCompare(a.date));
 
   const vol: Record<string, number> = {};
@@ -24,7 +25,7 @@ export default function History({ ctx }: { ctx: Ctx }) {
   const now = new Date();
   for (const s of saved) {
     const diff = (now.getTime() - new Date(s.date).getTime()) / 864e5;
-    if (diff <= 7 && diff >= -1) for (const g of s.groups) vol[g]++;
+    if (diff <= 7 && diff >= -1) for (const g of activityGroups(s, allEx)) vol[g]++;
   }
   const max = Math.max(1, ...Object.values(vol));
   const todayIso = isoDate(now);
@@ -100,7 +101,7 @@ export default function History({ ctx }: { ctx: Ctx }) {
       <div>
         {saved.length ? saved.map((s) => {
           const date = new Date(s.date);
-          const exs = s.exerciseLog ?? buildExerciseList(s, allEx, data.sessions).map((entry) => ({
+          const exs = (s.exerciseLog || Object.values(s.completed).some(Boolean)) ? activityLog(s, allEx) : buildExerciseList(s, allEx, data.sessions).map((entry) => ({
             id: entry.id,
             name: allEx[entry.id]?.name ?? entry.id,
             group: entry.group,
@@ -112,7 +113,7 @@ export default function History({ ctx }: { ctx: Ctx }) {
               <div className="hd">{date.getDate()} {MES[date.getMonth()]}<small>{DIAS[date.getDay()]}</small></div>
               <div className="hg">
                 <div>
-                  {s.groups.map((g, i) => (
+                  {activityGroups(s, allEx).map((g, i) => (
                     <span key={i} className="gtag" style={{ background: colorOf(g), fontSize: 10 }}>{GROUPS[g].label}</span>
                   ))}
                 </div>

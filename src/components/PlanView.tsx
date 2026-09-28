@@ -2,15 +2,18 @@
 import { FORMATS, GROUPS } from '../data/exercises';
 import type { Plan, Session } from '../db/schema';
 import { buildExerciseList, createSession, nextSessionSuggestion, weeklyCoveragePairs } from '../logic/session';
+import { activityGroups, completedIds, hasActivity } from '../logic/activity';
+import { applyPublishedRoutine, ROUTINE_END, ROUTINE_ID, ROUTINE_START } from '../logic/publishedRoutine';
+import { isoDate } from '../logic/session';
 import type { Ctx } from './types';
 
 export default function PlanView({ ctx }: { ctx: Ctx }) {
   const { data } = ctx;
   const plan = data.plan;
-  const sessions = Object.values(data.sessions).filter((s) => s.saved);
+  const sessions = Object.values(data.sessions).filter(hasActivity);
   const suggestion = nextSessionSuggestion(ctx.curDate, data.sessions, plan);
   const scheduledSessions = Object.values(data.sessions)
-    .filter((session) => session.programTitle?.startsWith('Próxima semana'))
+    .filter((session) => session.programTitle?.startsWith('Próxima semana') || session.programTitle?.startsWith('Semana revisada'))
     .sort((a, b) => a.date.localeCompare(b.date));
 
   const set = (patch: Partial<Plan>) => ctx.putPlan({ ...plan, ...patch });
@@ -33,7 +36,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       ordered
         .map(
           (s) =>
-            `- ${s.date}: ${s.groups.map((g) => GROUPS[g].label).join(' + ')} · ${FORMATS[s.format].name} · ${s.mode} · lumbar ${s.metrics?.lumbarBefore ?? '-'}→${s.metrics?.lumbarAfter ?? '-'} · rodilla ${s.metrics?.knee ?? '-'} · notas: ${s.metrics?.notes || ''}`,
+            `- ${s.date}: ${activityGroups(s, ctx.allEx).map((g) => GROUPS[g].label).join(' + ')} · Hechos: ${completedIds(s).map((id) => ctx.allEx[id]?.name ?? id).join(', ')} · ${FORMATS[s.format].name} · ${s.mode} · notas: ${s.metrics?.notes || ''}`,
         )
         .join('\n');
     if (navigator.clipboard) {
@@ -79,7 +82,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       const date = dateAt(offset);
       const existing = data.sessions[date];
       // No toca una sesión hecha ni una rutina futura que ya dejaste armada.
-      if (existing?.saved || existing?.programmed?.length) {
+      if ((existing && hasActivity(existing)) || existing?.programmed?.length) {
         drafts[date] = existing;
         return existing;
       }
@@ -89,7 +92,9 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       // la semana no repite el mismo ejercicio en sus tres días aunque todavía
       // no se hayan marcado como realizadas.
       const historyForExercises = Object.fromEntries(
-        Object.entries(visibleHistory).map(([key, value]) => [key, { ...value, saved: true }]),
+        Object.entries(visibleHistory).map(([key, value]) => [key, drafts[key] ? {
+          ...value, completed: { ...value.completed, ...Object.fromEntries((value.programmed ?? []).map((id) => [id, true])) },
+        } : value]),
       );
       const programmed = buildExerciseList(session, ctx.allEx, historyForExercises).map((entry) => entry.id);
       const planned: Session = {
@@ -115,6 +120,25 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
         </div>
         <button className="mini" onClick={() => ctx.setView('requests')}>✎ Pedidos</button>
       </div>
+      {isoDate(new Date()) >= ROUTINE_START && isoDate(new Date()) <= ROUTINE_END && (
+        <div className="suggestion-card" data-testid="reviewed-routine">
+          <div className="t">Rutina revisada · 28 sep – 4 oct</div>
+          <h3>Empezamos por espalda + bíceps</h3>
+          <p>Dominadas estrictas, remo en máquina, curl con mancuernas y curl martillo. Después: piernas/hombros, pecho/tríceps y piernas/core.</p>
+          <p>La rutina se carga sin reemplazar tu historial ni los días que ya empezaste. Cada tilde cuenta como actividad, sin guardar otro formulario.</p>
+          {plan.routineRevision === ROUTINE_ID
+            ? <b>Rutina cargada. Abrí los días de abajo o la pestaña Hoy.</b>
+            : <button className="btn btn-primary" onClick={() => {
+              const updated = applyPublishedRoutine(data, isoDate(new Date()), true);
+              ctx.putSessions(Object.values(updated.sessions).filter((s) => s !== data.sessions[s.date]));
+              ctx.putPlan(updated.plan);
+              ctx.setCurDate(isoDate(new Date())); ctx.setView('today');
+            }}>Cargar rutina revisada</button>}
+          <p>Complemento opcional: bici o remo ergómetro. No reemplaza la sesión de fuerza ni cuenta como espalda realizada.</p>
+          <button className="btn btn-soft" onClick={() => ctx.setModal({ type: 'libInfo', id: 'rowing_erg' })}>Ver remo ergómetro</button>
+          <p>El ajuste automático semanal y la sincronización privada todavía están pendientes. Esta es la revisión concreta de esta semana.</p>
+        </div>
+      )}
       <div>
         <div className="wkcard">
           <div className="field">
@@ -155,8 +179,8 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
         </div>
         {scheduledSessions.length > 0 && (
           <div className="festival-routine">
-            <div className="t">Próxima semana cargada</div>
-            <p>Cuatro sesiones organizadas desde tu historial: todos los grupos aparecen antes de repetir uno. No modifica sesiones ya realizadas.</p>
+            <div className="t">{plan.routineRevision === ROUTINE_ID ? 'Sesiones programadas' : 'Próxima semana cargada'}</div>
+            <p>Abrí cada día para ver los ejercicios. Los días realizados se conservan, aunque difieran de la propuesta nueva.</p>
             {scheduledSessions.map((session) => (
               <button key={session.date} className="routine-session" onClick={() => { ctx.setCurDate(session.date); ctx.setView('today'); }}>
                 <span><b>{session.date}</b><small>{session.programTitle}</small></span>
@@ -168,7 +192,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
         )}
         <div className="wkvol">
           <div className="t">Estado de esta versión</div>
-          <div className="hrow"><b>{sessions.length}</b> sesiones guardadas</div>
+          <div className="hrow"><b>{sessions.length}</b> sesiones con actividad registrada</div>
           <div className="hrow">Formato más usado: <b>{mostUsed('format')}</b> · Modo más usado: <b>{mostUsed('mode')}</b></div>
           <div className="hrow">Lumbar promedio post: <b>{avgMetric('lumbarAfter')}</b> · Rodilla promedio: <b>{avgMetric('knee')}</b></div>
         </div>
