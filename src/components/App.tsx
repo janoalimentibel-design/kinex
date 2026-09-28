@@ -6,6 +6,7 @@ import type { CustomExercise, Plan, Session, V2Data } from '../db/schema';
 import { createSession, isoDate } from '../logic/session';
 import { hasActivity } from '../logic/activity';
 import { applyPublishedRoutine } from '../logic/publishedRoutine';
+import { editSession } from '../logic/editSession';
 import History from './History';
 import Library from './Library';
 import PlanView from './PlanView';
@@ -83,7 +84,7 @@ export default function App() {
     setCurDate: (date) => setCurDate(date),
     setView,
     setModal,
-    patchSession: (patch) => putSession({ ...session, ...patch }),
+    patchSession: (patch) => putSession(editSession(session, patch)),
     putSessions: (sessions: Session[]) => {
       setData((d) => (d ? { ...d, sessions: { ...d.sessions, ...Object.fromEntries(sessions.map((s) => [s.date, s])) } } : d));
       void db.sessions.bulkPut(sessions);
@@ -132,7 +133,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.35</div>
+            <div className="version">v3.36</div>
           </div>
         </div>
       </div>

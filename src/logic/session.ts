@@ -253,6 +253,15 @@ export function buildExerciseList(
     const entries: SessionEntry[] = [...planned, ...session.extras
       .filter((id) => all[id] && session.groups.includes(all[id].group))
       .map((id) => ({ id, group: all[id].group, src: 'extra' as const }))];
+    // Repair the display of drafts already broken by previous versions: a
+    // stale pinned list must never hide a newly selected muscle group.
+    for (const group of session.groups) {
+      if (entries.some((entry) => entry.group === group)) continue;
+      const amount = group === 'core' ? Math.max(4, FORMATS[session.format].perGroup) : FORMATS[session.format].perGroup;
+      for (const exercise of automaticExercises(all, group, session.mode, amount, sessions, session.date, allow)) {
+        entries.push({ id: exercise.id, group, src: 'auto' });
+      }
+    }
     return entries.map((entry): SessionEntry => {
       const replacement = session.replacements[entry.id];
       return replacement && all[replacement]

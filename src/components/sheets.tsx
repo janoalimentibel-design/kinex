@@ -32,7 +32,7 @@ function ComboSheet({ ctx }: { ctx: Ctx }) {
     });
 
   const apply = (groups: GroupId[]) => {
-    ctx.patchSession({ groups, completed: {}, replacements: {}, extras: [], saved: false });
+    ctx.patchSession({ groups });
     ctx.setModal(null);
   };
 
@@ -45,7 +45,7 @@ function ComboSheet({ ctx }: { ctx: Ctx }) {
       <div className="sh-sub">Elegí 2 grupos para fuerza, o Aeróbico solo para registrarlo aparte.</div>
       <div className="grpchips">
         {(Object.entries(GROUPS) as [GroupId, (typeof GROUPS)[GroupId]][]).map(([k, g]) => (
-          <div key={k} className={`grpchip ${picked.includes(k) ? 'on' : ''}`} onClick={() => toggle(k)}>{g.label}</div>
+          <button type="button" key={k} className={`grpchip ${picked.includes(k) ? 'on' : ''}`} aria-pressed={picked.includes(k)} onClick={() => toggle(k)}>{g.label}</button>
         ))}
       </div>
       <button

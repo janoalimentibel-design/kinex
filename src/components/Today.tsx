@@ -152,7 +152,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
               <button
                 key={k}
                 className={session.mode === k ? 'on' : ''}
-                onClick={() => ctx.patchSession({ mode: k, completed: {}, replacements: {}, extras: [], saved: false })}
+                onClick={() => ctx.patchSession({ mode: k })}
               >
                 {label}
               </button>

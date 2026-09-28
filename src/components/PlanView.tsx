@@ -50,7 +50,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
   };
 
   const applySuggestion = () => {
-    ctx.patchSession({ groups: suggestion.groups, saved: false });
+    ctx.patchSession({ groups: suggestion.groups });
     ctx.setView('today');
   };
 
