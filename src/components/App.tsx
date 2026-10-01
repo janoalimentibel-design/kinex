@@ -6,6 +6,7 @@ import type { CustomExercise, Plan, Session, V2Data } from '../db/schema';
 import { createSession, isoDate } from '../logic/session';
 import { hasActivity } from '../logic/activity';
 import { applyPublishedRoutine } from '../logic/publishedRoutine';
+import { rebalancePending } from '../logic/rebalance';
 import { editSession } from '../logic/editSession';
 import History from './History';
 import Library from './Library';
@@ -45,7 +46,7 @@ export default function App() {
 
   useEffect(() => {
     bootPromise ??= bootstrap(db).then(async (result) => {
-      const updated = applyPublishedRoutine(result.data, isoDate(new Date()));
+      const updated = rebalancePending(applyPublishedRoutine(result.data, isoDate(new Date())), isoDate(new Date()));
       if (updated !== result.data) {
         await db.transaction('rw', db.sessions, db.kv, async () => {
           await db.sessions.bulkPut(Object.values(updated.sessions).filter((s) => s !== result.data.sessions[s.date]));
@@ -70,8 +71,10 @@ export default function App() {
 
   const putSession = (s: Session) => {
     // A visible check confirms a completed disk write, not only React state.
-    void db.sessions.put(s).then(() => {
-      setData((d) => (d ? { ...d, sessions: { ...d.sessions, [s.date]: s } } : d));
+    const updated = rebalancePending({ ...data, sessions: { ...data.sessions, [s.date]: s } }, isoDate(new Date()), s.date);
+    const changed = Object.values(updated.sessions).filter((entry) => entry !== data.sessions[entry.date]);
+    void db.transaction('rw', db.sessions, () => db.sessions.bulkPut(changed)).then(() => {
+      setData(updated);
       setStorageError(null);
     }).catch(() => setStorageError('No se pudo guardar el cambio en este dispositivo. No cierres la app; liberá espacio y volvé a intentarlo.'));
   };
@@ -86,8 +89,12 @@ export default function App() {
     setModal,
     patchSession: (patch) => putSession(editSession(session, patch)),
     putSessions: (sessions: Session[]) => {
-      setData((d) => (d ? { ...d, sessions: { ...d.sessions, ...Object.fromEntries(sessions.map((s) => [s.date, s])) } } : d));
-      void db.sessions.bulkPut(sessions);
+      const updated = rebalancePending({ ...data, sessions: { ...data.sessions, ...Object.fromEntries(sessions.map((s) => [s.date, s])) } }, isoDate(new Date()));
+      const changed = Object.values(updated.sessions).filter((s) => s !== data.sessions[s.date]);
+      void db.transaction('rw', db.sessions, () => db.sessions.bulkPut(changed)).then(() => {
+        setData((current) => current ? { ...current, sessions: updated.sessions } : current);
+        setStorageError(null);
+      }).catch(() => setStorageError('No se pudo guardar la rutina. Volvé a intentarlo.'));
     },
     putPlan: (plan: Plan) => {
       setData((d) => (d ? { ...d, plan } : d));
@@ -100,7 +107,7 @@ export default function App() {
     importAll: async (v2: V2Data, source) => {
       const hydrated = await replaceAll(db, v2, source === 'v0' ? 'backup-v0' : source === 'v1' ? 'backup-v1' : 'backup-v2');
       const imported = toAppData(hydrated);
-      const updated = applyPublishedRoutine(imported, isoDate(new Date()));
+      const updated = rebalancePending(applyPublishedRoutine(imported, isoDate(new Date())), isoDate(new Date()));
       if (updated !== imported) {
         await db.transaction('rw', db.sessions, db.kv, async () => {
           await db.sessions.bulkPut(Object.values(updated.sessions).filter((s) => s !== imported.sessions[s.date]));
@@ -133,7 +140,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.36</div>
+            <div className="version">v3.37</div>
           </div>
         </div>
       </div>

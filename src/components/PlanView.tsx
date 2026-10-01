@@ -123,8 +123,8 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       {isoDate(new Date()) >= ROUTINE_START && isoDate(new Date()) <= ROUTINE_END && (
         <div className="suggestion-card" data-testid="reviewed-routine">
           <div className="t">Rutina revisada · 28 sep – 4 oct</div>
-          <h3>Empezamos por espalda + bíceps</h3>
-          <p>Dominadas estrictas, remo en máquina, curl con mancuernas y curl martillo. Después: piernas/hombros, pecho/tríceps y piernas/core.</p>
+          <h3>Rutina de la semana</h3>
+          <p>Los días pendientes se ajustan si coinciden con los músculos de un día contiguo. Abajo podés ver los grupos y ejercicios vigentes.</p>
           <p>La rutina se carga sin reemplazar tu historial ni los días que ya empezaste. Cada tilde cuenta como actividad, sin guardar otro formulario.</p>
           {plan.routineRevision === ROUTINE_ID
             ? <b>Rutina cargada. Abrí los días de abajo o la pestaña Hoy.</b>

@@ -44,11 +44,37 @@ export interface NextSessionSuggestion {
   reason: string;
 }
 
-export function suggestedGroups(date: string, sessions: Record<string, Session> = {}, _plan?: Plan): [GroupId, GroupId] {
+// Calendar neighbours include the other side of a week boundary and future
+// pinned routines. A completed replacement can belong to a different group.
+export function adjacentGroups(date: string, sessions: Record<string, Session>, all?: ExerciseMap): Set<GroupId> {
+  const groups = new Set<GroupId>();
+  for (const offset of [-1, 1]) {
+    const day = new Date(`${date}T12:00:00`);
+    day.setDate(day.getDate() + offset);
+    const neighbour = sessions[isoDate(day)];
+    if (!neighbour) continue;
+    for (const group of [...neighbour.groups, ...activityGroups(neighbour, all)]) {
+      if (group !== 'aerobico') groups.add(group);
+    }
+  }
+  return groups;
+}
+
+export function suggestedGroups(date: string, sessions: Record<string, Session> = {}, _plan?: Plan, all?: ExerciseMap): [GroupId, GroupId] {
   // El cardio cotidiano del usuario no debe secuestrar la sesión de fuerza.
   // Aeróbico se registra únicamente cuando el usuario lo elige como sesión aparte.
-  const pool = COMBOS;
-  const preferredIndex = (new Date(date).getDay() + 1) % pool.length;
+  const blocked = adjacentGroups(date, sessions, all);
+  let pool = COMBOS.filter((pair) => pair.every((group) => !blocked.has(group)));
+  // Neighbours may reserve groups absent from the usual pair combinations.
+  // Keep the no-repeat rule instead of silently falling back to a conflict.
+  if (!pool.length) {
+    const available = (['pierna', 'espalda', 'pecho', 'hombro', 'bicep', 'tricep', 'core'] as GroupId[]).filter((g) => !blocked.has(g));
+    pool = available.flatMap((a, i) => available.slice(i + 1).map((b): [GroupId, GroupId] => [a, b]));
+  }
+  // Pathological imported sessions can record every group across neighbours.
+  // The caller can expose that conflict; avoid crashing historical views.
+  if (!pool.length) pool = COMBOS;
+  const preferredIndex = (new Date(`${date}T12:00:00`).getDay() + 1) % COMBOS.length;
   const start = weekStart(date);
   const groupLoad = new Map<GroupId, number>();
 
@@ -56,7 +82,7 @@ export function suggestedGroups(date: string, sessions: Record<string, Session> 
   // guardar todavía— también cuenta, para que el próximo día se reequilibre.
   for (const [otherDate, session] of Object.entries(sessions)) {
     if (otherDate < start || otherDate >= date) continue;
-    for (const group of session.groups) groupLoad.set(group, (groupLoad.get(group) ?? 0) + 1);
+    for (const group of hasActivity(session) ? activityGroups(session, all) : session.groups) groupLoad.set(group, (groupLoad.get(group) ?? 0) + 1);
   }
 
   const ranked = pool.map((combo, index) => {
@@ -65,7 +91,8 @@ export function suggestedGroups(date: string, sessions: Record<string, Session> 
       return otherDate >= start && otherDate < date && session.groups.includes(combo[0]) && session.groups.includes(combo[1]);
     });
     // Se conserva una preferencia semanal estable solo como desempate.
-    const weeklyDistance = (index - preferredIndex + pool.length) % pool.length;
+    const originalIndex = COMBOS.findIndex((pair) => pair[0] === combo[0] && pair[1] === combo[1]);
+    const weeklyDistance = ((originalIndex < 0 ? index : originalIndex) - preferredIndex + COMBOS.length) % COMBOS.length;
     return { combo, score: used * 10 + (samePair ? 5 : 0) + weeklyDistance / 100 };
   });
   const best = ranked.sort((a, b) => a.score - b.score)[0].combo;
