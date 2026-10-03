@@ -1,12 +1,14 @@
 import type { ParsedBackup } from '../db/backup';
 import type { AppData } from '../db/bootstrap';
 import type { CustomExercise, GroupId, Plan, Session, V2Data } from '../db/schema';
+import type { ExerciseEdit } from '../logic/exerciseEdits';
 import type { ExerciseMap } from '../logic/session';
 
 export type View = 'today' | 'lib' | 'hist' | 'plan' | 'requests';
 
 export type ModalState =
   | { type: 'combo' }
+  | { type: 'revisions' }
   | { type: 'addToGroup'; group: GroupId }
   | { type: 'replace'; origId: string; group: GroupId }
   | { type: 'saveSession' }
@@ -25,9 +27,11 @@ export interface Ctx {
   setCurDate(date: string): void;
   setView(view: View): void;
   setModal(modal: ModalState): void;
-  patchSession(patch: Partial<Session>): void;
+  patchSession(patch: Partial<Session> | ((session: Session) => Partial<Session>)): void;
+  editExercise(edit: ExerciseEdit): void;
+  restoreSession(session: Session, customExercises?: CustomExercise[]): Promise<void>;
   putSessions(sessions: Session[]): void;
-  putPlan(plan: Plan): void;
+  putPlan(plan: Partial<Plan>): void;
   putCustom(exercise: CustomExercise): void;
   importAll(data: V2Data, source: 'v0' | 'v1' | 'v2'): Promise<void>;
   startRest(label: string, seconds: number): void;

@@ -1,15 +1,19 @@
 // Todos los bottom-sheets de la app — ports de los open* de A2.8.
 // Nuevo respecto de A2.8: ImportPreviewSheet (vista previa antes de reemplazar datos).
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { COMBOS, FORMATS, GROUPS, PROGRESSIONS } from '../data/exercises';
 import type { ParsedBackup } from '../db/backup';
 import type { CustomExercise, Energy, GroupId, Level } from '../db/schema';
 import { buildExerciseList, candidates } from '../logic/session';
+import { completedIds, activityLog } from '../logic/activity';
+import { db } from '../db/instance';
+import type { SessionRevision } from '../db/database';
 import { GalleryBlock } from './media';
 import type { Ctx, ModalState } from './types';
 
 export function Sheet({ modal, ctx }: { modal: NonNullable<ModalState>; ctx: Ctx }) {
   switch (modal.type) {
+    case 'revisions': return <RevisionsSheet ctx={ctx} />;
     case 'combo': return <ComboSheet ctx={ctx} />;
     case 'addToGroup': return <AddToGroupSheet ctx={ctx} group={modal.group} />;
     case 'replace': return <ReplaceSheet ctx={ctx} origId={modal.origId} group={modal.group} />;
@@ -81,10 +85,10 @@ function ComboSheet({ ctx }: { ctx: Ctx }) {
 
 function AddToGroupSheet({ ctx, group }: { ctx: Ctx; group: GroupId }) {
   const current = buildExerciseList(ctx.session, ctx.allEx, ctx.data.sessions).map((x) => x.id);
-  const opts = candidates(ctx.allEx, group, ctx.session.mode, true).filter((e) => !current.includes(e.id));
+  const opts = candidates(ctx.allEx, group, 'mix', true).filter((e) => !current.includes(e.id));
 
   const add = (id: string) => {
-    if (!ctx.session.extras.includes(id)) ctx.patchSession({ extras: [...ctx.session.extras, id], saved: false });
+    ctx.editExercise({ type: 'add', id });
     ctx.setModal(null);
   };
 
@@ -107,10 +111,12 @@ function AddToGroupSheet({ ctx, group }: { ctx: Ctx; group: GroupId }) {
 }
 
 function ReplaceSheet({ ctx, origId, group }: { ctx: Ctx; origId: string; group: GroupId }) {
-  const opts = candidates(ctx.allEx, group, ctx.session.mode, true).filter((e) => e.id !== origId);
+  const [chosenGroup, setChosenGroup] = useState(group);
+  const current = buildExerciseList(ctx.session, ctx.allEx, ctx.data.sessions).map((e) => e.id);
+  const opts = candidates(ctx.allEx, chosenGroup, 'mix', true).filter((e) => e.id !== origId && !current.includes(e.id));
 
   const replace = (newId: string) => {
-    ctx.patchSession({ replacements: { ...ctx.session.replacements, [origId]: newId }, saved: false });
+    ctx.editExercise({ type: 'replace', id: origId, replacement: newId });
     ctx.setModal(null);
   };
 
@@ -118,7 +124,8 @@ function ReplaceSheet({ ctx, origId, group }: { ctx: Ctx; origId: string; group:
     <>
       <div className="grip"></div>
       <h3>Cambiar ejercicio</h3>
-      <div className="sh-sub">Reemplaza por otro de {GROUPS[group].label}.</div>
+      <div className="sh-sub">El ejercicio elegido reemplaza al actual.</div>
+      <div className="field"><label>Grupo del reemplazo</label><select value={chosenGroup} onChange={(e) => setChosenGroup(e.target.value as GroupId)}>{Object.entries(GROUPS).map(([id, g]) => <option key={id} value={id}>{g.label}</option>)}</select></div>
       {opts.map((e) => (
         <div className="swap-item" key={e.id} onClick={() => replace(e.id)}>
           <div className="si-n">
@@ -143,16 +150,13 @@ function SaveSessionSheet({ ctx }: { ctx: Ctx }) {
   const score = (v: string) => Math.min(10, Math.max(0, Math.round(Number(v) || 0)));
 
   const save = () => {
-    const exerciseLog = buildExerciseList(ctx.session, ctx.allEx, ctx.data.sessions).map((entry) => ({
-      id: entry.id,
-      name: ctx.allEx[entry.id]?.name ?? entry.id,
-      group: entry.group,
-      completed: Boolean(ctx.session.completed[entry.id]),
-    }));
-    ctx.patchSession({
-      metrics: { lumbarBefore: score(lumbarBefore), lumbarAfter: score(lumbarAfter), knee: score(knee), energy, notes: notes.trim() },
-      saved: true,
-      exerciseLog,
+    ctx.patchSession((current) => {
+      const exerciseLog = activityLog(current, ctx.allEx);
+      const checked = new Set(completedIds(current));
+      for (const entry of buildExerciseList(current, ctx.allEx, ctx.data.sessions)) {
+        if (!exerciseLog.some((item) => item.id === entry.id)) exerciseLog.push({ id: entry.id, name: ctx.allEx[entry.id]?.name ?? entry.id, group: entry.group, completed: checked.has(entry.id) });
+      }
+      return { metrics: { lumbarBefore: score(lumbarBefore), lumbarAfter: score(lumbarAfter), knee: score(knee), energy, notes: notes.trim() }, saved: true, exerciseLog };
     });
     ctx.setModal(null);
   };
@@ -189,12 +193,11 @@ function SaveSessionSheet({ ctx }: { ctx: Ctx }) {
 function LibInfoSheet({ ctx, id }: { ctx: Ctx; id: string }) {
   const e = ctx.allEx[id];
   if (!e) return null;
-  const canAdd = ctx.session.groups.includes(e.group);
   const isCustom = Boolean(ctx.data.custom[id]);
   const noteTitle = isCustom ? 'Notas personales' : 'Objetivo';
 
   const addToDay = () => {
-    if (!ctx.session.extras.includes(id)) ctx.patchSession({ extras: [...ctx.session.extras, id], saved: false });
+    ctx.editExercise({ type: 'add', id });
     ctx.setModal(null);
     ctx.setView('today');
   };
@@ -239,13 +242,7 @@ function LibInfoSheet({ ctx, id }: { ctx: Ctx; id: string }) {
           ? e.cues.map((c, i) => <div className="cue" key={i}><span className="n">{i + 1}</span><span>{c}</span></div>)
           : <div className="why">Todavía no hay claves técnicas cargadas para este ejercicio personalizado.</div>}
       </div>
-      {canAdd ? (
-        <button className="btn btn-primary" onClick={addToDay}>Agregar al día actual</button>
-      ) : (
-        <button className="btn btn-soft" onClick={() => alert(`Este ejercicio pertenece a ${GROUPS[e.group].label}. Para usarlo hoy, primero cambiá uno de los grupos de la sesión.`)}>
-          No pertenece a los grupos de hoy
-        </button>
-      )}
+      <button className="btn btn-primary" onClick={addToDay}>Agregar al día actual</button>
     </>
   );
 }
@@ -344,9 +341,11 @@ function ImportPreviewSheet({ ctx, parsed }: { ctx: Ctx; parsed: ParsedBackup })
 
   const confirm = async () => {
     setBusy(true);
-    await ctx.importAll(data, source);
-    ctx.setModal(null);
-    alert('Backup importado.');
+    try {
+      await ctx.importAll(data, source);
+      ctx.setModal(null);
+      alert('Backup importado.');
+    } catch { setBusy(false); }
   };
 
   return (
@@ -378,4 +377,33 @@ function ImportPreviewSheet({ ctx, parsed }: { ctx: Ctx; parsed: ParsedBackup })
       </div>
     </>
   );
+}
+
+function RevisionsSheet({ ctx }: { ctx: Ctx }) {
+  const [revisions, setRevisions] = useState<SessionRevision[] | null>(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void db.sessionRevisions.where('date').equals(ctx.curDate).reverse().toArray().then((rows) => {
+      if (active) setRevisions(rows);
+    }).catch(() => { if (active) setError('No se pudieron leer las versiones.'); });
+    return () => { active = false; };
+  }, [ctx.curDate]);
+  return <><div className="grip"/><h3>Versiones del {ctx.curDate}</h3>
+    <p>Restaurar recupera este día. El estado actual también queda guardado como versión.</p>
+    {error && <p role="alert">{error}</p>}
+    {revisions === null && !error && <p>Cargando…</p>}
+    {revisions?.length === 0 && <p>No hay versiones anteriores guardadas en este dispositivo. Las copias empiezan con v3.38; no reconstruyen datos borrados antes.</p>}
+    {revisions?.map((revision) => <div className="wkvol" key={revision.id}>
+      <b>{new Date(revision.recordedAt).toLocaleString()}</b>
+      <p>{revision.session.groups.map(g => GROUPS[g].label).join(' + ')} · {completedIds(revision.session).length} ejercicios marcados</p>
+      <p>{(revision.session.selectedExercises ?? revision.session.exerciseLog?.map(e => e.id) ?? revision.session.programmed ?? []).map(id => ctx.allEx[id]?.name ?? revision.session.exerciseLog?.find(e => e.id === id)?.name ?? id).join(' · ')}</p>
+      <button className="btn btn-soft" disabled={busy} onClick={async () => {
+        setBusy(true);
+        try { await ctx.restoreSession(revision.session, revision.customExercises); ctx.setModal(null); }
+        catch { setError('No se pudo restaurar. La versión sigue guardada.'); setBusy(false); }
+      }}>Restaurar esta versión</button>
+    </div>)}
+  </>;
 }

@@ -2,7 +2,7 @@
 // Mismas reglas: 2 grupos por sesión, candidatos ordenados por nivel y nombre,
 // avanzados excluidos de la selección automática, extra del Extendido al grupo
 // menos trabajado en los últimos 7 días.
-import { COMBOS, FORMATS } from '../data/exercises';
+import { CATALOG, COMBOS, FORMATS } from '../data/exercises';
 import type { CatalogExercise, Format, GroupId, Mode, Plan, Session } from '../db/schema';
 import { activityGroups, activityLog, completedIds, hasActivity } from './activity';
 
@@ -53,7 +53,8 @@ export function adjacentGroups(date: string, sessions: Record<string, Session>, 
     day.setDate(day.getDate() + offset);
     const neighbour = sessions[isoDate(day)];
     if (!neighbour) continue;
-    for (const group of [...neighbour.groups, ...activityGroups(neighbour, all)]) {
+    const chosen = (neighbour.selectedExercises ?? neighbour.programmed ?? []).map(id => (all ?? CATALOG)[id]?.group).filter((group): group is GroupId => Boolean(group));
+    for (const group of [...neighbour.groups, ...chosen, ...activityGroups(neighbour, all)]) {
       if (group !== 'aerobico') groups.add(group);
     }
   }
@@ -265,6 +266,11 @@ export function buildExerciseList(
   now: Date = new Date(),
   allow: (e: CatalogExercise) => boolean = () => true, // filtro del motor (engine.ts) sobre la selección automática
 ): SessionEntry[] {
+  if (session.selectedExercises !== undefined) {
+    return [...new Set(session.selectedExercises)].map((id) => ({
+      id, group: all[id]?.group ?? session.exerciseLog?.find((e) => e.id === id)?.group ?? session.groups[0], src: Object.values(session.replacements).includes(id) ? 'reemplazo' as const : 'auto' as const,
+    }));
+  }
   // Historical views use the recorded exercises, never today's random selector.
   if (session.date < isoDate(now) && hasActivity(session) && (session.exerciseLog?.length || completedIds(session).length)) {
     return activityLog(session, all).map((e) => ({ id: e.id, group: e.group, src: 'auto' as const }));

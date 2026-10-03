@@ -30,7 +30,7 @@ export function applyPublishedRoutine(data: AppData, today: string, force = fals
   const sessions = { ...data.sessions };
   for (const day of WEEK_ROUTINE) {
     const existing = sessions[day.date];
-    if (day.date < today || (existing && hasActivity(existing))) continue;
+    if (day.date < today || (existing && (hasActivity(existing) || existing.manuallyEdited || existing.selectedExercises !== undefined))) continue;
     sessions[day.date] = {
       ...createSession(day.date), groups: day.groups, programmed: day.ids,
       format: day.ids.length === 5 ? 'ext' : 'base',

@@ -17,7 +17,7 @@ test('repairs a delivered chest draft against yesterday, persists it, and preser
     db.close();
   }, previous);
   await page.reload();
-  await expect(page.locator('.version')).toHaveText('v3.37');
+  await expect(page.locator('.version')).toHaveText('v3.38');
   await expect(page.locator('.grp-head .gn')).not.toContainText(['Pecho']);
   const groups = await page.locator('.grp-head .gn').allTextContents();
   expect(groups).not.toContain('Pecho');

@@ -71,6 +71,9 @@ export const zSession = zSessionV1.extend({
   // Una rutina cargada desde Plan puede fijar sus ejercicios antes de realizarla.
   // Al guardarse, exerciseLog mantiene la foto histórica igual que en una sesión libre.
   programmed: z.array(z.string()).optional(),
+  // Explicit user selection, including an intentionally empty day.
+  selectedExercises: z.array(z.string()).optional(),
+  manuallyEdited: z.boolean().optional(),
   programTitle: z.string().optional(),
   planner: z.object({ source: z.literal('adaptive'), week: z.string(), locked: z.boolean().optional() }).optional(),
 });

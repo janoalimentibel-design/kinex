@@ -8,7 +8,10 @@ export function editSession(session: Session, patch: Partial<Session>): Session 
     || (patch.extraTarget !== undefined && patch.extraTarget !== session.extraTarget);
   if (!changed) return { ...session, ...patch };
   return {
-    ...session, ...patch, programmed: undefined, programTitle: undefined,
+    ...session, ...patch, programmed: undefined, programTitle: undefined, manuallyEdited: true,
+    // An explicit new group/mode/format requests a new suggestion. The prior
+    // selection is recoverable in local revisions; recorded activity is retained.
+    selectedExercises: undefined,
     replacements: {}, completed: session.completed, exerciseLog: session.exerciseLog,
     setLogs: session.setLogs, metrics: session.metrics, saved: session.saved,
   };

@@ -1,14 +1,15 @@
 import { useState } from 'react';
+import { hasActivity } from '../logic/activity';
 import type { Ctx } from './types';
 
 export default function Requests({ ctx }: { ctx: Ctx }) {
   const { plan } = ctx.data;
-  const sessions = Object.values(ctx.data.sessions).filter((session) => session.saved || Object.values(session.completed).some(Boolean));
-  const [request, setRequest] = useState(() => localStorage.getItem('kinex-codex-draft') ?? '');
+  const sessions = Object.values(ctx.data.sessions).filter(hasActivity);
+  const [request, setRequest] = useState(() => { try { return localStorage.getItem('kinex-codex-draft') ?? ''; } catch { return ''; } });
 
   const updateRequest = (value: string) => {
     setRequest(value);
-    localStorage.setItem('kinex-codex-draft', value);
+    try { localStorage.setItem('kinex-codex-draft', value); } catch { /* Keep the in-memory draft usable. */ }
   };
 
   const requestBody = () => [
@@ -35,7 +36,7 @@ export default function Requests({ ctx }: { ctx: Ctx }) {
 
   const copyRequest = () => {
     const text = requestBody();
-    if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => alert('Pedido copiado.'));
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => alert('Pedido copiado.'), () => ctx.setModal({ type: 'summary', text }));
     else ctx.setModal({ type: 'summary', text });
   };
 
@@ -55,7 +56,6 @@ export default function Requests({ ctx }: { ctx: Ctx }) {
           value={request}
           onChange={(event) => updateRequest(event.target.value)}
           placeholder="Ej: Para los jueves quiero más espalda y menos ejercicios con banda. Cambiá…"
-          autoFocus
         />
         <div className="codex-actions">
           <button className="btn btn-primary" onClick={sendRequest}>Enviar a GitHub ↗</button>

@@ -2,11 +2,13 @@ import Dexie, { type EntityTable } from 'dexie';
 import type { CustomExercise, Meta, Plan, Session } from './schema';
 
 export type KvEntry = { key: 'plan'; value: Plan } | { key: 'meta'; value: Meta };
+export interface SessionRevision { id?: number; date: string; recordedAt: string; session: Session; customExercises?: CustomExercise[] }
 
 export type KinexDB = Dexie & {
   sessions: EntityTable<Session, 'date'>;
   customExercises: EntityTable<CustomExercise, 'id'>;
   kv: EntityTable<KvEntry, 'key'>;
+  sessionRevisions: EntityTable<SessionRevision, 'id'>;
 };
 
 export function createDatabase(name = 'kinex'): KinexDB {
@@ -29,5 +31,7 @@ export function createDatabase(name = 'kinex'): KinexDB {
         });
       }
     });
+  // Additive local undo history; no session records are rewritten by this upgrade.
+  db.version(3).stores({ sessions: 'date', customExercises: 'id', kv: 'key', sessionRevisions: '++id,date' });
   return db;
 }

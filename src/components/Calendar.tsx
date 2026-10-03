@@ -9,8 +9,8 @@ const DOW = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
 export default function Calendar({ ctx }: { ctx: Ctx }) {
   const today = new Date();
-  const [year, setYear] = useState(today.getUTCFullYear());
-  const [month, setMonth] = useState(today.getUTCMonth()); // 0-11
+  const [year, setYear] = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth()); // 0-11
 
   const trained = trainedDaysOfMonth(ctx.data.sessions, year, month);
   const todayIso = isoDate(new Date());

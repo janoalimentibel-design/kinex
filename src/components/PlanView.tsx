@@ -16,7 +16,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
     .filter((session) => session.programTitle?.startsWith('Próxima semana') || session.programTitle?.startsWith('Semana revisada'))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  const set = (patch: Partial<Plan>) => ctx.putPlan({ ...plan, ...patch });
+  const set = (patch: Partial<Plan>) => ctx.putPlan(patch);
 
   const avgMetric = (key: 'lumbarAfter' | 'knee') => {
     const vals = sessions.filter((s) => s.metrics).map((s) => s.metrics![key]);
@@ -74,7 +74,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
     const dateAt = (offset: number) => {
       const date = new Date(monday);
       date.setDate(monday.getDate() + offset);
-      return date.toISOString().slice(0, 10);
+      return isoDate(date);
     };
     const drafts: Record<string, Session> = {};
     const coverage = weeklyCoveragePairs(data.sessions, dateAt(0));
@@ -82,7 +82,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       const date = dateAt(offset);
       const existing = data.sessions[date];
       // No toca una sesión hecha ni una rutina futura que ya dejaste armada.
-      if ((existing && hasActivity(existing)) || existing?.programmed?.length) {
+      if ((existing && (hasActivity(existing) || existing.manuallyEdited || existing.selectedExercises !== undefined)) || existing?.programmed?.length) {
         drafts[date] = existing;
         return existing;
       }

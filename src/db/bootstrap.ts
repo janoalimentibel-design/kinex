@@ -6,7 +6,7 @@ import { CATALOG, LEGACY_STORAGE_KEY } from '../data/exercises';
 import type { KinexDB } from './database';
 import { migrateV0toV1, migrateV1toV2 } from './migrate';
 import { createDefaultPlan, type CustomExercise, type Meta, type Plan, type Session, type V2Data } from './schema';
-import { buildLegacyExerciseList } from '../logic/session';
+import { buildExerciseList, buildLegacyExerciseList } from '../logic/session';
 
 export interface AppData {
   sessions: Record<string, Session>;
@@ -51,7 +51,7 @@ export function hydrateHistoricalExerciseLogs(data: V2Data): V2Data {
   const hydratedSessions = data.sessions.map((session) => {
     if (!session.saved || session.exerciseLog) return session;
     changed = true;
-    const entries = buildLegacyExerciseList(session, all, sessions);
+    const entries = session.selectedExercises !== undefined ? buildExerciseList(session, all, sessions) : buildLegacyExerciseList(session, all, sessions);
     // Si en una versión previa se marcó un ejercicio agregado manualmente,
     // también se conserva aunque no formara parte de la selección automática.
     for (const [id, completed] of Object.entries(session.completed)) {
@@ -74,7 +74,11 @@ export function hydrateHistoricalExerciseLogs(data: V2Data): V2Data {
 export async function replaceAll(db: KinexDB, data: V2Data, migratedFrom: Meta['migratedFrom']): Promise<V2Data> {
   const hydrated = hydrateHistoricalExerciseLogs(data);
   const meta: Meta = { schemaVersion: 2, migratedFrom, migratedAt: new Date().toISOString() };
-  await db.transaction('rw', db.sessions, db.customExercises, db.kv, async () => {
+  await db.transaction('rw', db.sessions, db.sessionRevisions, db.customExercises, db.kv, async () => {
+    const previousCustom = await db.customExercises.toArray();
+    for (const session of await db.sessions.toArray()) {
+      await db.sessionRevisions.add({ date: session.date, recordedAt: new Date().toISOString(), session, customExercises: previousCustom });
+    }
     await Promise.all([db.sessions.clear(), db.customExercises.clear()]);
     await db.sessions.bulkPut(hydrated.sessions);
     await db.customExercises.bulkPut(hydrated.customExercises);

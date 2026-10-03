@@ -11,7 +11,8 @@ async function setGroups(page: Page, combo: string) {
   await page.locator('.swap-item', { hasText: combo }).click();
 }
 
-test.beforeEach(({ page }) => {
+test.beforeEach(async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-10-01T12:00:00') });
   page.on('dialog', (dialog) => void dialog.accept());
 });
 

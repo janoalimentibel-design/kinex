@@ -77,6 +77,11 @@ export default function History({ ctx }: { ctx: Ctx }) {
 
       <Calendar ctx={ctx} />
 
+      {Object.values(data.sessions).some(s => s.date <= todayIso && !hasActivity(s)) && <details className="wkvol">
+        <summary>Días guardados sin actividad marcada</summary>
+        <p>Estos días existen en el dispositivo, pero no tienen ejercicios marcados como hechos.</p>
+        {Object.values(data.sessions).filter(s => s.date <= todayIso && !hasActivity(s)).sort((a,b) => b.date.localeCompare(a.date)).map(s => <button className="btn btn-soft" key={s.date} onClick={() => { ctx.setCurDate(s.date); ctx.setView('today'); }}>{s.date} · {s.groups.map(g => GROUPS[g].label).join(' + ')}</button>)}
+      </details>}
       <div className="wkvol">
         <div className="t">Lumbar y rodilla por sesión</div>
         <MetricLines points={metrics} />
@@ -100,7 +105,7 @@ export default function History({ ctx }: { ctx: Ctx }) {
       </div>
       <div>
         {saved.length ? saved.map((s) => {
-          const date = new Date(s.date);
+          const date = new Date(`${s.date}T12:00:00`);
           const exs = (s.exerciseLog || Object.values(s.completed).some(Boolean)) ? activityLog(s, allEx) : buildExerciseList(s, allEx, data.sessions).map((entry) => ({
             id: entry.id,
             name: allEx[entry.id]?.name ?? entry.id,
@@ -122,6 +127,7 @@ export default function History({ ctx }: { ctx: Ctx }) {
                   Lumbar {s.metrics?.lumbarBefore ?? '-'}→{s.metrics?.lumbarAfter ?? '-'} · Rodilla {s.metrics?.knee ?? '-'} · Energía {s.metrics?.energy ?? '-'}
                 </div>
                 {s.metrics?.notes && <div className="hrow">“{s.metrics.notes}”</div>}
+                <button className="mini" onClick={() => { ctx.setCurDate(s.date); ctx.setView('today'); }}>Abrir / editar día</button>
                 <details className="history-exercises">
                   <summary>Ver ejercicios registrados</summary>
                   {completed.length ? (

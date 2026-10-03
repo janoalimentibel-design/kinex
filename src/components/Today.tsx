@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
 import type { GroupId, Mode } from '../db/schema';
 import { buildExerciseList, isoDate, restSeconds, type SessionEntry } from '../logic/session';
-import { activityLog, hasActivity } from '../logic/activity';
+import { completedIds, hasActivity } from '../logic/activity';
 import { colorOf, hasImage, isHoldImage, imageLabels, PhaseBlock } from './media';
 import { IconCaret, IconCheck } from './icons';
 import type { Ctx } from './types';
@@ -48,26 +48,17 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
   useEffect(() => setOpenEx({}), [curDate]);
 
   const list = buildExerciseList(session, allEx, data.sessions);
-  const done = list.filter((x) => session.completed[x.id]).length;
+  const checked = new Set(completedIds(session));
+  const done = list.filter((x) => checked.has(x.id)).length;
   const pct = list.length ? Math.round((done / list.length) * 100) : 0;
-  const d = new Date(curDate);
+  const d = new Date(`${curDate}T12:00:00`);
   const today = isoDate(new Date());
   const days = weekDays();
   const format = FORMATS[session.format];
 
-  const toggleDone = (id: string) => {
-    const completed = { ...session.completed, [id]: !session.completed[id] };
-    const source = activityLog({ ...session, completed }, allEx);
-    for (const entry of list) if (!source.some((item) => item.id === entry.id)) {
-      source.push({ id: entry.id, name: allEx[entry.id]?.name ?? entry.id, group: entry.group, completed: Boolean(completed[entry.id]) });
-    }
-    ctx.patchSession({
-      completed,
-      exerciseLog: source.map((item) => item.id === id ? { ...item, completed: Boolean(completed[id]) } : item),
-    });
-  };
-
-  const groupsInOrder = session.groups.filter((v, i, a) => a.indexOf(v) === i);
+  const toggleDone = (id: string) => ctx.editExercise({ type: 'toggle', id });
+  const groupsInOrder = [...new Set([...session.groups, ...list.map((entry) => entry.group)])];
+  const displayedGroups = curDate < today && list.length ? [...new Set(list.map((entry) => entry.group))] : groupsInOrder;
 
   return (
     <>
@@ -106,41 +97,43 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
         </div>
       )}
 
+      {curDate < today && !data.sessions[curDate] && <div className="notice">No hay un registro guardado para este día en este dispositivo. Los ejercicios de abajo son una sugerencia, no un entrenamiento realizado.</div>}
       <div>
         <div className="dayhead">
           <div className="dlabel">{`${DIAS[d.getDay()]} ${d.getDate()} ${MES[d.getMonth()]} · ${data.plan.week || 'Semana 1'} · ${data.plan.focus || 'Fuerza'}`}</div>
-          {session.programTitle && <div className="program-title">{session.programTitle}</div>}
+          {session.programTitle && curDate >= today && <div className="program-title">{session.programTitle}</div>}
           <div className="focus">
             Sesión{' '}
-            {session.groups.map((g, i) => (
+            {displayedGroups.map((g, i) => (
               <span key={i} className="gtag" style={{ background: colorOf(g) }}>{GROUPS[g].label}</span>
             ))}
           </div>
           <div className="meta">
-            <span>⏱ <b>{session.programmed?.length ? 'A tu ritmo' : format.duration}</b></span>
+            <span>⏱ <b>{session.selectedExercises !== undefined || session.programmed?.length ? 'A tu ritmo' : format.duration}</b></span>
             <span>◎ <b>{list.length} ejercicios</b></span>
-            <span><b>{session.groups.length}</b> grupos</span>
+            <span><b>{displayedGroups.length}</b> grupos</span>
           </div>
         </div>
 
+        <p className="sh-sub">Cambiar grupos, formato o modo genera otra lista. Lo ya realizado se conserva en Historial.</p>
         <div className="segwrap">
           <div className="seglabel">Formato</div>
           <div className="segment">
             {(Object.entries(FORMATS) as [typeof session.format, (typeof FORMATS)[keyof typeof FORMATS]][]).map(([k, f]) => (
-              <button key={k} className={session.format === k ? 'on' : ''} onClick={() => ctx.patchSession({ format: k, saved: false })}>
+              <button key={k} className={session.format === k ? 'on' : ''} onClick={() => ctx.patchSession({ format: k })}>
                 {f.name}
               </button>
             ))}
           </div>
         </div>
 
-        {session.format === 'ext' && (
+        {session.format === 'ext' && session.groups.length === 2 && (
           <div className="segwrap">
             <div className="seglabel">Ejercicio extra</div>
             <div className="segment">
-              <button className={session.extraTarget === 'auto' ? 'on' : ''} onClick={() => ctx.patchSession({ extraTarget: 'auto', saved: false })}>Auto</button>
-              <button className={session.extraTarget === 'g1' ? 'on' : ''} onClick={() => ctx.patchSession({ extraTarget: 'g1', saved: false })}>{GROUPS[session.groups[0]].label}</button>
-              <button className={session.extraTarget === 'g2' ? 'on' : ''} onClick={() => ctx.patchSession({ extraTarget: 'g2', saved: false })}>{GROUPS[session.groups[1]].label}</button>
+              <button className={session.extraTarget === 'auto' ? 'on' : ''} onClick={() => ctx.patchSession({ extraTarget: 'auto' })}>Auto</button>
+              <button className={session.extraTarget === 'g1' ? 'on' : ''} onClick={() => ctx.patchSession({ extraTarget: 'g1' })}>{GROUPS[session.groups[0]].label}</button>
+              <button className={session.extraTarget === 'g2' ? 'on' : ''} onClick={() => ctx.patchSession({ extraTarget: 'g2' })}>{GROUPS[session.groups[1]].label}</button>
             </div>
           </div>
         )}
@@ -163,6 +156,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
         <div className="actions">
           <button className="btn btn-ghost" onClick={() => ctx.setModal({ type: 'combo' })}>☰ Cambiar grupos</button>
           <button className="btn btn-primary" onClick={() => ctx.setModal({ type: 'saveSession' })}>✓ Marcar hecha</button>
+          <button className="btn btn-ghost" onClick={() => ctx.setModal({ type: 'revisions' })}>Deshacer / versiones del día</button>
         </div>
 
         <div className="prog">
@@ -171,9 +165,8 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
         </div>
 
         <div className="list">
-          {groupsInOrder.map((g) => {
+          {displayedGroups.map((g) => {
             const exs = list.filter((x) => x.group === g);
-            if (!exs.length) return null;
             return (
               <div key={g}>
                 <div className="grp-head">
@@ -211,22 +204,16 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
 }) {
   const { allEx, session } = ctx;
   const e = allEx[entry.id];
-  if (!e) return null;
-  const done = session.completed[entry.id];
+  if (!e) return <div className="ex"><div className="ex-head"><div className="nm">{session.exerciseLog?.find((item) => item.id === entry.id)?.name ?? entry.id}</div></div><button className="btn btn-danger" onClick={() => ctx.editExercise({ type: 'remove', id: entry.id })}>Quitar del día</button></div>;
+  const done = completedIds(session).includes(entry.id);
   const load = e.modes.includes('peso') && e.modes.includes('sinpeso') ? 'mixto' : e.modes.includes('peso') ? 'con peso' : 'sin peso';
   const times = workTimes(e.reps);
 
-  const removeExtra = () => {
-    const completed = { ...session.completed };
-    delete completed[entry.id];
-    ctx.patchSession({ extras: session.extras.filter((x) => x !== entry.id), completed });
-  };
-
-  // Progresiones: los reemplazos se registran sobre el id ORIGINAL de la lista.
-  const origId = entry.from ?? entry.id;
-  const replaceWith = (targetId: string) =>
-    ctx.patchSession({ replacements: { ...session.replacements, [origId]: targetId }, saved: false });
+  const remove = () => ctx.editExercise({ type: 'remove', id: entry.id });
+  const origId = entry.id;
+  const replaceWith = (targetId: string) => ctx.editExercise({ type: 'replace', id: entry.id, replacement: targetId });
   const links = PROGRESSIONS[entry.id];
+  const visibleIds = new Set(buildExerciseList(session, allEx, ctx.data.sessions).map(e => e.id));
 
   return (
     <div className={`ex ${done ? 'done' : ''} ${open ? 'open' : ''}`}>
@@ -242,7 +229,7 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
             {entry.src === 'reemplazo' && <span className="badge">cambio</span>}
           </div>
         </div>
-        <button className="chk" onClick={(ev) => { ev.stopPropagation(); toggleDone(); }}><IconCheck /></button>
+        <button className="chk" aria-label={`Marcar ${e.name}`} aria-pressed={Boolean(done)} onClick={(ev) => { ev.stopPropagation(); toggleDone(); }}><IconCheck /></button>
         <IconCaret />
       </div>
       <div className="ex-body">
@@ -281,15 +268,15 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
           </div>
           <div className="card-actions">
             <button className="btn btn-soft" onClick={() => ctx.setModal({ type: 'replace', origId, group: e.group as GroupId })}>Cambiar</button>
-            {links?.easier && allEx[links.easier] && (
+            {links?.easier && allEx[links.easier] && !visibleIds.has(links.easier) && (
               <button className="btn btn-soft prog-btn" onClick={() => replaceWith(links.easier!)}>↓ {allEx[links.easier].name}</button>
             )}
-            {links?.harder && allEx[links.harder] && (
+            {links?.harder && allEx[links.harder] && !visibleIds.has(links.harder) && (
               <button className="btn btn-soft prog-btn" onClick={() => replaceWith(links.harder!)}>
                 ↑ {allEx[links.harder].name}
               </button>
             )}
-            {entry.src === 'extra' && <button className="btn btn-danger" onClick={removeExtra}>Quitar</button>}
+            <button className="btn btn-danger" onClick={remove}>Quitar del día</button>
           </div>
         </div>
       </div>

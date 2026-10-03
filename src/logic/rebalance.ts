@@ -10,7 +10,7 @@ export function rebalancePending(data: AppData, today: string, keepDate?: string
   let changed = false;
   for (const date of Object.keys(sessions).sort()) {
     const session = sessions[date];
-    if (date < today || date === keepDate || hasActivity(session) || session.groups.includes('aerobico')) continue;
+    if (date < today || date === keepDate || hasActivity(session) || session.manuallyEdited || session.selectedExercises !== undefined || session.groups.includes('aerobico')) continue;
     const blocked = adjacentGroups(date, sessions, all);
     if (!session.groups.some((group) => blocked.has(group))) continue;
     const groups = suggestedGroups(date, sessions, data.plan, all);

@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CATALOG } from '../data/exercises';
 import { bootstrap, replaceAll, toAppData, type AppData } from '../db/bootstrap';
 import { db } from '../db/instance';
+import { createDataWriter, persistChanges } from '../db/writes';
+import { editExercise } from '../logic/exerciseEdits';
 import type { CustomExercise, Plan, Session, V2Data } from '../db/schema';
 import { createSession, isoDate } from '../logic/session';
 import { hasActivity } from '../logic/activity';
@@ -22,6 +24,7 @@ let bootPromise: ReturnType<typeof bootstrap> | null = null;
 
 export default function App() {
   const [data, setData] = useState<AppData | null>(null);
+  const writer = useRef<ReturnType<typeof createDataWriter> | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [storageError, setStorageError] = useState<string | null>(null);
@@ -47,36 +50,36 @@ export default function App() {
   useEffect(() => {
     bootPromise ??= bootstrap(db).then(async (result) => {
       const updated = rebalancePending(applyPublishedRoutine(result.data, isoDate(new Date())), isoDate(new Date()));
-      if (updated !== result.data) {
-        await db.transaction('rw', db.sessions, db.kv, async () => {
-          await db.sessions.bulkPut(Object.values(updated.sessions).filter((s) => s !== result.data.sessions[s.date]));
-          await db.kv.put({ key: 'plan', value: updated.plan });
-        });
-      }
+      if (updated !== result.data) await persistChanges(db, result.data, updated);
       return { ...result, data: updated };
     });
     void bootPromise.then((result) => {
+      writer.current ??= createDataWriter(db, result.data, setData);
       setData(result.data);
       setNotice(result.migrationNotice);
       setWarnings(result.warnings);
-    });
+    }).catch(() => setStorageError('No se pudieron leer tus datos. No borres el almacenamiento; volvé a abrir la app.'));
   }, []);
 
-  if (!data) return <div className="boot">Cargando KINEX…</div>;
+  if (!data) return <div className="boot">{storageError ?? 'Cargando KINEX…'}</div>;
 
   const allEx = { ...CATALOG, ...data.custom };
   // Las sesiones aún no tocadas se generan considerando los grupos que ya
   // elegiste en los días anteriores de la semana.
   const session = data.sessions[curDate] ?? createSession(curDate, data.sessions, data.plan);
 
-  const putSession = (s: Session) => {
-    // A visible check confirms a completed disk write, not only React state.
-    const updated = rebalancePending({ ...data, sessions: { ...data.sessions, [s.date]: s } }, isoDate(new Date()), s.date);
-    const changed = Object.values(updated.sessions).filter((entry) => entry !== data.sessions[entry.date]);
-    void db.transaction('rw', db.sessions, () => db.sessions.bulkPut(changed)).then(() => {
-      setData(updated);
-      setStorageError(null);
-    }).catch(() => setStorageError('No se pudo guardar el cambio en este dispositivo. No cierres la app; liberá espacio y volvé a intentarlo.'));
+  const commit = (transform: (current: AppData) => AppData | Promise<AppData>) => {
+    return writer.current!(transform).then(() => setStorageError(null)).catch((error) => {
+      setStorageError('No se pudo guardar el cambio. Tus datos anteriores se conservan; volvé a intentarlo.');
+      throw error;
+    });
+  };
+  const updateDay = (transform: (s: Session, current: AppData) => Session) => {
+    void commit((current) => {
+      const previous = current.sessions[curDate] ?? createSession(curDate, current.sessions, current.plan);
+      const next = transform(previous, current);
+      return rebalancePending({ ...current, sessions: { ...current.sessions, [curDate]: next } }, isoDate(new Date()), curDate);
+    }).catch(() => {});
   };
 
   const ctx: Ctx = {
@@ -87,34 +90,26 @@ export default function App() {
     setCurDate: (date) => setCurDate(date),
     setView,
     setModal,
-    patchSession: (patch) => putSession(editSession(session, patch)),
+    patchSession: (patch) => updateDay((previous) => editSession(previous, typeof patch === 'function' ? patch(previous) : patch)),
+    editExercise: (edit) => updateDay((previous, current) => editExercise(previous, edit, { ...CATALOG, ...current.custom }, current.sessions)),
+    restoreSession: (restored, custom = []) => commit((current) => ({ ...current, custom: { ...Object.fromEntries(custom.map(e => [e.id, e])), ...current.custom }, sessions: { ...current.sessions, [restored.date]: { ...restored, manuallyEdited: true } } })),
     putSessions: (sessions: Session[]) => {
-      const updated = rebalancePending({ ...data, sessions: { ...data.sessions, ...Object.fromEntries(sessions.map((s) => [s.date, s])) } }, isoDate(new Date()));
-      const changed = Object.values(updated.sessions).filter((s) => s !== data.sessions[s.date]);
-      void db.transaction('rw', db.sessions, () => db.sessions.bulkPut(changed)).then(() => {
-        setData((current) => current ? { ...current, sessions: updated.sessions } : current);
-        setStorageError(null);
-      }).catch(() => setStorageError('No se pudo guardar la rutina. Volvé a intentarlo.'));
+      void commit((current) => {
+        // Never overwrite activity written while this plan was being prepared.
+        const writable = sessions.filter((s) => !current.sessions[s.date] || (!hasActivity(current.sessions[s.date]) && !current.sessions[s.date].manuallyEdited && current.sessions[s.date].selectedExercises === undefined));
+        return rebalancePending({ ...current, sessions: { ...current.sessions, ...Object.fromEntries(writable.map((s) => [s.date, s])) } }, isoDate(new Date()));
+      }).catch(() => {});
     },
-    putPlan: (plan: Plan) => {
-      setData((d) => (d ? { ...d, plan } : d));
-      void db.kv.put({ key: 'plan', value: plan });
-    },
+    putPlan: (plan: Partial<Plan>) => { void commit((current) => ({ ...current, plan: { ...current.plan, ...plan } })).catch(() => {}); },
     putCustom: (exercise: CustomExercise) => {
-      setData((d) => (d ? { ...d, custom: { ...d.custom, [exercise.id]: exercise } } : d));
-      void db.customExercises.put(exercise);
+      void commit((current) => ({ ...current, custom: { ...current.custom, [exercise.id]: exercise } })).catch(() => {});
     },
     importAll: async (v2: V2Data, source) => {
-      const hydrated = await replaceAll(db, v2, source === 'v0' ? 'backup-v0' : source === 'v1' ? 'backup-v1' : 'backup-v2');
-      const imported = toAppData(hydrated);
-      const updated = rebalancePending(applyPublishedRoutine(imported, isoDate(new Date())), isoDate(new Date()));
-      if (updated !== imported) {
-        await db.transaction('rw', db.sessions, db.kv, async () => {
-          await db.sessions.bulkPut(Object.values(updated.sessions).filter((s) => s !== imported.sessions[s.date]));
-          await db.kv.put({ key: 'plan', value: updated.plan });
-        });
-      }
-      setData(updated);
+      await commit(async () => {
+        const hydrated = await replaceAll(db, v2, source === 'v0' ? 'backup-v0' : source === 'v1' ? 'backup-v1' : 'backup-v2');
+        const imported = toAppData(hydrated);
+        return rebalancePending(applyPublishedRoutine(imported, isoDate(new Date())), isoDate(new Date()));
+      });
     },
     startRest: (label, seconds) => setRest({ label, left: seconds, total: seconds, kind: 'rest' }),
     startTimer: (label, seconds) => setRest({ label, left: seconds, total: seconds, kind: 'work' }),
@@ -140,7 +135,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.37</div>
+            <div className="version">v3.38</div>
           </div>
         </div>
       </div>
@@ -179,7 +174,7 @@ export default function App() {
       </div>
 
       <div className={`modal ${modal ? 'show' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) setModal(null); }}>
-        <div className="sheet">{modal && <Sheet modal={modal} ctx={ctx} />}</div>
+        <div className="sheet">{modal && <Sheet key={`${curDate}:${JSON.stringify(modal)}`} modal={modal} ctx={ctx} />}</div>
       </div>
     </>
   );
