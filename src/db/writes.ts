@@ -12,6 +12,10 @@ export async function persistChanges(db: KinexDB, before: AppData, after: AppDat
       }
       await db.sessions.put(session);
     }
+    if (after.profile !== before.profile) {
+      if (after.profile) await db.kv.put({ key: 'profile', value: after.profile });
+      else await db.kv.delete('profile');
+    }
     if (after.plan !== before.plan) await db.kv.put({ key: 'plan', value: after.plan });
     for (const exercise of Object.values(after.custom)) {
       if (exercise !== before.custom[exercise.id]) await db.customExercises.put(exercise);
@@ -30,7 +34,9 @@ export function createDataWriter(db: KinexDB, initial: AppData, onChange: (data:
         const sessions = await db.sessions.toArray();
         const custom = await db.customExercises.toArray();
         const plan = await db.kv.get('plan');
+        const profile = await db.kv.get('profile');
         const before: AppData = {
+          ...(profile?.key === 'profile' ? { profile: profile.value } : {}),
           sessions: Object.fromEntries(sessions.map(s => [s.date, s])),
           custom: Object.fromEntries(custom.map(e => [e.id, e])),
           plan: plan?.key === 'plan' ? plan.value : current.plan,

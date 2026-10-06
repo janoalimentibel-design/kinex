@@ -5,10 +5,11 @@
 import { CATALOG, LEGACY_STORAGE_KEY } from '../data/exercises';
 import type { KinexDB } from './database';
 import { migrateV0toV1, migrateV1toV2 } from './migrate';
-import { createDefaultPlan, type CustomExercise, type Meta, type Plan, type Session, type V2Data } from './schema';
+import { createDefaultPlan, type CustomExercise, type Meta, type Plan, type Session, type V2Data, type TrainingProfile } from './schema';
 import { buildExerciseList, buildLegacyExerciseList } from '../logic/session';
 
 export interface AppData {
+  profile?: TrainingProfile;
   sessions: Record<string, Session>;
   custom: Record<string, CustomExercise>;
   plan: Plan;
@@ -29,6 +30,7 @@ export function toAppData(data: V2Data): AppData {
     sessions: Object.fromEntries(data.sessions.map((s) => [s.date, s])),
     custom: Object.fromEntries(data.customExercises.map((e) => [e.id, e])),
     plan: data.plan,
+    ...(data.profile ? { profile: data.profile } : {}),
   };
 }
 
@@ -37,6 +39,7 @@ export function toExportData(data: AppData): V2Data {
     sessions: Object.values(data.sessions).sort((a, b) => a.date.localeCompare(b.date)),
     customExercises: Object.values(data.custom),
     plan: data.plan,
+    ...(data.profile ? { profile: data.profile } : {}),
   };
 }
 
@@ -83,18 +86,22 @@ export async function replaceAll(db: KinexDB, data: V2Data, migratedFrom: Meta['
     await db.sessions.bulkPut(hydrated.sessions);
     await db.customExercises.bulkPut(hydrated.customExercises);
     await db.kv.put({ key: 'plan', value: hydrated.plan });
+    if (hydrated.profile) await db.kv.put({ key: 'profile', value: hydrated.profile });
+    else await db.kv.delete('profile');
     await db.kv.put({ key: 'meta', value: meta });
   });
   return hydrated;
 }
 
 async function loadFromDb(db: KinexDB): Promise<AppData> {
-  const [sessions, custom, planEntry] = await Promise.all([
+  const [sessions, custom, planEntry, profileEntry] = await Promise.all([
     db.sessions.toArray(),
     db.customExercises.toArray(),
     db.kv.get('plan'),
+    db.kv.get('profile'),
   ]);
   const raw: AppData = {
+    ...(profileEntry?.key === 'profile' ? { profile: profileEntry.value } : {}),
     sessions: Object.fromEntries(sessions.map((s) => [s.date, s])),
     custom: Object.fromEntries(custom.map((e) => [e.id, e])),
     plan: planEntry && planEntry.key === 'plan' ? planEntry.value : createDefaultPlan(),

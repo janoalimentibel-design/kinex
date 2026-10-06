@@ -1,6 +1,6 @@
 import type { ParsedBackup } from '../db/backup';
 import type { AppData } from '../db/bootstrap';
-import type { CustomExercise, GroupId, Plan, Session, V2Data } from '../db/schema';
+import type { CustomExercise, GroupId, Plan, Session, V2Data, TrainingProfile } from '../db/schema';
 import type { ExerciseEdit } from '../logic/exerciseEdits';
 import type { ExerciseMap } from '../logic/session';
 
@@ -31,6 +31,7 @@ export interface Ctx {
   editExercise(edit: ExerciseEdit): void;
   restoreSession(session: Session, customExercises?: CustomExercise[]): Promise<void>;
   putSessions(sessions: Session[]): void;
+  putProfile(profile: TrainingProfile): Promise<void>;
   putPlan(plan: Partial<Plan>): void;
   putCustom(exercise: CustomExercise): void;
   importAll(data: V2Data, source: 'v0' | 'v1' | 'v2'): Promise<void>;

@@ -100,6 +100,7 @@ export default function App() {
         return rebalancePending({ ...current, sessions: { ...current.sessions, ...Object.fromEntries(writable.map((s) => [s.date, s])) } }, isoDate(new Date()));
       }).catch(() => {});
     },
+    putProfile: (profile) => commit(current => ({ ...current, profile })),
     putPlan: (plan: Partial<Plan>) => { void commit((current) => ({ ...current, plan: { ...current.plan, ...plan } })).catch(() => {}); },
     putCustom: (exercise: CustomExercise) => {
       void commit((current) => ({ ...current, custom: { ...current.custom, [exercise.id]: exercise } })).catch(() => {});

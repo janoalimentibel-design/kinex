@@ -121,8 +121,27 @@ export const zV1Data = z.object({
   plan: zPlan,
 });
 
+// Private, user-authored profile. No medical claims are bundled with the app.
+export const zTrainingProfile = z.object({
+  goals: z.string().max(4000),
+  availability: z.string().max(2000),
+  equipment: z.string().max(2000),
+  reportedHistory: z.string().max(8000),
+  reportReference: z.string().max(2000),
+  clinicianInstructions: z.string().max(8000),
+  currentSymptoms: z.string().max(4000),
+  toleratedMovements: z.string().max(4000),
+  preferences: z.string().max(4000),
+  updatedAt: z.string(),
+});
+export type TrainingProfile = z.infer<typeof zTrainingProfile>;
+export function emptyTrainingProfile(): TrainingProfile {
+  return { goals: '', availability: '', equipment: '', reportedHistory: '', reportReference: '', clinicianInstructions: '', currentSymptoms: '', toleratedMovements: '', preferences: '', updatedAt: '' };
+}
+
 // Forma v2: la canónica actual.
 export const zV2Data = z.object({
+  profile: zTrainingProfile.optional(),
   sessions: z.array(zSession),
   customExercises: z.array(zCustomExercise),
   plan: zPlan,

@@ -1,4 +1,5 @@
 // Vista Plan — port de renderPlan/copyWeeklySummary de A2.8.
+import Tracking from './Tracking';
 import { FORMATS, GROUPS } from '../data/exercises';
 import type { Plan, Session } from '../db/schema';
 import { buildExerciseList, createSession, nextSessionSuggestion, weeklyCoveragePairs } from '../logic/session';
@@ -113,6 +114,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
 
   return (
     <div className="plan">
+      <Tracking ctx={ctx} />
       <div className="sectionhead">
         <div>
           <h2>Plan</h2>

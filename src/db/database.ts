@@ -1,7 +1,9 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { CustomExercise, Meta, Plan, Session } from './schema';
+import type { CustomExercise, Meta, Plan, Session, TrainingProfile } from './schema';
 
-export type KvEntry = { key: 'plan'; value: Plan } | { key: 'meta'; value: Meta };
+import type { SyncConnection } from '../sync/protocol';
+
+export type KvEntry = { key: 'profile'; value: TrainingProfile } | { key: 'syncConnection'; value: SyncConnection } | { key: 'plan'; value: Plan } | { key: 'meta'; value: Meta };
 export interface SessionRevision { id?: number; date: string; recordedAt: string; session: Session; customExercises?: CustomExercise[] }
 
 export type KinexDB = Dexie & {
