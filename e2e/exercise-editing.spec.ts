@@ -121,7 +121,7 @@ test('replacement can change muscle without adding a fifth exercise and survives
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Exportar backup' }).click();
   const download = await downloadPromise;
-  await page.locator('input[type="file"]').setInputFiles((await download.path())!);
+  await page.locator('#view-hist input[type="file"]').setInputFiles((await download.path())!);
   await page.getByRole('button', { name: 'Reemplazar mis datos' }).click();
   await expect(page.locator('.modal')).not.toHaveClass(/show/);
   await page.reload();

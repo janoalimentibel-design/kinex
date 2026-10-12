@@ -8,7 +8,7 @@ function drive_(url, method, body) {
     headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
     payload: JSON.stringify(body), muteHttpExceptions: true
   });
-  if (response.getResponseCode() >= 300) throw new Error('drive');
+  if (response.getResponseCode() >= 300) throw new Error('drive_' + response.getResponseCode());
   return JSON.parse(response.getContentText());
 }
 function doPost(e) {
@@ -40,6 +40,6 @@ function doPost(e) {
     state.version += 1; state.hash = hash;
     props.setProperty(key, JSON.stringify(state));
     return json_({ ok: true, version: state.version });
-  } catch (_) { return json_({ ok: false }); }
+  } catch (error) { return json_({ ok: false, error: /^drive_[0-9]{3}$/.test(error.message) ? error.message : 'request' }); }
   finally { if (lock.hasLock()) lock.releaseLock(); }
 }

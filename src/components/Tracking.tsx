@@ -30,6 +30,13 @@ export default function Tracking({ ctx }: { ctx: Ctx }) {
     <p>Al conectar, se enviarán tu historial, plan y perfil a tu Drive privado mientras la app esté abierta. Cada dispositivo mantiene su propia copia. No combina datos entre teléfonos.</p>
     <p role="status">{status}</p>
     <div className="field"><label htmlFor="pairing">Código de conexión personal</label><input id="pairing" type="password" autoComplete="off" value={pairing} onChange={e => setPairing(e.target.value)} /></div>
+    <div className="field"><label htmlFor="connection-file">Cargar código desde archivo</label><input id="connection-file" type="file" accept=".json,.txt,application/json,text/plain" onChange={async e => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (file.size > 10000) { setNotice('El archivo de conexión es demasiado grande.'); return; }
+      try { setPairing(await file.text()); setNotice('Código cargado. Tocá Conectar y enviar mis datos.'); }
+      catch { setNotice('No se pudo leer el archivo de conexión.'); }
+    }} /></div>
     <button className="btn btn-primary" disabled={!pairing} onClick={async () => {
       try { await ctx.sync.connect(pairing); setPairing(''); }
       catch { setNotice('Código inválido o no se pudo guardar la conexión.'); }

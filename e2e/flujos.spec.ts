@@ -107,7 +107,7 @@ test('exportar backup y reimportarlo con vista previa restaura los datos', async
   const download = await downloadPromise;
   const backupPath = await download.path();
 
-  await page.locator('input[type="file"]').setInputFiles(backupPath);
+  await page.locator('#view-hist input[type="file"]').setInputFiles(backupPath);
   await expect(page.locator('.sheet')).toContainText('1 sesiones');
   // El contador ya vale 1 antes de importar. Esperar sólo ese contador permite
   // terminar el test mientras dialog.accept sigue pendiente y cierra la página.
@@ -129,7 +129,7 @@ test('backup v0 de A2.8 se importa con conversión y vista previa', async ({ pag
   writeFileSync(v0File, JSON.stringify(V0_LEGACY));
 
   await nav(page, 'Historial');
-  await page.locator('input[type="file"]').setInputFiles(v0File);
+  await page.locator('#view-hist input[type="file"]').setInputFiles(v0File);
   await expect(page.locator('.sheet')).toContainText('versión anterior');
   await expect(page.locator('.sheet')).toContainText('1 sesiones');
   await page.getByRole('button', { name: 'Reemplazar mis datos' }).click();

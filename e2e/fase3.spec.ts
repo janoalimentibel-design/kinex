@@ -57,7 +57,7 @@ test('compatibilidad: un backup v1 de la Fase 1 se importa con vista previa', as
 
   await openApp(page);
   await page.locator('.nav button', { hasText: 'Historial' }).click();
-  await page.locator('input[type="file"]').setInputFiles(file);
+  await page.locator('#view-hist input[type="file"]').setInputFiles(file);
   await expect(page.locator('.sheet')).toContainText('1 sesiones');
   await page.getByRole('button', { name: 'Reemplazar mis datos' }).click();
   await expect(page.locator('.hcard')).toContainText('backup fase 1');

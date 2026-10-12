@@ -15,7 +15,9 @@ test('profile persists after reload and sync only acknowledges confirmed uploads
     received = route.request().postData() ?? '';
     await route.fulfill({ json: { ok: true, version: 1 }, headers: { 'Access-Control-Allow-Origin': '*' } });
   });
-  await page.getByLabel('Código de conexión personal').fill(JSON.stringify({ endpoint: 'https://script.google.com/macros/s/test/exec', token: 'a'.repeat(64) }));
+  await page.getByLabel('Cargar código desde archivo').setInputFiles({ name: 'CONEXION-KINEX.txt', mimeType: 'text/plain', buffer: Buffer.from(JSON.stringify({ endpoint: 'https://script.google.com/macros/s/test/exec', token: 'a'.repeat(64) })) });
+  await expect(page.getByText('Código cargado. Tocá Conectar y enviar mis datos.', { exact: true })).toBeVisible();
+  expect(received).toBe('');
   await page.getByRole('button', { name: 'Conectar y enviar mis datos' }).click();
   await expect(page.getByText(/^Enviado a Drive:/)).toBeVisible();
   expect(JSON.parse(JSON.parse(received).payload).data.profile.goals).toBe('Objetivo de prueba');

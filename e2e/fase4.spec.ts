@@ -46,7 +46,7 @@ test('racha, calendario y gráficos aparecen con datos importados; el calendario
   const { writeFileSync } = await import('node:fs');
   const file = test.info().outputPath('backup-fase4.json');
   writeFileSync(file, JSON.stringify(backup));
-  await page.locator('input[type="file"]').setInputFiles(file);
+  await page.locator('#view-hist input[type="file"]').setInputFiles(file);
   await page.getByRole('button', { name: 'Reemplazar mis datos' }).click();
 
   // racha de 3 semanas
