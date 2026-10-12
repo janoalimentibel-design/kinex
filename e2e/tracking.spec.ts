@@ -64,3 +64,38 @@ test('failed upload remains pending and a manual retry sends the completed sessi
   await expect(banner).toContainText('Enviado a Drive:');
   expect(snapshot?.data.sessions.some(s => Object.values(s.completed).length > 0 && Object.values(s.completed).every(Boolean))).toBe(true);
 });
+
+test('a key-only input reports the correction beside Connect without sending data', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.nav button', { hasText: 'Plan' }).click();
+  await page.getByText('Perfil y seguimiento privado', { exact: true }).click();
+  await page.getByLabel('Código de conexión personal').fill('a'.repeat(64));
+  await page.getByRole('button', { name: 'Conectar y enviar mis datos', exact: true }).click();
+  await expect(page.getByTestId('connection-feedback')).toContainText('Cargaste solo la clave');
+  await expect(page.getByTestId('connection-feedback')).toBeInViewport();
+  await expect(page.getByRole('button', { name: 'Conectar y enviar mis datos', exact: true })).toBeEnabled();
+});
+
+test('connect works without Web Locks or randomUUID and retry preserves the same device', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'locks', { value: undefined });
+    Object.defineProperty(crypto, 'randomUUID', { value: undefined });
+  });
+  let device = '';
+  let calls = 0;
+  await page.route('https://script.google.com/macros/s/test/exec', async route => {
+    const request = JSON.parse(route.request().postData()!);
+    if (device) expect(request.device).toBe(device);
+    device = request.device; calls++;
+    await route.fulfill({ json: { ok: true, version: calls } });
+  });
+  await page.goto('/');
+  await page.locator('.nav button', { hasText: 'Plan' }).click();
+  await page.getByText('Perfil y seguimiento privado', { exact: true }).click();
+  await page.getByLabel('Código de conexión personal').fill(JSON.stringify({ endpoint: 'https://script.google.com/macros/s/test/exec', token: 'a'.repeat(64) }));
+  await page.getByRole('button', { name: 'Conectar y enviar mis datos', exact: true }).click();
+  await expect(page.getByTestId('sync-feedback')).toContainText('Enviado a Drive:');
+  expect(device).toMatch(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
+  await page.getByRole('button', { name: 'Reintentar envío', exact: true }).click();
+  await expect.poll(() => calls).toBe(2);
+});

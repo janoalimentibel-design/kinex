@@ -14,6 +14,8 @@ export default function Tracking({ ctx }: { ctx: Ctx }) {
   const [dirty, setDirty] = useState(false);
   const [notice, setNotice] = useState('');
   const [pairing, setPairing] = useState('');
+  const [connectionNotice, setConnectionNotice] = useState('');
+  const [connecting, setConnecting] = useState(false);
   const { status } = ctx.sync;
   useEffect(() => { if (!dirty) setDraft(ctx.data.profile ?? emptyTrainingProfile()); }, [ctx.data.profile, dirty]);
   return <details className="wkcard">
@@ -28,20 +30,24 @@ export default function Tracking({ ctx }: { ctx: Ctx }) {
     <p role="status">{notice}</p>
     <h3>Seguimiento privado en Drive</h3>
     <p>Al conectar, se enviarán tu historial, plan y perfil a tu Drive privado mientras la app esté abierta. Cada dispositivo mantiene su propia copia. No combina datos entre teléfonos.</p>
-    <p role="status">{status}</p>
     <div className="field"><label htmlFor="pairing">Código de conexión personal</label><input id="pairing" type="password" autoComplete="off" value={pairing} onChange={e => setPairing(e.target.value)} /></div>
     <div className="field"><label htmlFor="connection-file">Cargar código desde archivo</label><input id="connection-file" type="file" accept=".json,.txt,application/json,text/plain" onChange={async e => {
       const file = e.target.files?.[0];
       if (!file) return;
-      if (file.size > 10000) { setNotice('El archivo de conexión es demasiado grande.'); return; }
-      try { setPairing(await file.text()); setNotice('Código cargado. Tocá Conectar y enviar mis datos.'); }
-      catch { setNotice('No se pudo leer el archivo de conexión.'); }
+      if (file.size > 10000) { setConnectionNotice('El archivo de conexión es demasiado grande.'); return; }
+      try { setPairing(await file.text()); setConnectionNotice('Código cargado. Tocá Conectar y enviar mis datos.'); }
+      catch { setConnectionNotice('No se pudo leer el archivo de conexión.'); }
     }} /></div>
-    <button className="btn btn-primary" disabled={!pairing} onClick={async () => {
-      try { await ctx.sync.connect(pairing); setPairing(''); }
-      catch { setNotice('Código inválido o no se pudo guardar la conexión.'); }
-    }}>Conectar y enviar mis datos</button>
-    <button className="btn btn-soft" onClick={async () => { try { await ctx.sync.disconnect(); } catch { setNotice('No se pudo desconectar. Reintentá.'); } }}>Desconectar</button>
+    <button className="btn btn-primary" disabled={!pairing || connecting || ctx.sync.busy} onClick={async () => {
+      setConnecting(true); setConnectionNotice('Comprobando y guardando la conexión…');
+      try { await ctx.sync.connect(pairing); setPairing(''); setConnectionNotice(''); }
+      catch (error) { setConnectionNotice(error instanceof Error ? error.message : 'No se pudo guardar la conexión. Reintentá.'); }
+      finally { setConnecting(false); }
+    }}>{connecting || ctx.sync.busy ? 'Conectando y enviando…' : 'Conectar y enviar mis datos'}</button>
+    <p role="status" data-testid="connection-feedback">{connectionNotice}</p>
+    <p role="status" data-testid="sync-feedback">{status}</p>
+    <button className="btn btn-soft" disabled={ctx.sync.busy || connecting} onClick={() => void ctx.sync.send()}>Reintentar envío</button>
+    <button className="btn btn-soft" onClick={async () => { try { await ctx.sync.disconnect(); } catch { setConnectionNotice('No se pudo desconectar. Reintentá.'); } }}>Desconectar</button>
     <p>La clave queda en este navegador y no se incluye en los respaldos. La copia en Drive puede ser leída desde tu conexión de Drive cuando pidas revisar tu entrenamiento.</p>
   </details>;
 }

@@ -16,7 +16,7 @@ export function usePrivateSync(data: AppData | null) {
     setBusy(true);
     const work = async () => {
       try {
-        await navigator.locks.request('kinex-private-upload', { signal: abort.signal }, async () => {
+        const transfer = async () => {
           const current = await db.kv.get('syncConnection');
           if (current?.key !== 'syncConnection') { setStatus('Sin conectar: abrí Plan → Perfil y seguimiento privado.'); return; }
           setStatus('Enviando datos a Drive…');
@@ -37,9 +37,11 @@ export function usePrivateSync(data: AppData | null) {
             return true;
           });
           if (saved && mounted.current && !abort.signal.aborted) setStatus(`Enviado a Drive: ${new Date(next.lastSync).toLocaleString()}`);
-        });
+        };
+        if (navigator.locks?.request) await navigator.locks.request('kinex-private-upload', { signal: abort.signal }, transfer);
+        else await transfer(); // Server revisions still reject conflicting writes.
       } catch (error) {
-        if (mounted.current && !abort.signal.aborted) setStatus(error instanceof Error && error.message.startsWith('Conflicto')
+        if (mounted.current && !abort.signal.aborted) setStatus(error instanceof Error && (error.message.startsWith('Conflicto') || error.message.startsWith('Google no respondió') || error.message.startsWith('Drive rechazó'))
           ? error.message : 'Pendiente: no se confirmó el envío. Tus datos siguen guardados en este dispositivo. Podés reintentar.');
       } finally {
         running.current = null;
