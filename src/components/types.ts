@@ -20,6 +20,7 @@ export type ModalState =
 
 // Contexto que App pasa a vistas y sheets: datos + mutaciones con persistencia write-through.
 export interface Ctx {
+  sync: ReturnType<typeof import('../sync/usePrivateSync').usePrivateSync>;
   data: AppData;
   allEx: ExerciseMap;
   curDate: string;

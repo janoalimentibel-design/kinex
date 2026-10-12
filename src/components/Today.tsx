@@ -159,6 +159,17 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
           <button className="btn btn-ghost" onClick={() => ctx.setModal({ type: 'revisions' })}>Deshacer / versiones del día</button>
         </div>
 
+        {list.length > 0 && list.every(entry => session.completed[entry.id] === true) && (
+          <div className="suggestion-card" data-testid="training-complete">
+            <h3>Entrenamiento completado</h3>
+            <p>Enviá la última copia de tu historial, plan y perfil a tu Drive privado para la próxima revisión.</p>
+            <button className="btn btn-primary" disabled={ctx.sync.busy} onClick={() => void ctx.sync.send()}>
+              {ctx.sync.busy ? 'Enviando…' : 'Enviar datos'}
+            </button>
+            <p role="status">{ctx.sync.status}</p>
+          </div>
+        )}
+
         <div className="prog">
           <div className="bar"><div className="fill" style={{ width: `${pct}%` }}></div></div>
           <div className="proglab"><span>{done} de {list.length} ejercicios</span><span>{pct}%</span></div>

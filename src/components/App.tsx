@@ -1,3 +1,4 @@
+import { usePrivateSync } from '../sync/usePrivateSync';
 import { useEffect, useRef, useState } from 'react';
 import { CATALOG } from '../data/exercises';
 import { bootstrap, replaceAll, toAppData, type AppData } from '../db/bootstrap';
@@ -24,6 +25,7 @@ let bootPromise: ReturnType<typeof bootstrap> | null = null;
 
 export default function App() {
   const [data, setData] = useState<AppData | null>(null);
+  const sync = usePrivateSync(data);
   const writer = useRef<ReturnType<typeof createDataWriter> | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -83,6 +85,7 @@ export default function App() {
   };
 
   const ctx: Ctx = {
+    sync,
     data,
     allEx,
     curDate,
