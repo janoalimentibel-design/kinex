@@ -1,5 +1,10 @@
 # START HERE — KINEX para Codex
 
+> Instrucciones vigentes: leer primero [AGENTS.md](AGENTS.md), que define el alcance
+> actual y el trabajo con tres roles de subagentes. Este documento conserva contexto
+> histórico; sus versiones, recuentos y la antigua tarea de «solo imágenes» no son
+> restricciones para los nuevos pedidos del usuario.
+
 ## Instrucción principal
 
 Estás trabajando en la carpeta raíz de **KINEX A3 v3.5.0 — app completa, en producción**.

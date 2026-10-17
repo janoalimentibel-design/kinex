@@ -2,7 +2,7 @@
 
 App personal mobile-first de entrenamiento: fuerza, control y movimiento. PWA instalable y 100% offline, con la UX y estética oscura/neón heredadas de A2.8 y compatibilidad total de datos.
 
-**Codex u otra IA: comenzar obligatoriamente por `START_HERE_CODEX.md`.** Las prioridades vigentes son ampliar imágenes con revisión visual y responder los pedidos ingresados desde el Buzón para Codex.
+**Codex u otra IA: comenzar por [AGENTS.md](AGENTS.md).** Incluye las instrucciones vigentes, la coordinación con el usuario y los tres roles de subagentes: código, interfaz y pruebas. `START_HERE_CODEX.md` conserva contexto histórico y pautas del proyecto; sus versiones, recuentos y alcance original no sustituyen las instrucciones actuales.
 
 **App en producción:** https://janoalimentibel-design.github.io/kinex/
 (en el teléfono: abrir la URL → "Añadir a pantalla de inicio" → funciona sin conexión)
