@@ -1,3 +1,4 @@
+import { RETIRED_EXERCISES } from '../data/gym';
 // Todos los bottom-sheets de la app — ports de los open* de A2.8.
 // Nuevo respecto de A2.8: ImportPreviewSheet (vista previa antes de reemplazar datos).
 import { useEffect, useState } from 'react';
@@ -85,7 +86,7 @@ function ComboSheet({ ctx }: { ctx: Ctx }) {
 
 function AddToGroupSheet({ ctx, group }: { ctx: Ctx; group: GroupId }) {
   const current = buildExerciseList(ctx.session, ctx.allEx, ctx.data.sessions).map((x) => x.id);
-  const opts = candidates(ctx.allEx, group, 'mix', true).filter((e) => !current.includes(e.id));
+  const opts = candidates(ctx.allEx, group, 'mix', true).filter((e) => !RETIRED_EXERCISES.has(e.id) && !current.includes(e.id));
 
   const add = (id: string) => {
     ctx.editExercise({ type: 'add', id });
@@ -113,7 +114,7 @@ function AddToGroupSheet({ ctx, group }: { ctx: Ctx; group: GroupId }) {
 function ReplaceSheet({ ctx, origId, group }: { ctx: Ctx; origId: string; group: GroupId }) {
   const [chosenGroup, setChosenGroup] = useState(group);
   const current = buildExerciseList(ctx.session, ctx.allEx, ctx.data.sessions).map((e) => e.id);
-  const opts = candidates(ctx.allEx, chosenGroup, 'mix', true).filter((e) => e.id !== origId && !current.includes(e.id));
+  const opts = candidates(ctx.allEx, chosenGroup, 'mix', true).filter((e) => !RETIRED_EXERCISES.has(e.id) && e.id !== origId && !current.includes(e.id));
 
   const replace = (newId: string) => {
     ctx.editExercise({ type: 'replace', id: origId, replacement: newId });
@@ -217,12 +218,12 @@ function LibInfoSheet({ ctx, id }: { ctx: Ctx; id: string }) {
         <div className="block">
           <div className="bt"><span className="bd"></span>Progresión</div>
           <div className="proglinks">
-            {PROGRESSIONS[id]?.easier && ctx.allEx[PROGRESSIONS[id].easier!] && (
+            {PROGRESSIONS[id]?.easier && !RETIRED_EXERCISES.has(PROGRESSIONS[id].easier!) && ctx.allEx[PROGRESSIONS[id].easier!] && (
               <button className="btn btn-soft prog-btn" onClick={() => ctx.setModal({ type: 'libInfo', id: PROGRESSIONS[id].easier! })}>
                 ↓ Más fácil: {ctx.allEx[PROGRESSIONS[id].easier!].name}
               </button>
             )}
-            {PROGRESSIONS[id]?.harder && ctx.allEx[PROGRESSIONS[id].harder!] && (
+            {PROGRESSIONS[id]?.harder && !RETIRED_EXERCISES.has(PROGRESSIONS[id].harder!) && ctx.allEx[PROGRESSIONS[id].harder!] && (
               <button className="btn btn-soft prog-btn" onClick={() => ctx.setModal({ type: 'libInfo', id: PROGRESSIONS[id].harder! })}>
                 ↑ Más difícil: {ctx.allEx[PROGRESSIONS[id].harder!].name}
               </button>

@@ -1,3 +1,4 @@
+import { RETIRED_EXERCISES } from '../data/gym';
 import CompletionPrompt from './CompletionPrompt';
 // Vista Hoy — port de renderStrip/renderDay/renderGroups/renderExercise de A2.8.
 import { useEffect, useState } from 'react';
@@ -282,10 +283,10 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
           </div>
           <div className="card-actions">
             <button className="btn btn-soft" onClick={() => ctx.setModal({ type: 'replace', origId, group: e.group as GroupId })}>Cambiar</button>
-            {links?.easier && allEx[links.easier] && !visibleIds.has(links.easier) && (
+            {links?.easier && !RETIRED_EXERCISES.has(links.easier) && allEx[links.easier] && !visibleIds.has(links.easier) && (
               <button className="btn btn-soft prog-btn" onClick={() => replaceWith(links.easier!)}>↓ {allEx[links.easier].name}</button>
             )}
-            {links?.harder && allEx[links.harder] && !visibleIds.has(links.harder) && (
+            {links?.harder && !RETIRED_EXERCISES.has(links.harder) && allEx[links.harder] && !visibleIds.has(links.harder) && (
               <button className="btn btn-soft prog-btn" onClick={() => replaceWith(links.harder!)}>
                 ↑ {allEx[links.harder].name}
               </button>

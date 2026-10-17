@@ -1,3 +1,4 @@
+import { automaticInGym } from '../data/gym';
 // Lógica pura de sesiones — portada 1:1 de A2.8 (src/session.js + funciones de app.js).
 // Mismas reglas: 2 grupos por sesión, candidatos ordenados por nivel y nombre,
 // avanzados excluidos de la selección automática, extra del Extendido al grupo
@@ -17,7 +18,7 @@ const AUTOMATIC_EXERCISE_EXCLUSIONS = new Set(['pullup_band', 'chin_assist']);
 // una máquina y una sesión solo con peso no recibe una dominada estricta.
 const WEEKLY_GROUP_PRIORITIES: Partial<Record<GroupId, string[]>> = {
   espalda: ['pullup'],
-  pierna: ['leg_ext', 'lying_leg_curl'],
+  pierna: ['bench_leg_extension'],
 };
 
 export interface SessionEntry {
@@ -221,11 +222,11 @@ function automaticExercises(
     .map((id) => all[id])
     .filter((exercise): exercise is CatalogExercise => Boolean(exercise))
     .filter((exercise) => isModeCompatible(exercise, mode) && allow(exercise))
-    .filter((exercise) => !AUTOMATIC_EXERCISE_EXCLUSIONS.has(exercise.id))
+    .filter((exercise) => !AUTOMATIC_EXERCISE_EXCLUSIONS.has(exercise.id) && automaticInGym(exercise.id))
     .filter((exercise) => !excluded.includes(exercise.id));
   const automatic = candidates(all, group, mode, false)
     .filter(allow)
-    .filter((e) => !AUTOMATIC_EXERCISE_EXCLUSIONS.has(e.id))
+    .filter((e) => !AUTOMATIC_EXERCISE_EXCLUSIONS.has(e.id) && automaticInGym(e.id))
     .filter((e) => !excluded.includes(e.id) && !priority.some((forced) => forced.id === e.id))
     .map((exercise) => {
       const usage = exerciseUsage(sessions, exercise.id, date);

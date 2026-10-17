@@ -1,3 +1,4 @@
+import { RETIRED_EXERCISES } from '../data/gym';
 // Vista Biblioteca — port de renderFilters/renderLib de A2.8.
 import { useState } from 'react';
 import { GROUPS } from '../data/exercises';
@@ -18,7 +19,7 @@ export default function Library({ ctx }: { ctx: Ctx }) {
   const rows = Object.entries(ctx.allEx).filter(([, e]) => {
     const hay = `${e.name} ${e.group} ${e.tags.join(' ')} ${e.level}`.toLowerCase();
     const inFilter = filter === 'all' || e.group === filter || (filter === 'advanced' && e.level === 'Avanzado');
-    return inFilter && hay.includes(q);
+    return !RETIRED_EXERCISES.has(e.id) && inFilter && hay.includes(q);
   });
 
   return (

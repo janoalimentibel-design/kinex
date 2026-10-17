@@ -1,3 +1,4 @@
+import { GYM_EQUIPMENT } from '../data/gym';
 // Vista Plan — port de renderPlan/copyWeeklySummary de A2.8.
 import Tracking from './Tracking';
 import { FORMATS, GROUPS } from '../data/exercises';
@@ -115,6 +116,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
   return (
     <div className="plan">
       <Tracking ctx={ctx} />
+      <details className="wkcard"><summary>Equipo de tu gimnasio</summary><p>{GYM_EQUIPMENT.join(' · ')}</p><p>La selección automática usa este equipo. Las máquinas no confirmadas siguen disponibles para elegir manualmente. El banco abdominal y la banca declinada tienen condiciones explicadas en sus fichas.</p></details>
       <div className="sectionhead">
         <div>
           <h2>Plan</h2>

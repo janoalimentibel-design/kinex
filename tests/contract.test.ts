@@ -25,10 +25,10 @@ test('formatos y grupos mantienen el contrato de A2.6', () => {
 
 test('el catálogo incluye la base original y los ejercicios de fuerza solicitados', () => {
   const all = Object.values(CATALOG);
-  expect(all).toHaveLength(138);
+  expect(all).toHaveLength(146);
   const byGroup: Record<string, number> = {};
   for (const e of all) byGroup[e.group] = (byGroup[e.group] ?? 0) + 1;
-  expect(byGroup).toEqual({ pierna: 33, espalda: 19, pecho: 15, hombro: 13, bicep: 15, tricep: 16, core: 20, aerobico: 7 });
+  expect(byGroup).toEqual({ pierna: 34, espalda: 20, pecho: 17, hombro: 14, bicep: 16, tricep: 17, core: 21, aerobico: 7 });
   for (const id of ['back_squat', 'romanian_deadlift', 'bench_press', 'dumbbell_curl', 'ab_wheel', 'rowing_erg', 'reverse_crunch', 'russian_twist', 'bicycle_crunch']) {
     expect(CATALOG[id], `falta ${id}`).toBeDefined();
   }
@@ -88,13 +88,15 @@ test('la dominada asistida con banda queda disponible, pero no se sugiere autom�
   expect(CATALOG.pullup_band).toBeDefined();
 });
 
-test('las prioridades semanales incluyen dominada estricta y las dos máquinas de pierna', () => {
+test('las prioridades semanales incluyen dominada y el accesorio de piernas fotografiado', () => {
   const back = { ...createSession('2026-08-03'), groups: ['espalda', 'pecho'] as ['espalda', 'pecho'] };
   expect(buildExerciseList(back, CATALOG, {}).map((entry) => entry.id)).toContain('pullup');
 
   const legs = { ...createSession('2026-08-03'), groups: ['pierna', 'core'] as ['pierna', 'core'] };
   const legIds = buildExerciseList(legs, CATALOG, {}).filter((entry) => entry.group === 'pierna').map((entry) => entry.id);
-  expect(legIds).toEqual(expect.arrayContaining(['leg_ext', 'lying_leg_curl']));
+  expect(legIds).toContain('bench_leg_extension');
+  expect(legIds).not.toContain('leg_ext');
+  expect(legIds).not.toContain('lying_leg_curl');
 });
 
 test('Core propone un bloque mínimo de cuatro y los grupos anteriores reequilibran la semana', () => {

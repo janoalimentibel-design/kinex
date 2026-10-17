@@ -1,0 +1,301 @@
+{
+  "tool": "image_gen.imagegen (herramienta integrada)",
+  "date": "2026-10-17",
+  "notes": "Originales PNG archivados por ejercicio en assets-src/exercises; WebP en public/assets/exercises. Las imágenes son ilustraciones sintéticas. Revisión visual de todas las fases antes de publicar. El brief de rotación externa resume la escena; los restantes prompts se conservan literalmente.",
+  "assets": [
+    {
+      "id": "external_rot",
+      "directory": "assets-src/exercises/external-rotation-v342",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "external-rotation-v342/inicio.png",
+          "prompt": "Brief: mismo modelo con camiseta negra y pantalón gris en gimnasio oscuro; banda verde anclada a la izquierda, codo junto al torso, antebrazo desde abdomen hacia fuera sin rotar tronco; tres fases y sin texto."
+        },
+        {
+          "phase": "medio",
+          "source": "external-rotation-v342/medio.png",
+          "prompt": "Brief: mismo modelo con camiseta negra y pantalón gris en gimnasio oscuro; banda verde anclada a la izquierda, codo junto al torso, antebrazo desde abdomen hacia fuera sin rotar tronco; tres fases y sin texto."
+        },
+        {
+          "phase": "final",
+          "source": "external-rotation-v342/final.png",
+          "prompt": "Brief: mismo modelo con camiseta negra y pantalón gris en gimnasio oscuro; banda verde anclada a la izquierda, codo junto al torso, antebrazo desde abdomen hacia fuera sin rotar tronco; tres fases y sin texto."
+        }
+      ]
+    },
+    {
+      "id": "pallof",
+      "directory": "assets-src/exercises/pallof-press-v342",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "pallof-press-v342/inicio.png",
+          "prompt": "ONE single photorealistic fitness instruction photo. Vertical 3:4; subject fills frame, no black/white bars, no text arrows logos or collage. Adult male with short dark hair trimmed beard, plain black T-shirt dark grey shorts black sneakers white soles. Dark rubber-floor gym, soft bright light on body and equipment. Pallof press ANTI-ROTATION with a vivid green band securely anchored to a rack on the LEFT edge of the image at sternum height. Adult man faces camera/front three-quarter, anchor is to his right side. Feet shoulder width, soft knees. Hold band with BOTH hands together at sternum, shoulder and hip lines remain square facing camera the whole time. NO torso rotation. Full figure fills portrait frame; anchor visible. START both hands at sternum, elbows bent and close to ribs."
+        },
+        {
+          "phase": "medio",
+          "source": "pallof-press-v342/medio.png",
+          "prompt": "Edit the reference into the NEXT instructional phase of this SAME exercise. Keep identical person clothing face equipment gym camera framing light and scale. Only change pose as described; keep all contact points and anchor fixed. One photograph, no text arrows collage or letterboxing. Pallof press ANTI-ROTATION with a vivid green band securely anchored to a rack on the LEFT edge of the image at sternum height. Adult man faces camera/front three-quarter, anchor is to his right side. Feet shoulder width, soft knees. Hold band with BOTH hands together at sternum, shoulder and hip lines remain square facing camera the whole time. NO torso rotation. Full figure fills portrait frame; anchor visible. MID both hands pressed forward halfway, elbows bent about 100 degrees, torso perfectly still."
+        },
+        {
+          "phase": "final",
+          "source": "pallof-press-v342/final.png",
+          "prompt": "Edit the reference into the NEXT instructional phase of this SAME exercise. Keep identical person clothing face equipment gym camera framing light and scale. Only change pose as described; keep all contact points and anchor fixed. One photograph, no text arrows collage or letterboxing. Pallof press ANTI-ROTATION with a vivid green band securely anchored to a rack on the LEFT edge of the image at sternum height. Adult man faces camera/front three-quarter, anchor is to his right side. Feet shoulder width, soft knees. Hold band with BOTH hands together at sternum, shoulder and hip lines remain square facing camera the whole time. NO torso rotation. Full figure fills portrait frame; anchor visible. END both hands straight forward away from chest at shoulder height, elbows nearly straight, torso square and unmoving. Stretched band travels diagonally from anchor to hands."
+        }
+      ]
+    },
+    {
+      "id": "suitcase",
+      "directory": "assets-src/exercises/suitcase-carry-v342",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "suitcase-carry-v342/inicio.png",
+          "prompt": "ONE single photorealistic fitness instruction photo. Vertical 3:4; subject fills frame, no black/white bars, no text arrows logos or collage. Adult male with short dark hair trimmed beard, plain black T-shirt dark grey shorts black sneakers white soles. Dark rubber-floor gym, soft bright light on body and equipment. SUITCASE CARRY with ONE dumbbell in RIGHT hand only, left hand completely empty. Torso upright, shoulders level, no side bend. Dark rubber gym floor, three-quarter camera showing full body and single dumbbell; body occupies 85 percent frame, no letterboxing. START standing tall with feet hip-width, one dumbbell at right side, straight relaxed elbow."
+        },
+        {
+          "phase": "medio",
+          "source": "suitcase-carry-v342/medio.png",
+          "prompt": "Edit the reference into the NEXT instructional phase of this SAME exercise. Keep identical person clothing face equipment gym camera framing light and scale. Only change pose as described; keep all contact points and anchor fixed. One photograph, no text arrows collage or letterboxing. SUITCASE CARRY with ONE dumbbell in RIGHT hand only, left hand completely empty. Torso upright, shoulders level, no side bend. Dark rubber gym floor, three-quarter camera showing full body and single dumbbell; body occupies 85 percent frame, no letterboxing. MID walking slowly forward with LEFT foot one small step ahead and right foot trailing; right dumbbell stays at side, torso vertical."
+        },
+        {
+          "phase": "final",
+          "source": "suitcase-carry-v342/final.png",
+          "prompt": "Edit this photo into a visibly DIFFERENT walking step. Keep man/gym/camera/one dumbbell in SAME right hand (viewer left), left hand empty. The RIGHT FOOT (viewer LEFT shoe) is now IN FRONT and planted, LEFT FOOT (viewer RIGHT shoe) BEHIND with heel raised. Show obvious walking stride, no crossed legs, torso upright, shoulders level. Full shoes and head in frame with margin. Black shirt gray shorts. No text or arrows."
+        }
+      ]
+    },
+    {
+      "id": "scap_pushup",
+      "directory": "assets-src/exercises/scap-pushup-v2-v342",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "scap-pushup-v2-v342/inicio.png",
+          "prompt": "Photorealistic exercise instructional photograph, LANDSCAPE composition WIDE SIDE VIEW pulled back enough to show EVERY fingertip and both entire shoes with large margin. Adult athletic man short dark hair black T-shirt gray shorts black/white shoes in dim gym. Scapular push-up START: high plank both elbows completely STRAIGHT, hands under shoulders, body straight toes to head. Shoulder blades come gently toward each other and chest sinks only 2cm between shoulders, no elbow bend. Camera from exact side and slightly above so back curve readable. Full body centered HORIZONTALLY, no cropped body parts, NO text/arrows/collage."
+        },
+        {
+          "phase": "medio",
+          "source": "scap-pushup-v2-v342/medio.png",
+          "prompt": "Edit this exact landscape photograph keeping model, framing, camera and all equipment. SCAPULAR PUSH-UP MEDIO: both elbows remain FULLY STRAIGHT, shoulders directly over hands, hips stay at SAME height. Push ground away to spread shoulder blades HALFWAY, move upper chest UP only 1.5 cm from shoulder blade protraction, back becomes neutral. This is NOT an ordinary pushup and NOT a pike, no elbow bending, no lumbar flexion, no head drop. Preserve all fingertips and shoes with generous margin. No text/arrows."
+        },
+        {
+          "phase": "final",
+          "source": "scap-pushup-v2-v342/final.png",
+          "prompt": "Edit this exact landscape photograph keeping model, framing, camera and all equipment. SCAPULAR PUSH-UP FINAL: both elbows remain FULLY STRAIGHT, shoulders directly over hands, hips stay at SAME height. Push ground away to spread shoulder blades FULLY, move upper chest UP only 3 cm from shoulder blade protraction, upper back gently domed at shoulder blades. This is NOT an ordinary pushup and NOT a pike, no elbow bending, no lumbar flexion, no head drop. Preserve all fingertips and shoes with generous margin. No text/arrows."
+        }
+      ]
+    },
+    {
+      "id": "mcgill",
+      "directory": "assets-src/exercises/mcgill-v342",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "mcgill-v342/inicio.png",
+          "prompt": "ONE single photorealistic fitness instruction photo. Vertical 3:4; subject fills frame, no black/white bars, no text arrows logos or collage. Adult male with short dark hair trimmed beard, plain black T-shirt dark grey shorts black sneakers white soles. Dark rubber-floor gym, soft bright light on body and equipment. MODIFIED MCGILL CURL-UP, not a sit-up. Man supine on exercise mat with one knee bent and that foot on mat, opposite leg fully straight on mat. Both hands flat under natural low back curve. Fixed close SIDE camera includes entire body filling frame. Lumbar curve and pelvis remain completely still. No hands behind neck. START head and shoulders resting on mat, neck neutral, one knee bent other leg straight, hands underneath low back."
+        },
+        {
+          "phase": "medio",
+          "source": "mcgill-v342/medio.png",
+          "prompt": "Edit the reference into the NEXT instructional phase of this SAME exercise. Keep identical person clothing face equipment gym camera framing light and scale. Only change pose as described; keep all contact points and anchor fixed. One photograph, no text arrows collage or letterboxing. MODIFIED MCGILL CURL-UP, not a sit-up. Man supine on exercise mat with one knee bent and that foot on mat, opposite leg fully straight on mat. Both hands flat under natural low back curve. Fixed close SIDE camera includes entire body filling frame. Lumbar curve and pelvis remain completely still. No hands behind neck. MID head and shoulder blades rise together only about 2 cm as one rigid unit, neck in line with torso, pelvis on mat, lumbar curve unchanged."
+        },
+        {
+          "phase": "final",
+          "source": "mcgill-v342/final.png",
+          "prompt": "Edit the reference into the NEXT instructional phase of this SAME exercise. Keep identical person clothing face equipment gym camera framing light and scale. Only change pose as described; keep all contact points and anchor fixed. One photograph, no text arrows collage or letterboxing. MODIFIED MCGILL CURL-UP, not a sit-up. Man supine on exercise mat with one knee bent and that foot on mat, opposite leg fully straight on mat. Both hands flat under natural low back curve. Fixed close SIDE camera includes entire body filling frame. Lumbar curve and pelvis remain completely still. No hands behind neck. END head and shoulder blades rise as one unit only 4 cm, NEVER sitting up. Chin not jammed down. One knee bent other leg straight, pelvis and low back unchanged, hands under lumbar."
+        }
+      ]
+    },
+    {
+      "id": "heel_taps",
+      "directory": "assets-src/exercises/heel-taps-v342",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "heel-taps-v342/inicio.png",
+          "prompt": "ONE single photorealistic fitness instruction photo. Vertical 3:4; subject fills frame, no black/white bars, no text arrows logos or collage. Adult male with short dark hair trimmed beard, plain black T-shirt dark grey shorts black sneakers white soles. Dark rubber-floor gym, soft bright light on body and equipment. SUPINE ALTERNATING HEEL TAPS abdominal exercise. Man on mat, head shoulders and pelvis stay on mat, arms along sides palms down. Hips and knees initially 90 degrees, thighs vertical shins horizontal. Fixed SIDE view showing whole body large in frame; no letterboxing. START both legs tabletop with hips knees 90 degrees, heels up off mat, arms at sides."
+        },
+        {
+          "phase": "medio",
+          "source": "heel-taps-v342/medio.png",
+          "prompt": "Edit the reference into the NEXT instructional phase of this SAME exercise. Keep identical person clothing face equipment gym camera framing light and scale. Only change pose as described; keep all contact points and anchor fixed. One photograph, no text arrows collage or letterboxing. SUPINE ALTERNATING HEEL TAPS abdominal exercise. Man on mat, head shoulders and pelvis stay on mat, arms along sides palms down. Hips and knees initially 90 degrees, thighs vertical shins horizontal. Fixed SIDE view showing whole body large in frame; no letterboxing. MID one thigh lowers halfway toward mat, that knee remains bent 90 degrees, opposite thigh stays vertical tabletop. No back arch."
+        },
+        {
+          "phase": "final",
+          "source": "heel-taps-v342/final.png",
+          "prompt": "Edit the reference into the NEXT instructional phase of this SAME exercise. Keep identical person clothing face equipment gym camera framing light and scale. Only change pose as described; keep all contact points and anchor fixed. One photograph, no text arrows collage or letterboxing. SUPINE ALTERNATING HEEL TAPS abdominal exercise. Man on mat, head shoulders and pelvis stay on mat, arms along sides palms down. Hips and knees initially 90 degrees, thighs vertical shins horizontal. Fixed SIDE view showing whole body large in frame; no letterboxing. END lowered heel gently touches mat close to pelvis while same knee stays bent; other leg remains in tabletop. Back neutral no lifted shoulders no bicycle crunch."
+        }
+      ]
+    },
+    {
+      "id": "bench_leg_extension",
+      "directory": "assets-src/exercises/bench-leg-extension",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "bench-leg-extension/inicio.png",
+          "prompt": "Generate ONE new photorealistic fitness instruction photo. Vertical 3:4, no collage text arrows logos watermark or letterboxing. Adult male short dark hair trimmed beard, plain black T-shirt, dark grey shorts, black sneakers white soles, dark rubber-floor gym. Well-lit body and equipment fill frame, realistic anatomy and visible contact points. SEATED KNEE EXTENSION on a simple adjustable weight bench with a plate-loaded LEG DEVELOPER ATTACHMENT at the foot end, NOT a commercial seated leg-extension machine. Upright supported back, hands gripping seat edges. Seat supports thighs, knees align with attachment pivot, shin roller on front of lower shins above ankles, weight plates on loading peg. SIDE three-quarter view shows full person and bench attachment. START seated knees bent 90 degrees, shins hanging down behind padded front roller."
+        },
+        {
+          "phase": "medio",
+          "source": "bench-leg-extension/medio.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. SEATED KNEE EXTENSION on a simple adjustable weight bench with a plate-loaded LEG DEVELOPER ATTACHMENT at the foot end, NOT a commercial seated leg-extension machine. Upright supported back, hands gripping seat edges. Seat supports thighs, knees align with attachment pivot, shin roller on front of lower shins above ankles, weight plates on loading peg. SIDE three-quarter view shows full person and bench attachment. Requested phase: MID extend both knees halfway, lifting the lever and roller in an arc. Upper legs and pelvis stay on bench."
+        },
+        {
+          "phase": "final",
+          "source": "bench-leg-extension/final.png",
+          "prompt": "Edit this exact bench leg extension exercise photo. Keep same man, scene, bench and camera. FINAL position: BOTH KNEES EXTENDED almost straight, with the calves/shins extending FORWARD in line with thighs, knees retain just 10 degrees softness. Lower legs are HORIZONTAL pointing forward (to image right). Shin roller rises with the lever under FRONT of lower shins above ankles. Feet and entire machine remain fully visible; zoom out slightly if needed to fit straight legs. Pelvis, thighs and back stay on same bench, hands grip seat. NO knee hyperextension, NO feet on floor, NO text/arrows."
+        }
+      ]
+    },
+    {
+      "id": "chest_supported_db_row",
+      "directory": "assets-src/exercises/chest-supported-db-row",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "chest-supported-db-row/inicio.png",
+          "prompt": "Generate ONE new photorealistic fitness instruction photo. Vertical 3:4, no collage text arrows logos watermark or letterboxing. Adult male short dark hair trimmed beard, plain black T-shirt, dark grey shorts, black sneakers white soles, dark rubber-floor gym. Well-lit body and equipment fill frame, realistic anatomy and visible contact points. CHEST SUPPORTED DUMBBELL ROW: man lies face down with chest and abdomen against 35-degree INCLINE BENCH, feet planted wide on floor, head in line with spine. One dumbbell each hand. Fixed SIDE three-quarter view clearly shows chest support, both hands, bench and feet. No standing bent-over row. START both arms hanging vertically toward floor holding dumbbells, elbows straight, chest on pad."
+        },
+        {
+          "phase": "medio",
+          "source": "chest-supported-db-row/medio.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. CHEST SUPPORTED DUMBBELL ROW: man lies face down with chest and abdomen against 35-degree INCLINE BENCH, feet planted wide on floor, head in line with spine. One dumbbell each hand. Fixed SIDE three-quarter view clearly shows chest support, both hands, bench and feet. No standing bent-over row. Requested phase: MID elbows bent about 70 degrees and drawn toward ribs, dumbbells rising beside bench, chest stays on pad."
+        },
+        {
+          "phase": "final",
+          "source": "chest-supported-db-row/final.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. CHEST SUPPORTED DUMBBELL ROW: man lies face down with chest and abdomen against 35-degree INCLINE BENCH, feet planted wide on floor, head in line with spine. One dumbbell each hand. Fixed SIDE three-quarter view clearly shows chest support, both hands, bench and feet. No standing bent-over row. Requested phase: END elbows near 90 degrees beside ribs, dumbbells beside lower chest, no torso lift or shoulder shrug."
+        }
+      ]
+    },
+    {
+      "id": "dumbbell_floor_press",
+      "directory": "assets-src/exercises/dumbbell-floor-press",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "dumbbell-floor-press/inicio.png",
+          "prompt": "Generate ONE new photorealistic fitness instruction photo. Vertical 3:4, no collage text arrows logos watermark or letterboxing. Adult male short dark hair trimmed beard, plain black T-shirt, dark grey shorts, black sneakers white soles, dark rubber-floor gym. Well-lit body and equipment fill frame, realistic anatomy and visible contact points. DUMBBELL FLOOR PRESS: man lies supine directly on a mat on gym floor, no bench. Knees bent feet flat, two dumbbells neutral-to-slight-pronated grip, wrists straight, elbows 30-45 degrees from torso. SIDE three-quarter view, whole body and both dumbbells visible. START upper arms gently on floor, elbows bent 90 degrees, forearms vertical with dumbbells above elbows beside chest."
+        },
+        {
+          "phase": "medio",
+          "source": "dumbbell-floor-press/medio.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. DUMBBELL FLOOR PRESS: man lies supine directly on a mat on gym floor, no bench. Knees bent feet flat, two dumbbells neutral-to-slight-pronated grip, wrists straight, elbows 30-45 degrees from torso. SIDE three-quarter view, whole body and both dumbbells visible. Requested phase: MID dumbbells pressed halfway up, elbows opening, upper arms off floor, pelvis stays on mat."
+        },
+        {
+          "phase": "final",
+          "source": "dumbbell-floor-press/final.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. DUMBBELL FLOOR PRESS: man lies supine directly on a mat on gym floor, no bench. Knees bent feet flat, two dumbbells neutral-to-slight-pronated grip, wrists straight, elbows 30-45 degrees from torso. SIDE three-quarter view, whole body and both dumbbells visible. Requested phase: END both arms nearly straight above chest, dumbbells separate shoulder width, wrists neutral, shoulder blades and head on mat."
+        }
+      ]
+    },
+    {
+      "id": "decline_db_press",
+      "directory": "assets-src/exercises/decline-db-press",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "decline-db-press/inicio.png",
+          "prompt": "Generate ONE new photorealistic fitness instruction photo. Vertical 3:4, no collage text arrows logos watermark or letterboxing. Adult male short dark hair trimmed beard, plain black T-shirt, dark grey shorts, black sneakers white soles, dark rubber-floor gym. Well-lit body and equipment fill frame, realistic anatomy and visible contact points. DECLINE DUMBBELL BENCH PRESS. Safe commercial DECLINE bench with head end 15 degrees LOWER than hips and padded ankle/leg restraints at high foot end. Man supine with legs securely under rollers, spine in natural curve, head supported, two dumbbells. Fixed SIDE three-quarter view shows obvious downward slope toward head and secure leg support. Not incline, not floor press. START dumbbells beside lower chest, elbows 90 degrees, forearms vertical, wrists straight, shoulders supported."
+        },
+        {
+          "phase": "medio",
+          "source": "decline-db-press/medio.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. DECLINE DUMBBELL BENCH PRESS. Safe commercial DECLINE bench with head end 15 degrees LOWER than hips and padded ankle/leg restraints at high foot end. Man supine with legs securely under rollers, spine in natural curve, head supported, two dumbbells. Fixed SIDE three-quarter view shows obvious downward slope toward head and secure leg support. Not incline, not floor press. Requested phase: MID dumbbells pushed halfway up vertically above lower chest, both elbows partially extended."
+        },
+        {
+          "phase": "final",
+          "source": "decline-db-press/final.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. DECLINE DUMBBELL BENCH PRESS. Safe commercial DECLINE bench with head end 15 degrees LOWER than hips and padded ankle/leg restraints at high foot end. Man supine with legs securely under rollers, spine in natural curve, head supported, two dumbbells. Fixed SIDE three-quarter view shows obvious downward slope toward head and secure leg support. Not incline, not floor press. Requested phase: END arms nearly straight vertically above lower chest, dumbbells shoulder width apart, back and head on declining pad."
+        }
+      ]
+    },
+    {
+      "id": "incline_reverse_fly",
+      "directory": "assets-src/exercises/incline-reverse-fly",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "incline-reverse-fly/inicio.png",
+          "prompt": "Generate ONE new photorealistic fitness instruction photo. Vertical 3:4, no collage text arrows logos watermark or letterboxing. Adult male short dark hair trimmed beard, plain black T-shirt, dark grey shorts, black sneakers white soles, dark rubber-floor gym. Well-lit body and equipment fill frame, realistic anatomy and visible contact points. CHEST SUPPORTED REVERSE DUMBBELL FLY: man prone with chest/abdomen supported on 35 degree incline bench, feet on floor. Two small dumbbells. Elbows slightly bent and fixed throughout, no rowing. Rear three-quarter camera clearly shows both arms moving sideways and chest support. START both arms hanging down under shoulders holding light dumbbells."
+        },
+        {
+          "phase": "medio",
+          "source": "incline-reverse-fly/medio.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. CHEST SUPPORTED REVERSE DUMBBELL FLY: man prone with chest/abdomen supported on 35 degree incline bench, feet on floor. Two small dumbbells. Elbows slightly bent and fixed throughout, no rowing. Rear three-quarter camera clearly shows both arms moving sideways and chest support. Requested phase: MID arms sweeping outward halfway to sides with gentle constant elbow bend, chest remains on bench."
+        },
+        {
+          "phase": "final",
+          "source": "incline-reverse-fly/final.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. CHEST SUPPORTED REVERSE DUMBBELL FLY: man prone with chest/abdomen supported on 35 degree incline bench, feet on floor. Two small dumbbells. Elbows slightly bent and fixed throughout, no rowing. Rear three-quarter camera clearly shows both arms moving sideways and chest support. Requested phase: END arms spread to sides in a T at shoulder level, elbows only softly bent, no shoulder shrug and chest on bench."
+        }
+      ]
+    },
+    {
+      "id": "incline_db_curl",
+      "directory": "assets-src/exercises/incline-db-curl",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "incline-db-curl/inicio.png",
+          "prompt": "Generate ONE new photorealistic fitness instruction photo. Vertical 3:4, no collage text arrows logos watermark or letterboxing. Adult male short dark hair trimmed beard, plain black T-shirt, dark grey shorts, black sneakers white soles, dark rubber-floor gym. Well-lit body and equipment fill frame, realistic anatomy and visible contact points. INCLINE SEATED DUMBBELL BICEPS CURL. Man seated on 65 degree high incline bench, head/back fully supported, feet on floor. Dumbbell in each hand with palms facing forward. Upper arms hang beside torso and remain stationary. Fixed side three-quarter camera shows back support and arm motion. START both elbows nearly straight, dumbbells hanging beside hips, shoulders relaxed against bench."
+        },
+        {
+          "phase": "medio",
+          "source": "incline-db-curl/medio.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. INCLINE SEATED DUMBBELL BICEPS CURL. Man seated on 65 degree high incline bench, head/back fully supported, feet on floor. Dumbbell in each hand with palms facing forward. Upper arms hang beside torso and remain stationary. Fixed side three-quarter camera shows back support and arm motion. Requested phase: MID flex both elbows to 90 degrees while upper arms stay vertical and torso supported."
+        },
+        {
+          "phase": "final",
+          "source": "incline-db-curl/final.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. INCLINE SEATED DUMBBELL BICEPS CURL. Man seated on 65 degree high incline bench, head/back fully supported, feet on floor. Dumbbell in each hand with palms facing forward. Upper arms hang beside torso and remain stationary. Fixed side three-quarter camera shows back support and arm motion. Requested phase: END elbows flexed to about 120 degrees, dumbbells near front shoulders, upper arms remain beside torso, back supported."
+        }
+      ]
+    },
+    {
+      "id": "supported_db_kickback",
+      "directory": "assets-src/exercises/supported-db-kickback",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "supported-db-kickback/inicio.png",
+          "prompt": "Generate ONE new photorealistic fitness instruction photo. Vertical 3:4, no collage text arrows logos watermark or letterboxing. Adult male short dark hair trimmed beard, plain black T-shirt, dark grey shorts, black sneakers white soles, dark rubber-floor gym. Well-lit body and equipment fill frame, realistic anatomy and visible contact points. SUPPORTED ONE ARM DUMBBELL TRICEPS KICKBACK. Left knee and left hand on flat bench, right foot firmly on floor, right hand holds ONE light dumbbell. Torso straight near horizontal, neck aligned. Right upper arm beside torso parallel to floor and never moves. Fixed SIDE camera shows elbow angle clearly. START right elbow bent 90 degrees, forearm hanging vertically toward floor while upper arm stays horizontal beside ribs."
+        },
+        {
+          "phase": "medio",
+          "source": "supported-db-kickback/medio.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. SUPPORTED ONE ARM DUMBBELL TRICEPS KICKBACK. Left knee and left hand on flat bench, right foot firmly on floor, right hand holds ONE light dumbbell. Torso straight near horizontal, neck aligned. Right upper arm beside torso parallel to floor and never moves. Fixed SIDE camera shows elbow angle clearly. Requested phase: MID right forearm extends halfway backward from elbow, right upper arm stays still horizontal at torso side."
+        },
+        {
+          "phase": "final",
+          "source": "supported-db-kickback/final.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. SUPPORTED ONE ARM DUMBBELL TRICEPS KICKBACK. Left knee and left hand on flat bench, right foot firmly on floor, right hand holds ONE light dumbbell. Torso straight near horizontal, neck aligned. Right upper arm beside torso parallel to floor and never moves. Fixed SIDE camera shows elbow angle clearly. Requested phase: END right elbow nearly straight with dumbbell behind hip at same height as torso, left hand/knee still supported, no torso rotation."
+        }
+      ]
+    },
+    {
+      "id": "bench_crunch",
+      "directory": "assets-src/exercises/bench-crunch",
+      "phases": [
+        {
+          "phase": "inicio",
+          "source": "bench-crunch/inicio.png",
+          "prompt": "Generate ONE new photorealistic fitness instruction photo. Vertical 3:4, no collage text arrows logos watermark or letterboxing. Adult male short dark hair trimmed beard, plain black T-shirt, dark grey shorts, black sneakers white soles, dark rubber-floor gym. Well-lit body and equipment fill frame, realistic anatomy and visible contact points. SHORT RANGE ABDOMINAL CRUNCH on a LOW WHITE abdominal bench with black padded board, padded leg rollers securing bent legs. Bench almost horizontal or only 5 degrees decline, no added weight, no sit-up. Man supine with pelvis and back supported by board, knees flexed and feet gently secured in rollers. Arms crossed lightly over chest. Fixed SIDE camera shows entire body and simple low white bench with leg rollers. START head shoulders pelvis on padded bench, natural low-back curve, arms crossed over chest."
+        },
+        {
+          "phase": "medio",
+          "source": "bench-crunch/medio.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. SHORT RANGE ABDOMINAL CRUNCH on a LOW WHITE abdominal bench with black padded board, padded leg rollers securing bent legs. Bench almost horizontal or only 5 degrees decline, no added weight, no sit-up. Man supine with pelvis and back supported by board, knees flexed and feet gently secured in rollers. Arms crossed lightly over chest. Fixed SIDE camera shows entire body and simple low white bench with leg rollers. Requested phase: MID shoulders curl up only 2 cm as man exhales, pelvis and lower back remain supported, neck neutral."
+        },
+        {
+          "phase": "final",
+          "source": "bench-crunch/final.png",
+          "prompt": "Edit this exercise teaching photograph. Keep the EXACT same adult man, black T-shirt, gray shorts, black/white sneakers, camera, gym, equipment and framing. Only change the pose to the requested distinct phase. Whole body, both hands and the equipment visible with margin, no cropped feet or hands. Photorealistic clear anatomy, no text/arrows/logos/collage. SHORT RANGE ABDOMINAL CRUNCH on a LOW WHITE abdominal bench with black padded board, padded leg rollers securing bent legs. Bench almost horizontal or only 5 degrees decline, no added weight, no sit-up. Man supine with pelvis and back supported by board, knees flexed and feet gently secured in rollers. Arms crossed lightly over chest. Fixed SIDE camera shows entire body and simple low white bench with leg rollers. Requested phase: END shoulder blades rise just 4 cm in a SMALL crunch, torso never sits upright, hips and lumbar area remain supported on bench. No pulling against leg rollers."
+        }
+      ]
+    }
+  ]
+}

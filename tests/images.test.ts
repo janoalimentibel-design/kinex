@@ -3,7 +3,7 @@ import { CATALOG } from '../src/data/exercises';
 import { REAL_IMAGES } from '../src/data/images';
 import { imageLabels } from '../src/components/media';
 
-test('las 138 fichas del catálogo tienen imágenes asignadas', () => {
+test('las 146 fichas del catálogo tienen imágenes asignadas', () => {
   expect(Object.keys(REAL_IMAGES).sort()).toEqual(Object.keys(CATALOG).sort());
 });
 

@@ -10,6 +10,7 @@ export interface ExerciseImages {
   /** Solo las fases que aportan información; permite omitir intermedios redundantes. */
   visiblePhases?: ('Inicio' | 'Medio' | 'Final')[];
   note?: string;
+  instructions?: Partial<Record<'Inicio' | 'Medio' | 'Final' | 'Posición', string>>;
 }
 
 export const REAL_IMAGES: Record<string, ExerciseImages> = {
@@ -291,19 +292,29 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   pallof: {
-    thumb: './assets/exercises/pallof/thumb.webp',
+    instructions: {
+      Inicio: "Manos al pecho y banda anclada a un costado. Tronco de frente.",
+      Medio: "Alejá las manos sin dejar que la banda te haga girar.",
+      Final: "Brazos extendidos frente al pecho. Resistís la rotación; no girás.",
+    },
+    thumb: './assets/exercises/pallof-press-v342/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/pallof/inicio.webp',
-      Medio: './assets/exercises/pallof/medio.webp',
-      Final: './assets/exercises/pallof/final.webp',
+      Inicio: './assets/exercises/pallof-press-v342/inicio.webp',
+      Medio: './assets/exercises/pallof-press-v342/medio.webp',
+      Final: './assets/exercises/pallof-press-v342/final.webp',
     },
   },
   heel_taps: {
-    thumb: './assets/exercises/heel-taps/thumb.webp',
+    instructions: {
+      Inicio: "Ambas piernas a 90°, cabeza y espalda apoyadas.",
+      Medio: "Bajá una pierna doblada; la otra queda quieta arriba.",
+      Final: "Tocá suavemente con el talón, volvé y alterná. Evitá arquear la espalda.",
+    },
+    thumb: './assets/exercises/heel-taps-v342/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/heel-taps/inicio.webp',
-      Medio: './assets/exercises/heel-taps/medio.webp',
-      Final: './assets/exercises/heel-taps/final.webp',
+      Inicio: './assets/exercises/heel-taps-v342/inicio.webp',
+      Medio: './assets/exercises/heel-taps-v342/medio.webp',
+      Final: './assets/exercises/heel-taps-v342/final.webp',
     },
   },
   curl_band: {
@@ -867,11 +878,16 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   external_rot: {
-    thumb: './assets/exercises/external-rotation/thumb.webp',
+    instructions: {
+      Inicio: "Banda anclada al costado. Codo pegado al cuerpo, antebrazo hacia el abdomen.",
+      Medio: "Abrí el antebrazo sin separar el codo ni girar el torso.",
+      Final: "Llegá al recorrido cómodo con el codo quieto; volvé despacio.",
+    },
+    thumb: './assets/exercises/external-rotation-v342/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/external-rotation/inicio.webp',
-      Medio: './assets/exercises/external-rotation/medio.webp',
-      Final: './assets/exercises/external-rotation/final.webp',
+      Inicio: './assets/exercises/external-rotation-v342/inicio.webp',
+      Medio: './assets/exercises/external-rotation-v342/medio.webp',
+      Final: './assets/exercises/external-rotation-v342/final.webp',
     },
   },
   hammer_band: {
@@ -971,11 +987,17 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   mcgill: {
-    thumb: './assets/exercises/mcgill/thumb.webp',
+    visiblePhases: ['Inicio', 'Final'],
+    instructions: {
+      Inicio: "Una rodilla doblada, la otra pierna extendida; manos bajo la curva lumbar.",
+      Medio: "Elevá cabeza y hombros juntos unos centímetros, sin aplastar la zona lumbar.",
+      Final: "Sostené la elevación corta con cuello alineado; no te sientes.",
+    },
+    thumb: './assets/exercises/mcgill-v342/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/mcgill/inicio.webp',
-      Medio: './assets/exercises/mcgill/medio.webp',
-      Final: './assets/exercises/mcgill/final.webp',
+      Inicio: './assets/exercises/mcgill-v342/inicio.webp',
+      Medio: './assets/exercises/mcgill-v342/medio.webp',
+      Final: './assets/exercises/mcgill-v342/final.webp',
     },
   },
   supine_row_band: {
@@ -1052,11 +1074,17 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   scap_pushup: {
-    thumb: './assets/exercises/scap-pushup-v2/thumb.webp',
+    visiblePhases: ['Inicio', 'Final'],
+    instructions: {
+      Inicio: "Plancha con codos estirados; dejá que el pecho baje apenas entre los hombros.",
+      Medio: "Mové solamente las escápulas, manteniendo codos e cadera quietos.",
+      Final: "Empujá el suelo para separar los omóplatos, sin flexionar los codos.",
+    },
+    thumb: './assets/exercises/scap-pushup-v2-v342/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/scap-pushup-v2/inicio.webp',
-      Medio: './assets/exercises/scap-pushup-v2/medio.webp',
-      Final: './assets/exercises/scap-pushup-v2/final.webp',
+      Inicio: './assets/exercises/scap-pushup-v2-v342/inicio.webp',
+      Medio: './assets/exercises/scap-pushup-v2-v342/medio.webp',
+      Final: './assets/exercises/scap-pushup-v2-v342/final.webp',
     },
   },
   ecc_pushup: {
@@ -1076,11 +1104,16 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   suitcase: {
-    thumb: './assets/exercises/suitcase-carry/thumb.webp',
+    instructions: {
+      Inicio: "Una sola mancuerna al costado; hombros a la misma altura.",
+      Medio: "Caminá con pasos cortos sin inclinarte hacia la carga.",
+      Final: "Alterná el paso manteniendo el tronco vertical. Luego cambiá de mano.",
+    },
+    thumb: './assets/exercises/suitcase-carry-v342/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/suitcase-carry/inicio.webp',
-      Medio: './assets/exercises/suitcase-carry/medio.webp',
-      Final: './assets/exercises/suitcase-carry/final.webp',
+      Inicio: './assets/exercises/suitcase-carry-v342/inicio.webp',
+      Medio: './assets/exercises/suitcase-carry-v342/medio.webp',
+      Final: './assets/exercises/suitcase-carry-v342/final.webp',
     },
   },
   short_curl: {
@@ -1129,6 +1162,113 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
       Inicio: './assets/exercises/lat-pulldown-supine/inicio.webp',
       Medio: './assets/exercises/lat-pulldown-supine/medio.webp',
       Final: './assets/exercises/lat-pulldown-supine/final.webp',
+    },
+  },
+  bench_leg_extension: {
+    instructions: {
+      Inicio: "Alineá las rodillas con el eje; rodillo delante de las tibias, encima de los tobillos.",
+      Medio: "Extendé las rodillas levantando el accesorio; pelvis apoyada.",
+      Final: "Llegá cerca de la extensión sin trabar las rodillas; bajá con control.",
+    },
+    thumb: './assets/exercises/bench-leg-extension/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/bench-leg-extension/inicio.webp',
+      Medio: './assets/exercises/bench-leg-extension/medio.webp',
+      Final: './assets/exercises/bench-leg-extension/final.webp',
+    },
+  },
+  chest_supported_db_row: {
+    visiblePhases: ['Inicio', 'Final'],
+    instructions: {
+      Inicio: "Pecho apoyado en banco inclinado, pies firmes y brazos abajo.",
+      Medio: "Llevá los codos hacia las costillas sin despegar el pecho.",
+      Final: "Mancuernas junto a las costillas; bajá sin encoger los hombros.",
+    },
+    thumb: './assets/exercises/chest-supported-db-row/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/chest-supported-db-row/inicio.webp',
+      Medio: './assets/exercises/chest-supported-db-row/medio.webp',
+      Final: './assets/exercises/chest-supported-db-row/final.webp',
+    },
+  },
+  dumbbell_floor_press: {
+    instructions: {
+      Inicio: "En el suelo, brazos a unos 30–45° del torso; antebrazos verticales.",
+      Medio: "Empujá las mancuernas manteniendo cabeza y pelvis apoyadas.",
+      Final: "Extendé los brazos sobre el pecho sin golpear las mancuernas.",
+    },
+    thumb: './assets/exercises/dumbbell-floor-press/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/dumbbell-floor-press/inicio.webp',
+      Medio: './assets/exercises/dumbbell-floor-press/medio.webp',
+      Final: './assets/exercises/dumbbell-floor-press/final.webp',
+    },
+  },
+  decline_db_press: {
+    instructions: {
+      Inicio: "Solo con banco apto para declive y piernas sujetas; pesos junto al pecho.",
+      Medio: "Empujá hacia arriba manteniendo el cuerpo apoyado.",
+      Final: "Brazos casi extendidos sobre el pecho. Bajá con control.",
+    },
+    thumb: './assets/exercises/decline-db-press/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/decline-db-press/inicio.webp',
+      Medio: './assets/exercises/decline-db-press/medio.webp',
+      Final: './assets/exercises/decline-db-press/final.webp',
+    },
+  },
+  incline_reverse_fly: {
+    instructions: {
+      Inicio: "Pecho apoyado en el banco; mancuernas livianas abajo.",
+      Medio: "Abrí los brazos a los lados con una pequeña flexión fija del codo.",
+      Final: "Llegá aproximadamente a la altura de los hombros sin encogerlos.",
+    },
+    thumb: './assets/exercises/incline-reverse-fly/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/incline-reverse-fly/inicio.webp',
+      Medio: './assets/exercises/incline-reverse-fly/medio.webp',
+      Final: './assets/exercises/incline-reverse-fly/final.webp',
+    },
+  },
+  incline_db_curl: {
+    instructions: {
+      Inicio: "Espalda apoyada en banco inclinado, brazos a los costados.",
+      Medio: "Flexioná los codos manteniendo quietos los brazos y el torso.",
+      Final: "Acercá las mancuernas a los hombros; bajá despacio.",
+    },
+    thumb: './assets/exercises/incline-db-curl/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/incline-db-curl/inicio.webp',
+      Medio: './assets/exercises/incline-db-curl/medio.webp',
+      Final: './assets/exercises/incline-db-curl/final.webp',
+    },
+  },
+  supported_db_kickback: {
+    visiblePhases: ['Inicio', 'Final'],
+    instructions: {
+      Inicio: "Mano y rodilla apoyadas; brazo de trabajo junto al torso, codo a 90°.",
+      Medio: "Extendé el antebrazo manteniendo el brazo inmóvil.",
+      Final: "Terminá cerca de la extensión, sin girar ni elevar el hombro.",
+    },
+    thumb: './assets/exercises/supported-db-kickback/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/supported-db-kickback/inicio.webp',
+      Medio: './assets/exercises/supported-db-kickback/medio.webp',
+      Final: './assets/exercises/supported-db-kickback/final.webp',
+    },
+  },
+  bench_crunch: {
+    visiblePhases: ['Inicio', 'Final'],
+    instructions: {
+      Inicio: "Banco casi horizontal, sin peso; piernas flexionadas y apoyo suave en rodillos.",
+      Medio: "Exhalá y elevá apenas los hombros; pelvis apoyada.",
+      Final: "Recorrido corto de pocos centímetros; no hagas un sit-up ni tires con las piernas.",
+    },
+    thumb: './assets/exercises/bench-crunch/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/bench-crunch/inicio.webp',
+      Medio: './assets/exercises/bench-crunch/medio.webp',
+      Final: './assets/exercises/bench-crunch/final.webp',
     },
   },
 };
