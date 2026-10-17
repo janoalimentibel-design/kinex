@@ -139,14 +139,14 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.40</div>
+            <div className="version">v3.41</div>
           </div>
         </div>
       </div>
 
       {storageError && <div className="notice" role="alert">{storageError}</div>}
       <div className={`view ${view === 'today' ? 'show' : ''}`} id="view-today">
-        <Today ctx={ctx} notice={notice} warnings={warnings} dismissNotice={() => setNotice(null)} />
+        <Today ctx={ctx} active={view === 'today'} notice={notice} warnings={warnings} dismissNotice={() => setNotice(null)} />
       </div>
       <div className={`view ${view === 'lib' ? 'show' : ''}`} id="view-lib">
         <Library ctx={ctx} />

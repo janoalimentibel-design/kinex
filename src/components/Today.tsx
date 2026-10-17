@@ -1,3 +1,4 @@
+import CompletionPrompt from './CompletionPrompt';
 // Vista Hoy — port de renderStrip/renderDay/renderGroups/renderExercise de A2.8.
 import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
@@ -37,8 +38,9 @@ function timeLabel(seconds: number): string {
   return seconds % 60 === 0 ? `${seconds / 60} min` : `${seconds}s`;
 }
 
-export default function Today({ ctx, notice, warnings, dismissNotice }: {
+export default function Today({ ctx, notice, warnings, dismissNotice, active }: {
   ctx: Ctx;
+  active: boolean;
   notice: string | null;
   warnings: string[];
   dismissNotice: () => void;
@@ -62,6 +64,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
 
   return (
     <>
+      <CompletionPrompt ctx={ctx} active={active && curDate === today} complete={list.length > 0 && done === list.length} signature={list.map(e => e.id).join(',')} />
       <div className="weekwrap">
         <div className="weekhead">
           <h2>Tu semana</h2>
@@ -159,7 +162,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
           <button className="btn btn-ghost" onClick={() => ctx.setModal({ type: 'revisions' })}>Deshacer / versiones del día</button>
         </div>
 
-        {list.length > 0 && list.every(entry => session.completed[entry.id] === true) && (
+        {list.length > 0 && done === list.length && (
           <div className="suggestion-card" data-testid="training-complete">
             <h3>Entrenamiento completado</h3>
             <p>Enviá la última copia de tu historial, plan y perfil a tu Drive privado para la próxima revisión.</p>
