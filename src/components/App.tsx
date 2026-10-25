@@ -4,6 +4,7 @@ import { CATALOG } from '../data/exercises';
 import { bootstrap, replaceAll, toAppData, type AppData } from '../db/bootstrap';
 import { db } from '../db/instance';
 import { createDataWriter } from '../db/writes';
+import { acknowledgePlanPatch, readPendingPlan, stagePlanPatch, type PendingPlan } from '../db/planJournal';
 import { editExercise } from '../logic/exerciseEdits';
 import type { CustomExercise, Plan, Session, V2Data } from '../db/schema';
 import { buildExerciseList, createSession, isoDate } from '../logic/session';
@@ -31,6 +32,7 @@ export default function App() {
   const [notice, setNotice] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [storageError, setStorageError] = useState<string | null>(null);
+  const [planDraftWarning, setPlanDraftWarning] = useState<{ id: string; message: string } | null>(null);
   const [view, setView] = useState<View>('today');
   const [curDate, setCurDate] = useState(() => isoDate(new Date()));
   const [modal, setModal] = useState<ModalState>(null);
@@ -53,8 +55,14 @@ export default function App() {
   useEffect(() => {
     bootPromise ??= bootstrap(db).then(async (result) => {
       let updated = result.data;
+      let pending: PendingPlan | null = null;
+      try { pending = readPendingPlan(sessionStorage); } catch { /* IndexedDB remains available if tab storage is blocked. */ }
       const initialize = createDataWriter(db, result.data, (next) => { updated = next; });
-      await initialize(current => rebalancePending(applyPublishedRoutine(current, isoDate(new Date())), isoDate(new Date())));
+      await initialize(current => {
+        const reviewed = rebalancePending(applyPublishedRoutine(current, isoDate(new Date())), isoDate(new Date()));
+        return pending ? { ...reviewed, plan: { ...reviewed.plan, ...pending.patch } } : reviewed;
+      });
+      if (pending) try { acknowledgePlanPatch(sessionStorage, pending.id); } catch { /* Keep the recovery record if cleanup fails. */ }
       return { ...result, data: updated };
     });
     void bootPromise.then((result) => {
@@ -107,28 +115,49 @@ export default function App() {
     },
     loadReviewedRoutine: async () => {
       let openDate: string | undefined;
+      let replacedPlan = false;
+      let superseded: PendingPlan | null = null;
+      try { superseded = readPendingPlan(sessionStorage); } catch { /* Tab storage may be unavailable. */ }
       await commit(current => {
         const today = isoDate(new Date());
         const updated = rebalancePending(applyPublishedRoutine(current, today, true), today);
+        replacedPlan = updated.plan !== current.plan;
         const dates = updated.plan.routineRevision === OCT26_ID ? OCT26_DAYS.map(day => day.date) : Object.keys(updated.sessions).sort();
         openDate = dates.find(date => date >= today && updated.sessions[date] && !hasActivity(updated.sessions[date]) &&
           buildExerciseList(updated.sessions[date], { ...CATALOG, ...updated.custom }, updated.sessions).length > 0)
           ?? dates.find(date => date >= today && updated.sessions[date]) ?? dates.filter(date => updated.sessions[date]).at(-1);
         return updated;
       });
+      if (superseded && replacedPlan) try { acknowledgePlanPatch(sessionStorage, superseded.id); } catch { /* Keep recovery data if cleanup fails. */ }
       if (openDate) { setCurDate(openDate); setView('today'); }
     },
     putProfile: (profile) => commit(current => ({ ...current, profile })),
-    putPlan: (plan: Partial<Plan>) => { void commit((current) => ({ ...current, plan: { ...current.plan, ...plan } })).catch(() => {}); },
+    putPlan: (plan: Partial<Plan>) => {
+      let pending: PendingPlan | null = null;
+      let warningId: string | null = null;
+      try { pending = stagePlanPatch(sessionStorage, plan); }
+      catch {
+        warningId = crypto.randomUUID();
+        setPlanDraftWarning({ id: warningId, message: 'El borrador no pudo protegerse antes de guardar. No recargues hasta que termine el guardado.' });
+      }
+      const patch = { ...pending?.patch, ...plan };
+      void commit(current => ({ ...current, plan: { ...current.plan, ...patch } })).then(() => {
+        if (pending) try { acknowledgePlanPatch(sessionStorage, pending.id); } catch { /* A later reload can replay this committed patch. */ }
+        if (warningId) setPlanDraftWarning(current => current?.id === warningId ? null : current);
+      }).catch(() => {});
+    },
     putCustom: (exercise: CustomExercise) => {
       void commit((current) => ({ ...current, custom: { ...current.custom, [exercise.id]: exercise } })).catch(() => {});
     },
     importAll: async (v2: V2Data, source) => {
+      let superseded: PendingPlan | null = null;
+      try { superseded = readPendingPlan(sessionStorage); } catch { /* Tab storage may be unavailable. */ }
       await commit(async () => {
         const hydrated = await replaceAll(db, v2, source === 'v0' ? 'backup-v0' : source === 'v1' ? 'backup-v1' : 'backup-v2');
         const imported = toAppData(hydrated);
         return rebalancePending(applyPublishedRoutine(imported, isoDate(new Date())), isoDate(new Date()));
       });
+      if (superseded) try { acknowledgePlanPatch(sessionStorage, superseded.id); } catch { /* Keep recovery data if cleanup fails. */ }
     },
     startRest: (label, seconds) => setRest({ label, left: seconds, total: seconds, kind: 'rest' }),
     startTimer: (label, seconds) => setRest({ label, left: seconds, total: seconds, kind: 'work' }),
@@ -159,7 +188,7 @@ export default function App() {
         </div>
       </div>
 
-      {storageError && <div className="notice" role="alert">{storageError}</div>}
+      {(storageError || planDraftWarning) && <div className="notice" role="alert">{storageError ?? planDraftWarning?.message}</div>}
       <div className={`view ${view === 'today' ? 'show' : ''}`} id="view-today">
         <Today ctx={ctx} active={view === 'today'} notice={notice} warnings={warnings} dismissNotice={() => setNotice(null)} />
       </div>

@@ -20,6 +20,10 @@ Miércoles, viernes y domingo: recuperación. No se fijan kilos ni se aumentan a
 
 La carga de la semana es atómica, idempotente y conserva historial, sesiones empezadas, selecciones manuales (incluso vacías), programas previos y perfil. Abrir el próximo día salta sesiones explícitamente vacías. El calendario muestra la semana de la fecha abierta y el Plan refleja las selecciones actuales.
 
+## Guardado del plan
+
+La publicación detectó una carrera al editar y recargar antes del commit de IndexedDB. Un journal de parches parciales en sessionStorage conserva el cambio de esta pestaña durante la recarga. Se confirma por identificador después de guardar y se recupera sobre el estado actual; las importaciones y la carga explícita de rutina descartan únicamente el borrador anterior que reemplazaron tras guardar correctamente. No cambia el esquema del backup.
+
 ## Imágenes
 
 Generación mediante imagegen; originales en assets-src y WebP en public/assets. Prompts completos y decisiones de revisión:
@@ -30,6 +34,6 @@ Generación mediante imagegen; originales en assets-src y WebP en public/assets.
 
 ## Validación
 
-98 pruebas unitarias aprobadas; build y check:assets aprobados. Suite Chromium: 120 aprobadas, una omitida de backup privado y una expectativa de catálogo corregida y comprobada en una repetición de las dos pruebas de zoom. 16 pruebas WebKit aprobadas (rutina, edición, catálogo, seguimiento y zoom). Revisión visual del calendario, carga de rutina y cuatro sesiones programadas. La publicación ejecuta nuevamente la suite completa en CI.
+104 pruebas unitarias aprobadas; build y check:assets aprobados. Suite Chromium: 120 aprobadas, una omitida de backup privado y una expectativa de catálogo corregida y comprobada en una repetición de las dos pruebas de zoom. 16 pruebas WebKit aprobadas (rutina, edición, catálogo, seguimiento y zoom). Revisión visual del calendario, carga de rutina y cuatro sesiones programadas. El E2E original de edición y recarga pasó 12 repeticiones tras proteger el borrador del plan. La publicación ejecuta nuevamente la suite completa en CI.
 
 Los datos personales, diagnóstico, historial y archivos de conexión permanecen fuera del repositorio público.
