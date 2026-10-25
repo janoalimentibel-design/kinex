@@ -3,6 +3,8 @@ import { CATALOG } from '../src/data/exercises';
 import { RETIRED_EXERCISES, UNCONFIRMED_EQUIPMENT, MANUAL_ONLY_EXERCISES } from '../src/data/gym';
 import { buildExerciseList, createSession } from '../src/logic/session';
 import type { GroupId } from '../src/db/schema';
+import { createDefaultPlan } from '../src/db/schema';
+import { parseBackup, serializeBackup } from '../src/db/backup';
 
 test('las nuevas sugerencias respetan el equipo confirmado y las exclusiones en todos los modos', () => {
   const excluded = new Set([...RETIRED_EXERCISES, ...UNCONFIRMED_EQUIPMENT, ...MANUAL_ONLY_EXERCISES]);
@@ -23,4 +25,17 @@ test('las exclusiones no borran elecciones explícitas ni registros anteriores',
   expect(buildExerciseList(past, CATALOG, {}, new Date('2026-10-17T12:00:00')).map(e => e.id)).toEqual(['knee_pushup', 'bracing_90']);
   const programmed = { ...createSession('2026-11-01'), groups: ['core'] as GroupId[], programmed: ['bench_crunch'] };
   expect(buildExerciseList(programmed, CATALOG, {}).map(e => e.id)).toEqual(['bench_crunch']);
+});
+
+test('la extensión retirada sigue legible en elecciones, actividad y backups anteriores', () => {
+  const selected = { ...createSession('2026-10-12'), selectedExercises: ['leg_ext'] };
+  const recorded = { ...createSession('2026-10-13'), completed: { leg_ext: true }, saved: true };
+  const programmed = { ...createSession('2026-10-14'), groups: ['pierna'] as GroupId[], programmed: ['leg_ext'] };
+  const sessions = [selected, recorded, programmed];
+  const restored = parseBackup(serializeBackup({ sessions, customExercises: [], plan: createDefaultPlan() })).data;
+  expect(restored.sessions).toEqual(sessions);
+  for (const session of restored.sessions) {
+    expect(buildExerciseList(session, CATALOG, {}, new Date('2026-10-25T12:00:00')).map(e => e.id)).toEqual(['leg_ext']);
+  }
+  expect(CATALOG.leg_ext.name).toBe('Extensión de cuádriceps en máquina');
 });

@@ -10,8 +10,8 @@ import { colorOf, hasImage, isHoldImage, imageLabels, PhaseBlock } from './media
 import { IconCaret, IconCheck } from './icons';
 import type { Ctx } from './types';
 
-function weekDays(): Date[] {
-  const t = new Date();
+function weekDays(date: string): Date[] {
+  const t = new Date(`${date}T12:00:00`);
   const wd = (t.getDay() + 6) % 7;
   const mon = new Date(t);
   mon.setDate(t.getDate() - wd);
@@ -56,7 +56,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
   const pct = list.length ? Math.round((done / list.length) * 100) : 0;
   const d = new Date(`${curDate}T12:00:00`);
   const today = isoDate(new Date());
-  const days = weekDays();
+  const days = weekDays(curDate);
   const format = FORMATS[session.format];
 
   const toggleDone = (id: string) => ctx.editExercise({ type: 'toggle', id });

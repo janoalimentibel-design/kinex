@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import { CATALOG } from '../data/exercises';
 import { bootstrap, replaceAll, toAppData, type AppData } from '../db/bootstrap';
 import { db } from '../db/instance';
-import { createDataWriter, persistChanges } from '../db/writes';
+import { createDataWriter } from '../db/writes';
 import { editExercise } from '../logic/exerciseEdits';
 import type { CustomExercise, Plan, Session, V2Data } from '../db/schema';
-import { createSession, isoDate } from '../logic/session';
+import { buildExerciseList, createSession, isoDate } from '../logic/session';
 import { hasActivity } from '../logic/activity';
 import { applyPublishedRoutine } from '../logic/publishedRoutine';
+import { OCT26_DAYS, OCT26_ID } from '../logic/routineOct26';
 import { rebalancePending } from '../logic/rebalance';
 import { editSession } from '../logic/editSession';
 import History from './History';
@@ -51,8 +52,9 @@ export default function App() {
 
   useEffect(() => {
     bootPromise ??= bootstrap(db).then(async (result) => {
-      const updated = rebalancePending(applyPublishedRoutine(result.data, isoDate(new Date())), isoDate(new Date()));
-      if (updated !== result.data) await persistChanges(db, result.data, updated);
+      let updated = result.data;
+      const initialize = createDataWriter(db, result.data, (next) => { updated = next; });
+      await initialize(current => rebalancePending(applyPublishedRoutine(current, isoDate(new Date())), isoDate(new Date())));
       return { ...result, data: updated };
     });
     void bootPromise.then((result) => {
@@ -103,6 +105,19 @@ export default function App() {
         return rebalancePending({ ...current, sessions: { ...current.sessions, ...Object.fromEntries(writable.map((s) => [s.date, s])) } }, isoDate(new Date()));
       }).catch(() => {});
     },
+    loadReviewedRoutine: async () => {
+      let openDate: string | undefined;
+      await commit(current => {
+        const today = isoDate(new Date());
+        const updated = rebalancePending(applyPublishedRoutine(current, today, true), today);
+        const dates = updated.plan.routineRevision === OCT26_ID ? OCT26_DAYS.map(day => day.date) : Object.keys(updated.sessions).sort();
+        openDate = dates.find(date => date >= today && updated.sessions[date] && !hasActivity(updated.sessions[date]) &&
+          buildExerciseList(updated.sessions[date], { ...CATALOG, ...updated.custom }, updated.sessions).length > 0)
+          ?? dates.find(date => date >= today && updated.sessions[date]) ?? dates.filter(date => updated.sessions[date]).at(-1);
+        return updated;
+      });
+      if (openDate) { setCurDate(openDate); setView('today'); }
+    },
     putProfile: (profile) => commit(current => ({ ...current, profile })),
     putPlan: (plan: Partial<Plan>) => { void commit((current) => ({ ...current, plan: { ...current.plan, ...plan } })).catch(() => {}); },
     putCustom: (exercise: CustomExercise) => {
@@ -139,7 +154,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.42</div>
+            <div className="version">v3.43</div>
           </div>
         </div>
       </div>

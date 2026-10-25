@@ -14,6 +14,61 @@ export interface ExerciseImages {
 }
 
 export const REAL_IMAGES: Record<string, ExerciseImages> = {
+  decline_bench_crunch: {
+    thumb: './assets/exercises/decline-bench-crunch-v343/thumb.webp',
+    visiblePhases: ['Inicio', 'Final'],
+    phases: {
+      Inicio: './assets/exercises/decline-bench-crunch-v343/inicio.webp',
+      Medio: './assets/exercises/decline-bench-crunch-v343/medio.webp',
+      Final: './assets/exercises/decline-bench-crunch-v343/final.webp',
+    },
+    instructions: {
+      Inicio: 'Cabeza en el extremo bajo del banco inclinado, brazos cruzados y pelvis apoyada.',
+      Medio: 'Exhalá y subí poco los hombros sin tirar con las piernas.',
+      Final: 'Flexión corta, sin sentarte. Regresá despacio con el cuello alineado.',
+    },
+    note: 'Banco inclinado con rodillos: cabeza más baja que caderas. Recorrido corto y sin peso; no es una incorporación completa.',
+  },
+  decline_bench_reach: {
+    thumb: './assets/exercises/decline-bench-reach-v343/thumb.webp',
+    visiblePhases: ['Inicio', 'Final'],
+    phases: {
+      Inicio: './assets/exercises/decline-bench-reach-v343/inicio.webp',
+      Medio: './assets/exercises/decline-bench-reach-v343/medio.webp',
+      Final: './assets/exercises/decline-bench-reach-v343/final.webp',
+    },
+    instructions: {
+      Inicio: 'En el banco inclinado, brazos al frente y piernas sujetas suavemente.',
+      Medio: 'Acercá poco los hombros hacia las rodillas al exhalar; la pelvis no se mueve.',
+      Final: 'Alcanzá al frente sin llegar a sentarte ni tirar del cuello.',
+    },
+    note: 'Variante de posición de brazos en el mismo banco. No requiere tocar las rodillas ni aumentar el recorrido.',
+  },
+  decline_bench_hold: {
+    thumb: './assets/exercises/decline-bench-crunch-v343/final.webp',
+    display: 'hold',
+    phases: {
+      Inicio: './assets/exercises/decline-bench-crunch-v343/final.webp',
+      Medio: './assets/exercises/decline-bench-crunch-v343/final.webp',
+      Final: './assets/exercises/decline-bench-crunch-v343/final.webp',
+    },
+    instructions: { Posición: 'Sostené la elevación corta con pelvis apoyada y respiración continua. No sigas subiendo.' },
+    note: 'Una sola postura: el ejercicio consiste en sostener, no en repetir tres fases.',
+  },
+  standing_calf_raise: {
+    thumb: './assets/exercises/standing-calf-raise-v343/thumb.webp',
+    visiblePhases: ['Inicio', 'Final'],
+    phases: {
+      Inicio: './assets/exercises/standing-calf-raise-v343/inicio.webp',
+      Medio: './assets/exercises/standing-calf-raise-v343/medio.webp',
+      Final: './assets/exercises/standing-calf-raise-v343/final.webp',
+    },
+    instructions: {
+      Inicio: 'Pies paralelos en el suelo y una mano en un apoyo firme. Podés empezar sin mancuerna.',
+      Medio: 'Levantá ambos talones sin doblar las rodillas ni saltar.',
+      Final: 'Pausá sobre el antepié y bajá despacio hasta apoyar los talones.',
+    },
+  },
   tibialis: {
     thumb: './assets/exercises/tibialis-v3/thumb.webp',
     phases: {

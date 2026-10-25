@@ -1,21 +1,34 @@
 import { GYM_EQUIPMENT } from '../data/gym';
+import { useState } from 'react';
 // Vista Plan — port de renderPlan/copyWeeklySummary de A2.8.
 import Tracking from './Tracking';
 import { FORMATS, GROUPS } from '../data/exercises';
 import type { Plan, Session } from '../db/schema';
 import { buildExerciseList, createSession, nextSessionSuggestion, weeklyCoveragePairs } from '../logic/session';
 import { activityGroups, completedIds, hasActivity } from '../logic/activity';
-import { applyPublishedRoutine, ROUTINE_END, ROUTINE_ID, ROUTINE_START } from '../logic/publishedRoutine';
+import { ROUTINE_END, ROUTINE_ID, ROUTINE_START } from '../logic/publishedRoutine';
+import { OCT26_AVAILABLE, OCT26_DAYS, OCT26_END, OCT26_ID } from '../logic/routineOct26';
 import { isoDate } from '../logic/session';
 import type { Ctx } from './types';
 
 export default function PlanView({ ctx }: { ctx: Ctx }) {
   const { data } = ctx;
   const plan = data.plan;
+  const [loadingRoutine, setLoadingRoutine] = useState(false);
+  const [routineError, setRoutineError] = useState<string | null>(null);
+  const loadReviewed = async () => {
+    setLoadingRoutine(true);
+    setRoutineError(null);
+    try { await ctx.loadReviewedRoutine(); }
+    catch { setRoutineError('No se pudo guardar la rutina. Tus datos anteriores se conservan. Volvé a intentarlo.'); }
+    finally { setLoadingRoutine(false); }
+  };
   const sessions = Object.values(data.sessions).filter(hasActivity);
   const suggestion = nextSessionSuggestion(ctx.curDate, data.sessions, plan);
   const scheduledSessions = Object.values(data.sessions)
-    .filter((session) => session.programTitle?.startsWith('Próxima semana') || session.programTitle?.startsWith('Semana revisada'))
+    .filter((session) => plan.routineRevision === OCT26_ID && plan.week === '26 oct – 1 nov'
+      ? OCT26_DAYS.some(day => day.date === session.date)
+      : session.programTitle?.startsWith('Próxima semana') || session.programTitle?.startsWith('Semana revisada'))
     .sort((a, b) => a.date.localeCompare(b.date));
 
   const set = (patch: Partial<Plan>) => ctx.putPlan(patch);
@@ -124,6 +137,20 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
         </div>
         <button className="mini" onClick={() => ctx.setView('requests')}>✎ Pedidos</button>
       </div>
+      {isoDate(new Date()) >= OCT26_AVAILABLE && isoDate(new Date()) <= OCT26_END && (
+        <div className="suggestion-card" data-testid="reviewed-routine-oct26">
+          <div className="t">Rutina revisada · 26 oct – 1 nov</div>
+          <h3>Cuatro días: lunes, martes, jueves y sábado</h3>
+          <p>Miércoles, viernes y domingo quedan para recuperación. Los grupos de fuerza se reparten con descanso entre repeticiones.</p>
+          <p>Se conservan el historial y los días que ya empezaste, editaste o programaste.</p>
+          <p>Usá cargas controladas, dejando 2–3 repeticiones en reserva. No aumentamos el peso automáticamente ni fijamos kilos sin registros de carga. Parar si aparece molestia lumbar o irradiada.</p>
+          <p>El abdominal en banco inclinado queda condicionado a tu tolerancia e indicaciones: sin peso y con recorrido recortado. Si molesta o no está indicado, omitilo; Bird Dog ya está incluido. Bici o remo son complementos opcionales.</p>
+          <button className="btn btn-primary" disabled={loadingRoutine} onClick={() => void loadReviewed()}>
+            {loadingRoutine ? 'Guardando rutina…' : plan.routineRevision === OCT26_ID ? 'Abrir próximo día de la rutina' : 'Cargar semana del 26 de octubre'}
+          </button>
+          {routineError && <p role="alert">{routineError}</p>}
+        </div>
+      )}
       {isoDate(new Date()) >= ROUTINE_START && isoDate(new Date()) <= ROUTINE_END && (
         <div className="suggestion-card" data-testid="reviewed-routine">
           <div className="t">Rutina revisada · 28 sep – 4 oct</div>
@@ -132,12 +159,8 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
           <p>La rutina se carga sin reemplazar tu historial ni los días que ya empezaste. Cada tilde cuenta como actividad, sin guardar otro formulario.</p>
           {plan.routineRevision === ROUTINE_ID
             ? <b>Rutina cargada. Abrí los días de abajo o la pestaña Hoy.</b>
-            : <button className="btn btn-primary" onClick={() => {
-              const updated = applyPublishedRoutine(data, isoDate(new Date()), true);
-              ctx.putSessions(Object.values(updated.sessions).filter((s) => s !== data.sessions[s.date]));
-              ctx.putPlan(updated.plan);
-              ctx.setCurDate(isoDate(new Date())); ctx.setView('today');
-            }}>Cargar rutina revisada</button>}
+            : <button className="btn btn-primary" disabled={loadingRoutine} onClick={() => void loadReviewed()}>{loadingRoutine ? 'Guardando rutina…' : 'Cargar rutina revisada'}</button>}
+          {routineError && <p role="alert">{routineError}</p>}
           <p>Complemento opcional: bici o remo ergómetro. No reemplaza la sesión de fuerza ni cuenta como espalda realizada.</p>
           <button className="btn btn-soft" onClick={() => ctx.setModal({ type: 'libInfo', id: 'rowing_erg' })}>Ver remo ergómetro</button>
           <p>El ajuste automático semanal y la sincronización privada todavía están pendientes. Esta es la revisión concreta de esta semana.</p>
@@ -183,12 +206,12 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
         </div>
         {scheduledSessions.length > 0 && (
           <div className="festival-routine">
-            <div className="t">{plan.routineRevision === ROUTINE_ID ? 'Sesiones programadas' : 'Próxima semana cargada'}</div>
+            <div className="t">{plan.routineRevision === ROUTINE_ID || plan.routineRevision === OCT26_ID ? 'Sesiones programadas' : 'Próxima semana cargada'}</div>
             <p>Abrí cada día para ver los ejercicios. Los días realizados se conservan, aunque difieran de la propuesta nueva.</p>
             {scheduledSessions.map((session) => (
               <button key={session.date} className="routine-session" onClick={() => { ctx.setCurDate(session.date); ctx.setView('today'); }}>
-                <span><b>{session.date}</b><small>{session.programTitle}</small></span>
-                <span>{session.programmed?.map((id) => ctx.allEx[id]?.name ?? id).join(' · ')}</span>
+                <span><b>{session.date}</b><small>{session.programTitle ?? session.groups.map(group => GROUPS[group].label).join(' + ')}</small></span>
+                <span>{buildExerciseList(session, ctx.allEx, data.sessions).map(entry => ctx.allEx[entry.id]?.name ?? entry.id).join(' · ') || 'Sin ejercicios elegidos para este día.'}</span>
                 <i>Abrir ›</i>
               </button>
             ))}

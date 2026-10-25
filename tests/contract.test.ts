@@ -25,10 +25,10 @@ test('formatos y grupos mantienen el contrato de A2.6', () => {
 
 test('el catálogo incluye la base original y los ejercicios de fuerza solicitados', () => {
   const all = Object.values(CATALOG);
-  expect(all).toHaveLength(146);
+  expect(all).toHaveLength(150);
   const byGroup: Record<string, number> = {};
   for (const e of all) byGroup[e.group] = (byGroup[e.group] ?? 0) + 1;
-  expect(byGroup).toEqual({ pierna: 34, espalda: 20, pecho: 17, hombro: 14, bicep: 16, tricep: 17, core: 21, aerobico: 7 });
+  expect(byGroup).toEqual({ pierna: 35, espalda: 20, pecho: 17, hombro: 14, bicep: 16, tricep: 17, core: 24, aerobico: 7 });
   for (const id of ['back_squat', 'romanian_deadlift', 'bench_press', 'dumbbell_curl', 'ab_wheel', 'rowing_erg', 'reverse_crunch', 'russian_twist', 'bicycle_crunch']) {
     expect(CATALOG[id], `falta ${id}`).toBeDefined();
   }

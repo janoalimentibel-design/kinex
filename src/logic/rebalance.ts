@@ -11,6 +11,9 @@ export function rebalancePending(data: AppData, today: string, keepDate?: string
   for (const date of Object.keys(sessions).sort()) {
     const session = sessions[date];
     if (date < today || date === keepDate || hasActivity(session) || session.manuallyEdited || session.selectedExercises !== undefined || session.groups.includes('aerobico')) continue;
+    // Explicit programs from imports or other planners are not adaptive drafts.
+    if (session.programmed?.length && session.planner?.source !== 'adaptive' &&
+      !session.programTitle?.startsWith('Semana revisada') && !session.programTitle?.startsWith('Próxima semana')) continue;
     const blocked = adjacentGroups(date, sessions, all);
     if (!session.groups.some((group) => blocked.has(group))) continue;
     const groups = suggestedGroups(date, sessions, data.plan, all);

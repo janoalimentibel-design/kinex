@@ -25,7 +25,6 @@ const GALLERIES: [string, string, number?, string?][] = [
   ['Bird Dog', 'bird-dog'],
   ['Wall Sit', 'wall-sit'],
   ['Balance a una pierna', 'balance-una-pierna'],
-  ['Extensión de cuádriceps en máquina', 'extension-cuadriceps'],
   ['Gemelos en máquina', 'gemelos-maquina'],
   ['Active Hang', 'active-hang', 1],
   ['Band Lat Pulldown', 'band-lat-pulldown'],
@@ -89,9 +88,12 @@ const GALLERIES: [string, string, number?, string?][] = [
   ["Apertura inversa con pecho apoyado", "incline-reverse-fly"],
   ["Curl de bíceps sentado en banco inclinado", "incline-db-curl"],
   ["Patada de tríceps con mancuerna y apoyo", "supported-db-kickback", 2],
-  ["Abdominal corto en banco con rodillos", "bench-crunch", 2],
   ['Pallof Press', 'pallof-press-v342'],
   ['Heel Taps', 'heel-taps-v342'],
+  ["Crunch en banco abdominal inclinado", "decline-bench-crunch-v343", 2],
+  ["Crunch en banco inclinado con brazos al frente", "decline-bench-reach-v343", 2],
+  ["Sostén abdominal en banco inclinado", "decline-bench-hold-v343", 1],
+  ["Elevación de talones de pie con apoyo", "standing-calf-raise-v343", 2],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;

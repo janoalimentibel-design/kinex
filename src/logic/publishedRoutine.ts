@@ -3,6 +3,7 @@ import type { AppData } from '../db/bootstrap';
 import type { GroupId, Session } from '../db/schema';
 import { hasActivity } from './activity';
 import { createSession } from './session';
+import { applyOct26Routine } from './routineOct26';
 
 // Only the requested routine is distributed. Personal backups and activity
 // records must never be bundled with the public application.
@@ -22,6 +23,8 @@ export const WEEK_ROUTINE: { date: string; groups: GroupId[]; ids: string[] }[] 
 
 /** One-time, additive delivery. Never import/replace the user's database. */
 export function applyPublishedRoutine(data: AppData, today: string, force = false): AppData {
+  const october = applyOct26Routine(data, today, force);
+  if (october !== data) return october;
   if (today < ROUTINE_START || today > ROUTINE_END || data.plan.routineRevision === ROUTINE_ID) return data;
   const hasRecentHistory = Object.values(data.sessions).some((s) =>
     s.date >= '2026-09-21' && s.date < ROUTINE_START && hasActivity(s));

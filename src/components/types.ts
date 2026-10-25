@@ -32,6 +32,7 @@ export interface Ctx {
   editExercise(edit: ExerciseEdit): void;
   restoreSession(session: Session, customExercises?: CustomExercise[]): Promise<void>;
   putSessions(sessions: Session[]): void;
+  loadReviewedRoutine(): Promise<void>;
   putProfile(profile: TrainingProfile): Promise<void>;
   putPlan(plan: Partial<Plan>): void;
   putCustom(exercise: CustomExercise): void;
