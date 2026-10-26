@@ -14,7 +14,7 @@ export function completedIds(session: Session): string[] {
 }
 
 export function hasActivity(session: Session): boolean {
-  return session.saved || completedIds(session).length > 0;
+  return session.saved || completedIds(session).length > 0 || Boolean(session.aerobicActivities?.length) || session.trainingCalories !== undefined;
 }
 
 export function activityGroups(session: Session, all: Record<string, CatalogExercise> = CATALOG): GroupId[] {
@@ -22,7 +22,7 @@ export function activityGroups(session: Session, all: Record<string, CatalogExer
   const groups = ids.map((id) => all[id]?.group ?? session.exerciseLog?.find((item) => item.id === id)?.group)
     .filter((group): group is GroupId => Boolean(group));
   // Older explicitly saved sessions can have no exercise-level record.
-  return [...new Set(groups.length ? groups : session.saved && !ids.length ? session.groups : [])];
+  return [...new Set([...(groups.length ? groups : session.saved && !ids.length ? session.groups : []), ...(session.aerobicActivities?.length ? ['aerobico' as const] : [])])];
 }
 
 export function activityLog(session: Session, all: Record<string, CatalogExercise>) {

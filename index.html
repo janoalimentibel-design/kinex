@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a0c10">
+<script>
+(function () {
+  var preference = 'auto';
+  try { preference = localStorage.getItem('kinex-appearance') || 'auto'; } catch (_) {}
+  var theme = preference === 'light' || preference === 'dark' ? preference : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.colorScheme = theme;
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', theme === 'dark' ? '#0a0c10' : '#f5f5ed');
+})();
+</script>
 <meta name="description" content="KINEX — fuerza, control y movimiento. App personal de entrenamiento.">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <title>KINEX</title>

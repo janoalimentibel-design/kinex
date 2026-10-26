@@ -9,6 +9,8 @@ import { editExercise } from '../logic/exerciseEdits';
 import type { CustomExercise, Plan, Session, V2Data } from '../db/schema';
 import { buildExerciseList, createSession, isoDate } from '../logic/session';
 import { hasActivity } from '../logic/activity';
+import { activitySignature } from '../logic/aerobic';
+import { zSession } from '../db/schema';
 import { applyPublishedRoutine } from '../logic/publishedRoutine';
 import { OCT26_DAYS, OCT26_ID } from '../logic/routineOct26';
 import { rebalancePending } from '../logic/rebalance';
@@ -20,6 +22,7 @@ import Requests from './Requests';
 import RestTimer, { type RestState } from './RestTimer';
 import { Sheet } from './sheets';
 import Today from './Today';
+import AppearanceToggle from './AppearanceToggle';
 import type { Ctx, ModalState, View } from './types';
 
 // Cache del arranque: StrictMode monta dos veces en dev y la migración debe correr una sola vez.
@@ -105,6 +108,15 @@ export default function App() {
     setModal,
     patchSession: (patch) => updateDay((previous) => editSession(previous, typeof patch === 'function' ? patch(previous) : patch)),
     editExercise: (edit) => updateDay((previous, current) => editExercise(previous, edit, { ...CATALOG, ...current.custom }, current.sessions)),
+    saveActivityData: (date, patch, expectedSignature) => {
+      const captured = structuredClone(patch);
+      return commit(current => {
+        const previous = current.sessions[date] ?? createSession(date, current.sessions, current.plan);
+        if (activitySignature(previous) !== expectedSignature) throw new Error('La actividad de este día cambió. Conservamos tu borrador; revisá los datos guardados antes de reemplazarlos.');
+        const next = zSession.parse({ ...previous, ...captured, manuallyEdited: true });
+        return rebalancePending({ ...current, sessions: { ...current.sessions, [date]: next } }, isoDate(new Date()), date);
+      });
+    },
     restoreSession: (restored, custom = []) => commit((current) => ({ ...current, custom: { ...Object.fromEntries(custom.map(e => [e.id, e])), ...current.custom }, sessions: { ...current.sessions, [restored.date]: { ...restored, manuallyEdited: true } } })),
     putSessions: (sessions: Session[]) => {
       void commit((current) => {
@@ -180,10 +192,11 @@ export default function App() {
             <div className="logo">KI<span>NEX</span></div>
             <div className="tag">Fuerza · control · movimiento</div>
           </div>
+          <AppearanceToggle />
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.44</div>
+            <div className="version">v3.46</div>
           </div>
         </div>
       </div>

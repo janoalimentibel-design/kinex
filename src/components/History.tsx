@@ -1,6 +1,6 @@
 // Vista Historial — port de renderHist + export/import de A2.8.
 // La importación ahora pasa por parseBackup (v0 y v1) con vista previa antes de reemplazar.
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES } from '../data/exercises';
 import { parseBackup, serializeBackup, BackupError } from '../db/backup';
 import { toExportData } from '../db/bootstrap';
@@ -8,6 +8,8 @@ import { buildExerciseList, isoDate } from '../logic/session';
 import { metricSeries, sessionsPerWeek, weeklyStreak } from '../logic/stats';
 import { activityGroups, activityLog, hasActivity } from '../logic/activity';
 import Calendar from './Calendar';
+import { activityTotals } from '../logic/aerobic';
+import { listActivityDrafts } from './ActivityLog';
 import { MetricLines, WeekBars } from './charts';
 import { colorOf } from './media';
 import type { Ctx } from './types';
@@ -15,6 +17,13 @@ import type { Ctx } from './types';
 export default function History({ ctx }: { ctx: Ctx }) {
   const { data, allEx } = ctx;
   const fileRef = useRef<HTMLInputElement>(null);
+  const [activityDrafts, setActivityDrafts] = useState(listActivityDrafts);
+  useEffect(() => {
+    const refresh = () => { setActivityDrafts(listActivityDrafts()); };
+    window.addEventListener('storage', refresh);
+    window.addEventListener('kinex-activity-draft', refresh);
+    return () => { window.removeEventListener('storage', refresh); window.removeEventListener('kinex-activity-draft', refresh); };
+  }, []);
 
   const saved = Object.values(data.sessions)
     .filter(hasActivity)
@@ -76,6 +85,7 @@ export default function History({ ctx }: { ctx: Ctx }) {
       )}
 
       <Calendar ctx={ctx} />
+      {activityDrafts.length > 0 && <div className="activity-draft-summary"><b>Borradores de actividad sin guardar</b><p>No están incluidos en el backup ni en los datos enviados.</p>{activityDrafts.map(date => <button className="btn btn-soft" key={date} onClick={() => { ctx.setCurDate(date); ctx.setView('today'); }}>{date} · Actividad y calorías</button>)}</div>}
 
       {Object.values(data.sessions).some(s => s.date <= todayIso && !hasActivity(s)) && <details className="wkvol">
         <summary>Días guardados sin actividad marcada</summary>
@@ -106,7 +116,8 @@ export default function History({ ctx }: { ctx: Ctx }) {
       <div>
         {saved.length ? saved.map((s) => {
           const date = new Date(`${s.date}T12:00:00`);
-          const exs = (s.exerciseLog || Object.values(s.completed).some(Boolean)) ? activityLog(s, allEx) : buildExerciseList(s, allEx, data.sessions).map((entry) => ({
+          const totals = activityTotals(s);
+          const exs = (s.exerciseLog || Object.values(s.completed).some(Boolean)) ? activityLog(s, allEx) : (s.saved ? buildExerciseList(s, allEx, data.sessions) : []).map((entry) => ({
             id: entry.id,
             name: allEx[entry.id]?.name ?? entry.id,
             group: entry.group,
@@ -126,6 +137,9 @@ export default function History({ ctx }: { ctx: Ctx }) {
                 <div className="hrow">
                   Lumbar {s.metrics?.lumbarBefore ?? '-'}→{s.metrics?.lumbarAfter ?? '-'} · Rodilla {s.metrics?.knee ?? '-'} · Energía {s.metrics?.energy ?? '-'}
                 </div>
+                {(s.aerobicActivities ?? []).map(item => <div className="hrow" key={item.id}><b>{item.type}</b> · {item.minutes} min · {item.calories === undefined ? 'kcal sin registrar' : `${item.calories} kcal`} · {item.distanceKm === undefined ? 'km sin registrar' : `${item.distanceKm} km`}</div>)}
+                {s.trainingCalories !== undefined && <div className="hrow">Entrenamiento: {s.trainingCalories} kcal{s.trainingCaloriesIncludeAerobic ? ' · incluye aeróbico' : ''}</div>}
+                {(Boolean(s.aerobicActivities?.length) || s.trainingCalories !== undefined) && <div className="hrow">Total registrado: {totals.totalCalories === null ? 'kcal sin registrar' : `${totals.totalCalories} kcal`}</div>}
                 {s.metrics?.notes && <div className="hrow">“{s.metrics.notes}”</div>}
                 <button className="mini" onClick={() => { ctx.setCurDate(s.date); ctx.setView('today'); }}>Abrir / editar día</button>
                 <details className="history-exercises">

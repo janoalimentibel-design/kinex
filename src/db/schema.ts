@@ -59,12 +59,23 @@ export const zExerciseLogEntry = z.object({
   completed: z.boolean(),
 });
 
+export const zAerobicActivity = z.object({
+  id: z.string().min(1),
+  type: z.string().trim().min(1).max(100),
+  minutes: z.number().finite().positive(),
+  calories: z.number().finite().min(0).optional(),
+  distanceKm: z.number().finite().min(0).optional(),
+});
+export type AerobicActivity = z.infer<typeof zAerobicActivity>;
+
 export const zSession = zSessionV1.extend({
+  aerobicActivities: z.array(zAerobicActivity).refine(items => new Set(items.map(item => item.id)).size === items.length, 'Actividad duplicada').optional(),
+  trainingCalories: z.number().finite().min(0).optional(),
+  trainingCaloriesIncludeAerobic: z.boolean().optional(),
   // Las sesiones nuevas pueden ser de un único grupo para registrar cardio solo.
   // Las importaciones v1 se siguen validando con la tupla histórica de dos grupos.
   groups: z.array(zGroupId).min(1).max(2),
-  // Campos de v2 aceptados solo para que los backups históricos sigan importando.
-  // La interfaz actual ya no los crea ni los utiliza.
+  // El check-in anterior sigue admitido en backups; setLogs registra ejecución real.
   checkin: zCheckin.nullable().optional(),
   setLogs: z.record(z.string(), z.array(zSetEntry)).optional(),
   exerciseLog: z.array(zExerciseLogEntry).optional(),

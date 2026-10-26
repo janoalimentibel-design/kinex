@@ -30,6 +30,7 @@ export interface Ctx {
   setModal(modal: ModalState): void;
   patchSession(patch: Partial<Session> | ((session: Session) => Partial<Session>)): void;
   editExercise(edit: ExerciseEdit): void;
+  saveActivityData(date: string, patch: import('../logic/aerobic').ActivityData, expectedSignature: string): Promise<void>;
   restoreSession(session: Session, customExercises?: CustomExercise[]): Promise<void>;
   putSessions(sessions: Session[]): void;
   loadReviewedRoutine(): Promise<void>;

@@ -1,5 +1,6 @@
 import { RETIRED_EXERCISES } from '../data/gym';
 import CompletionPrompt from './CompletionPrompt';
+import ActivityLog from './ActivityLog';
 // Vista Hoy — port de renderStrip/renderDay/renderGroups/renderExercise de A2.8.
 import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
@@ -58,6 +59,11 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
   const today = isoDate(new Date());
   const days = weekDays(curDate);
   const format = FORMATS[session.format];
+  const moveWeek = (offset: number) => {
+    const next = new Date(`${curDate}T12:00:00`);
+    next.setDate(next.getDate() + offset * 7);
+    ctx.setCurDate(isoDate(next));
+  };
 
   const toggleDone = (id: string) => ctx.editExercise({ type: 'toggle', id });
   const groupsInOrder = [...new Set([...session.groups, ...list.map((entry) => entry.group)])];
@@ -70,6 +76,12 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
         <div className="weekhead">
           <h2>Tu semana</h2>
           <span className="wk">{`${days[0].getDate()} ${MES[days[0].getMonth()]} – ${days[6].getDate()} ${MES[days[6].getMonth()]}`}</span>
+        </div>
+        <div className="week-navigation">
+          <button className="btn btn-soft" aria-label="Semana anterior" onClick={() => moveWeek(-1)}>‹</button>
+          <button className="btn btn-soft" onClick={() => ctx.setCurDate(today)}>Hoy</button>
+          <label>Buscar día <input type="date" aria-label="Buscar día" value={curDate} onChange={e => { if (e.target.value) ctx.setCurDate(e.target.value); }} /></label>
+          <button className="btn btn-soft" aria-label="Semana siguiente" onClick={() => moveWeek(1)}>›</button>
         </div>
         <div className="days">
           {days.map((day) => {
@@ -91,6 +103,10 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
         </div>
       </div>
 
+      {ctx.sync.pendingOverwrite && <div className="notice" role="status">
+        <p>{ctx.sync.status}</p>
+        <button className="btn btn-primary" disabled={ctx.sync.busy} onClick={() => void ctx.sync.send()}>Enviar datos actualizados</button>
+      </div>}
       {notice && (
         <div className="notice">
           <b>Migración completada.</b> {notice}
@@ -206,6 +222,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
           })}
         </div>
       </div>
+      <ActivityLog key={curDate} ctx={ctx} />
     </>
   );
 }
