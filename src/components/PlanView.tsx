@@ -143,6 +143,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
           <h3>Cuatro días: lunes, martes, jueves y sábado</h3>
           <p>Miércoles, viernes y domingo quedan para recuperación. Los grupos de fuerza se reparten con descanso entre repeticiones.</p>
           <p>Se conservan el historial y los días que ya empezaste, editaste o programaste.</p>
+          <p>Esta es una revisión puntual del historial de ejercicios, no un cálculo automático de progreso en fuerza. Las series y repeticiones son objetivos de las fichas. El registro actual permite marcar ejercicios realizados; todavía no permite ingresar kilos, repeticiones reales y esfuerzo por serie.</p>
           <p>Usá cargas controladas, dejando 2–3 repeticiones en reserva. No aumentamos el peso automáticamente ni fijamos kilos sin registros de carga. Parar si aparece molestia lumbar o irradiada.</p>
           <p>El abdominal en banco inclinado queda condicionado a tu tolerancia e indicaciones: sin peso y con recorrido recortado. Si molesta o no está indicado, omitilo; Bird Dog ya está incluido. Bici o remo son complementos opcionales.</p>
           <button className="btn btn-primary" disabled={loadingRoutine} onClick={() => void loadReviewed()}>

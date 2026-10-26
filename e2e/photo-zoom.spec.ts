@@ -19,6 +19,38 @@ test('las fotos abren ampliadas y cierran conservando el detalle del ejercicio',
   await expect(page.locator('.lib-gallery')).toBeVisible();
 });
 
+for (const [name, directory, labels] of [
+  ['Crunch en banco abdominal inclinado', 'decline-bench-crunch-v344', ['Inicio', 'Final']],
+  ['Crunch en banco inclinado con brazos al frente', 'decline-bench-reach-v344', ['Inicio', 'Final']],
+  ['Sostén abdominal en banco inclinado', 'decline-bench-hold-v344', ['Posición']],
+] as const) {
+  test(`banco inclinado: ${name} carga y amplía sus fases vigentes`, async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.nav button', { hasText: 'Biblioteca' }).click();
+    await page.locator('.search').fill(name);
+    await page.locator('.libcard', { hasText: name }).click();
+    await expect(page.locator('.lib-gallery .phase-lab-inline')).toHaveText([...labels]);
+    if (labels[0] === 'Posición') {
+      await expect(page.locator('.sheet .stats .k')).toHaveText(['Series', 'Tiempo', 'Descanso']);
+    }
+    const sources: string[] = [];
+    for (const label of labels) {
+      const photo = page.getByRole('button', { name: `Ampliar ${name} · ${label}`, exact: true });
+      await expect(photo.locator('img')).toHaveAttribute('src', new RegExp(`/assets/exercises/${directory}/`));
+      sources.push((await photo.locator('img').getAttribute('src'))!);
+      await photo.click();
+      const dialog = page.getByRole('dialog', { name: `${name} · ${label} ampliada`, exact: true });
+      await expect(dialog).toBeVisible();
+      await expect(dialog.locator('.zoom-photo')).toHaveAttribute('src', sources.at(-1)!);
+      await expect.poll(() => dialog.locator('.zoom-photo').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+      await expect(dialog.locator('p')).not.toHaveText('');
+      await dialog.getByRole('button', { name: 'Cerrar foto' }).click();
+      await expect(dialog).not.toBeVisible();
+    }
+    expect(new Set(sources).size).toBe(labels.length);
+  });
+}
+
 test('la biblioteca retira ejercicios descartados y ofrece las incorporaciones y variantes vigentes', async ({ page }) => {
   await page.goto('/');
   await page.locator('.nav button', { hasText: 'Biblioteca' }).click();

@@ -12,6 +12,12 @@ test('serrato muestra inicio y final sin una fase intermedia redundante', () => 
   expect(REAL_IMAGES.serratus.note).toContain('escápulas');
 });
 
+test('el banco inclinado distingue dos movimientos y una postura sostenida', () => {
+  expect(imageLabels('decline_bench_crunch')).toEqual(['Inicio', 'Final']);
+  expect(imageLabels('decline_bench_reach')).toEqual(['Inicio', 'Final']);
+  expect(imageLabels('decline_bench_hold')).toEqual(['Posición']);
+});
+
 test('las posturas y secuencias conservan sus etiquetas apropiadas', () => {
   expect(imageLabels('chin_iso')).toEqual(['Posición']);
   expect(imageLabels('tri_iso')).toEqual(['Posición']);

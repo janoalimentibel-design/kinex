@@ -210,7 +210,7 @@ function LibInfoSheet({ ctx, id }: { ctx: Ctx; id: string }) {
       <div className="sh-sub">{GROUPS[e.group].label} · {e.level} · {e.tags.join(' · ')}</div>
       <div className="stats">
         <div className="stat"><div className="v">{e.sets}</div><div className="k">Series</div></div>
-        <div className="stat"><div className="v">{e.reps}</div><div className="k">Reps</div></div>
+        <div className="stat"><div className="v">{e.reps}</div><div className="k">{/\d\s*(?:s|min)\b/i.test(e.reps) ? 'Tiempo' : 'Reps'}</div></div>
         <div className="stat"><div className="v">{e.rest}</div><div className="k">Descanso</div></div>
       </div>
       <GalleryBlock id={id} exercise={e} />

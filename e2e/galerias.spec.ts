@@ -90,9 +90,9 @@ const GALLERIES: [string, string, number?, string?][] = [
   ["Patada de tríceps con mancuerna y apoyo", "supported-db-kickback", 2],
   ['Pallof Press', 'pallof-press-v342'],
   ['Heel Taps', 'heel-taps-v342'],
-  ["Crunch en banco abdominal inclinado", "decline-bench-crunch-v343", 2],
-  ["Crunch en banco inclinado con brazos al frente", "decline-bench-reach-v343", 2],
-  ["Sostén abdominal en banco inclinado", "decline-bench-hold-v343", 1],
+  ["Crunch en banco abdominal inclinado", "decline-bench-crunch-v344", 2],
+  ["Crunch en banco inclinado con brazos al frente", "decline-bench-reach-v344", 2],
+  ["Sostén abdominal en banco inclinado", "decline-bench-hold-v344", 1],
   ["Elevación de talones de pie con apoyo", "standing-calf-raise-v343", 2],
 ];
 

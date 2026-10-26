@@ -1,5 +1,5 @@
-// Guardia de assets: para cada ejercicio con imágenes valida que existan las tres
-// fases + thumb, que ninguna ruta se repita y que NINGÚN archivo esté duplicado
+// Guardia de assets: valida fotogramas declarados (o tres fases heredadas),
+// archivos y que NINGÚN archivo distinto esté duplicado
 // por hash (el problema histórico de A2.6: fases repetidas con nombre distinto).
 // Nota: hashes distintos no garantizan fases visualmente distintas — la revisión
 // visual en móvil sigue siendo obligatoria para cada batch nuevo.
@@ -34,9 +34,25 @@ for (const [exercise, phases] of Object.entries(byExercise)) {
   if (phases.size !== 3) errors.push(`${exercise}: se esperaban 3 fases distintas, hay ${phases.size}`);
 }
 
+// Sequences with two useful views and holds declare real frames explicitly.
+let declared = 0;
+const folders = new Set(paths.map(rel => rel.match(/exercises\/([^/]+)\//)?.[1]).filter(Boolean));
+for (const folder of folders) {
+  const manifest = new URL(`../assets-src/exercises/${folder}/frames.json`, import.meta.url);
+  if (!existsSync(manifest)) continue;
+  try {
+    const { frames, thumbnail } = JSON.parse(readFileSync(manifest, 'utf8'));
+    if (!Array.isArray(frames) || !frames.length || new Set(frames).size !== frames.length || !frames.includes(thumbnail)) throw new Error('fotogramas inválidos');
+    const prefix = `./assets/exercises/${folder}/`;
+    const referenced = [...seenPaths].filter(rel => rel.startsWith(prefix) && !rel.endsWith('/thumb.webp'));
+    if (referenced.length !== frames.length || frames.some(frame => !seenPaths.has(`${prefix}${frame}.webp`))) throw new Error('el mapa no coincide con frames.json');
+    declared++;
+  } catch (error) { errors.push(`${folder}: ${error.message}`); }
+}
+
 if (errors.length) {
   console.error('CHECK ASSETS: FALLÓ');
   for (const e of errors) console.error(' - ' + e);
   process.exit(1);
 }
-console.log(`CHECK ASSETS: OK — ${seenPaths.size} archivos, ${Object.keys(byExercise).length} ejercicios con 3 fases, sin duplicados por hash`);
+console.log(`CHECK ASSETS: OK — ${seenPaths.size} archivos, ${Object.keys(byExercise).length} carpetas con 3 fases heredadas, ${declared} secuencias declaradas, sin duplicados por hash`);
