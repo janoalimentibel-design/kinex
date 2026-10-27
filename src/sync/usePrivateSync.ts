@@ -2,15 +2,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { db } from '../db/instance';
 import type { AppData } from '../db/bootstrap';
 import { parsePairing, upload } from './protocol';
+import { changedRecordedDates, reviewBaseline, sessionBaselines } from './sessionReview';
+import type { Session } from '../db/schema';
 
 export function usePrivateSync(data: AppData | null) {
   const [status, setStatus] = useState('Sin conectar');
   const [busy, setBusy] = useState(false);
   const [pendingOverwrite, setPendingOverwrite] = useState(false);
+  const [pendingDates, setPendingDates] = useState<string[]>([]);
+  const baselineReady = useRef<Promise<void> | null>(null);
   const running = useRef<Promise<void> | null>(null);
   const controller = useRef<AbortController | null>(null);
   const mounted = useRef(true);
-  const send = useCallback((manual = true) => {
+  const send = useCallback((manual = true, date?: string) => {
     if (running.current) return running.current;
     const abort = new AbortController();
     controller.current = abort;
@@ -18,30 +22,45 @@ export function usePrivateSync(data: AppData | null) {
     const work = async () => {
       try {
         const transfer = async () => {
+          if (baselineReady.current) await baselineReady.current;
           const current = await db.kv.get('syncConnection');
           if (current?.key !== 'syncConnection') { setStatus('Sin conectar: abrí Plan → Perfil y seguimiento privado.'); return; }
-          setStatus('Enviando datos a Drive…');
           let sessionSignatures: Record<string, string> = {};
+          let sessions: Session[] = [];
           const payload = await db.transaction('r', db.sessions, db.customExercises, db.kv, async () => {
             const plan = await db.kv.get('plan');
             const profile = await db.kv.get('profile');
             if (plan?.key !== 'plan') throw new Error('Missing plan');
-            const sessions = await db.sessions.toArray();
+            sessions = await db.sessions.toArray();
             sessionSignatures = Object.fromEntries(sessions.map(session => [session.date, JSON.stringify(session)]));
             return JSON.stringify({ schemaVersion: 2, data: {
               sessions, customExercises: await db.customExercises.toArray(),
               plan: plan.value, ...(profile?.key === 'profile' ? { profile: profile.value } : {}),
             } });
           });
-          const changedDates = current.value.syncedSessions
-            ? Object.keys(current.value.syncedSessions).filter(date => current.value.syncedSessions?.[date] !== sessionSignatures[date])
-            : current.value.lastSync ? Object.keys(sessionSignatures) : [];
+          const review = reviewBaseline(current.value, sessions);
+          const changedDates = changedRecordedDates(review.baseline, sessions);
           setPendingOverwrite(changedDates.length > 0);
-          if (changedDates.length) {
-            setStatus(`Cambios pendientes en un día ya enviado (${changedDates.join(', ')}). Tocá Enviar datos para confirmar el reemplazo en Drive.`);
-            if (!manual || !window.confirm('Este día ya se envió y cambiaste sus datos. ¿Querés volver a enviar los datos y sobrescribir la copia de Drive con estos nuevos?')) return;
+          setPendingDates(changedDates);
+          const requiresFirstReview = review.origin === 'observed';
+          if (!manual && (requiresFirstReview || changedDates.length)) {
+            setStatus(changedDates.length ? 'Cambios guardados en este dispositivo. Podés enviarlos cuando quieras.' : 'Conectado a Drive.');
+            return;
           }
-          const next = { ...await upload(current.value, payload, abort.signal), syncedSessions: sessionSignatures };
+          if (manual && (requiresFirstReview || changedDates.length)) {
+            const selected = date && changedDates.includes(date) ? date : changedDates[0];
+            const label = selected ? new Date(`${selected}T12:00:00`).toLocaleDateString('es', { day: 'numeric', month: 'long' }) : '';
+            const question = requiresFirstReview
+              ? 'Ya existe una copia anterior en Drive. ¿Querés actualizarla con los datos guardados en este dispositivo?'
+              : `Cambiaste el registro del ${label}, que ya habías enviado.${changedDates.length > 1 ? ` También hay cambios en otros ${changedDates.length - 1} días.` : ''} ¿Querés volver a enviar los datos y actualizar la copia de Drive?`;
+            if (!window.confirm(question)) {
+              setStatus('Cambios guardados en este dispositivo. La copia de Drive se conserva.');
+              return;
+            }
+          }
+          setStatus('Enviando datos a Drive…');
+          const next = { ...await upload(current.value, payload, abort.signal), syncedSessions: sessionSignatures,
+            sessionReview: sessionBaselines(sessions), sessionReviewOrigin: 'confirmed' as const };
           const saved = await db.transaction('rw', db.kv, async () => {
             const active = await db.kv.get('syncConnection');
             if (active?.key !== 'syncConnection' || active.value.device !== next.device || active.value.token !== next.token) return false;
@@ -50,6 +69,7 @@ export function usePrivateSync(data: AppData | null) {
           });
           if (saved && mounted.current && !abort.signal.aborted) {
             setPendingOverwrite(false);
+            setPendingDates([]);
             setStatus(`Enviado a Drive: ${new Date(next.lastSync).toLocaleString()}`);
           }
         };
@@ -72,6 +92,17 @@ export function usePrivateSync(data: AppData | null) {
   }, []);
   useEffect(() => {
     if (!data) return;
+    if (!baselineReady.current) {
+      const observed = Object.values(data.sessions);
+      baselineReady.current = db.transaction('rw', db.kv, async () => {
+        const active = await db.kv.get('syncConnection');
+        if (active?.key !== 'syncConnection' || (active.value.sessionReview && active.value.sessionReviewOrigin)) return;
+        const review = reviewBaseline(active.value, observed);
+        await db.kv.put({ key: 'syncConnection', value: { ...active.value, sessionReview: review.baseline, sessionReviewOrigin: review.origin } });
+      });
+      // Failure remains retryable; never invent a successful upload.
+      void baselineReady.current.catch(() => { baselineReady.current = null; });
+    }
     // Do not abort an upload when a new local change arrives: retain its server revision.
     let stopped = false;
     const timer = setTimeout(async () => {
@@ -100,7 +131,8 @@ export function usePrivateSync(data: AppData | null) {
     if (running.current) await running.current;
     await db.kv.delete('syncConnection');
     setPendingOverwrite(false);
+    setPendingDates([]);
     setStatus('Desconectado. La copia ya enviada permanece en tu Drive.');
   };
-  return { status, busy, pendingOverwrite, send, connect, disconnect };
+  return { status, busy, pendingOverwrite, pendingDates, send, connect, disconnect };
 }

@@ -8,7 +8,7 @@ import type { GroupId, Mode } from '../db/schema';
 import { buildExerciseList, isoDate, restSeconds, type SessionEntry } from '../logic/session';
 import { completedIds, hasActivity } from '../logic/activity';
 import { colorOf, hasImage, isHoldImage, imageLabels, PhaseBlock } from './media';
-import { IconCaret, IconCheck } from './icons';
+import { IconCaret, IconCheck, IconChevron } from './icons';
 import type { Ctx } from './types';
 
 function weekDays(date: string): Date[] {
@@ -78,17 +78,20 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
           <span className="wk">{`${days[0].getDate()} ${MES[days[0].getMonth()]} – ${days[6].getDate()} ${MES[days[6].getMonth()]}`}</span>
         </div>
         <div className="week-navigation">
-          <button className="btn btn-soft" aria-label="Semana anterior" onClick={() => moveWeek(-1)}>‹</button>
+          <button className="btn btn-soft" aria-label="Semana anterior" onClick={() => moveWeek(-1)}><IconChevron direction="left" /></button>
           <button className="btn btn-soft" onClick={() => ctx.setCurDate(today)}>Hoy</button>
-          <label>Buscar día <input type="date" aria-label="Buscar día" value={curDate} onChange={e => { if (e.target.value) ctx.setCurDate(e.target.value); }} /></label>
-          <button className="btn btn-soft" aria-label="Semana siguiente" onClick={() => moveWeek(1)}>›</button>
+          <label className="week-date"><span className="visually-hidden">Buscar día</span><input type="date" aria-label="Buscar día" value={curDate} onChange={e => { if (e.target.value) ctx.setCurDate(e.target.value); }} /></label>
+          <button className="btn btn-soft" aria-label="Semana siguiente" onClick={() => moveWeek(1)}><IconChevron direction="right" /></button>
         </div>
         <div className="days">
           {days.map((day) => {
             const di = isoDate(day);
             const s = data.sessions[di];
             return (
-              <div
+              <button
+                type="button"
+                aria-label={`${DIAS[day.getDay()]} ${day.getDate()} ${MES[day.getMonth()]}`}
+                aria-pressed={di === curDate}
                 key={di}
                 className={`day ${di === curDate ? 'active' : ''} ${s && hasActivity(s) ? 'trained' : ''} ${di === today ? 'today' : ''}`}
                 onClick={() => ctx.setCurDate(di)}
@@ -97,16 +100,12 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
                 <div className="dd">{day.getDate()}</div>
                 <div className="mo">{MES[day.getMonth()]}</div>
                 <div className="dot"></div>
-              </div>
+              </button>
             );
           })}
         </div>
       </div>
 
-      {ctx.sync.pendingOverwrite && <div className="notice" role="status">
-        <p>{ctx.sync.status}</p>
-        <button className="btn btn-primary" disabled={ctx.sync.busy} onClick={() => void ctx.sync.send()}>Enviar datos actualizados</button>
-      </div>}
       {notice && (
         <div className="notice">
           <b>Migración completada.</b> {notice}
@@ -183,7 +182,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
           <div className="suggestion-card" data-testid="training-complete">
             <h3>Entrenamiento completado</h3>
             <p>Enviá la última copia de tu historial, plan y perfil a tu Drive privado para la próxima revisión.</p>
-            <button className="btn btn-primary" disabled={ctx.sync.busy} onClick={() => void ctx.sync.send()}>
+            <button className="btn btn-primary" disabled={ctx.sync.busy} onClick={() => void ctx.sync.send(true, ctx.curDate)}>
               {ctx.sync.busy ? 'Enviando…' : 'Enviar datos'}
             </button>
             <p role="status">{ctx.sync.status}</p>

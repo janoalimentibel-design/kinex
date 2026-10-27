@@ -3,6 +3,12 @@ import { expect, test, type Page } from '@playwright/test';
 // Keep mocked uploads inside Playwright; active service workers can bypass page.route.
 test.use({ serviceWorkers: 'block' });
 
+async function openAppearance(page: Page) {
+  const trigger = page.getByRole('button', { name: 'Cambiar apariencia', exact: true });
+  if (await trigger.getAttribute('aria-expanded') !== 'true') await trigger.click();
+  return page.getByLabel('Apariencia', { exact: true });
+}
+
 async function saveActivities(page: Page) {
   const save = page.getByRole('button', { name: 'Guardar actividad y calorías', exact: true });
   await save.click();
@@ -69,13 +75,14 @@ for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('/');
-    const selector = page.getByLabel('Apariencia', { exact: true });
+    const selector = await openAppearance(page);
     await expect(selector).toHaveValue('auto');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(selector).toBeInViewport();
     await selector.selectOption('light');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await page.reload();
+    await openAppearance(page);
     await expect(selector).toHaveValue('light');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await selector.selectOption('dark');
@@ -86,6 +93,7 @@ for (const width of [320, 390]) {
     await page.emulateMedia({ colorScheme: 'dark' });
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await page.reload();
+    await openAppearance(page);
     await expect(selector).toHaveValue('auto');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -97,7 +105,9 @@ for (const width of [320, 390]) {
       await saveActivities(page);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       for (const theme of width === 390 ? ['light', 'dark'] : []) {
+        await openAppearance(page);
         await selector.selectOption(theme);
+        await page.getByRole('button', { name: 'Cambiar apariencia', exact: true }).click();
         await page.evaluate(() => scrollTo(0, 0));
         await page.screenshot({ path: testInfo.outputPath(`${theme}-header-390.png`) });
         await page.screenshot({ path: testInfo.outputPath(`${theme}-full-390.png`), fullPage: true });
@@ -129,14 +139,14 @@ test('corregir cardio ya enviado pide consentimiento y envía las calorías nuev
   await page.locator('.nav button', { hasText: 'Hoy' }).click();
   await page.getByLabel('Calorías 1', { exact: true }).fill('130');
   await saveActivities(page);
-  await expect(page.getByRole('button', { name: 'Enviar datos actualizados', exact: true })).toBeVisible();
+  await page.locator('.nav button', { hasText: 'Plan' }).click();
   const before = calls;
   expect(JSON.parse(payload).data.sessions.some((s: { aerobicActivities?: { calories: number }[] }) => s.aerobicActivities?.[0]?.calories === 100)).toBe(true);
   const confirmation = page.waitForEvent('dialog').then(async dialog => {
-    expect(dialog.message()).toContain('ya se envió');
+    expect(dialog.message()).toContain('ya habías enviado');
     await dialog.accept();
   });
-  await page.getByRole('button', { name: 'Enviar datos actualizados', exact: true }).click();
+  await page.getByRole('button', { name: 'Reintentar envío', exact: true }).click();
   await confirmation;
   await expect.poll(() => calls).toBe(before + 1);
   expect(JSON.parse(payload).data.sessions.some((s: { aerobicActivities?: { calories: number }[] }) => s.aerobicActivities?.[0]?.calories === 130)).toBe(true);

@@ -1,3 +1,5 @@
+import BottomSheet from './BottomSheet';
+import { IconNavigation } from './icons';
 import { usePrivateSync } from '../sync/usePrivateSync';
 import { useEffect, useRef, useState } from 'react';
 import { CATALOG } from '../data/exercises';
@@ -196,7 +198,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.46</div>
+            <div className="version">v3.47</div>
           </div>
         </div>
       </div>
@@ -227,16 +229,16 @@ export default function App() {
       )}
 
       <div className="nav">
-        {tabs.map(([v, icon, label]) => (
-          <button key={v} className={view === v ? 'on' : ''} onClick={() => { setView(v); scrollTo(0, 0); }}>
-            {icon}<span>{label}</span>
+        {tabs.map(([v, , label]) => (
+          <button key={v} className={view === v ? 'on' : ''} aria-current={view === v ? 'page' : undefined} onClick={() => { setView(v); scrollTo(0, 0); }}>
+            <IconNavigation name={v} /><span>{label}</span>
           </button>
         ))}
       </div>
 
-      <div className={`modal ${modal ? 'show' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) setModal(null); }}>
-        <div className="sheet">{modal && <Sheet key={`${curDate}:${JSON.stringify(modal)}`} modal={modal} ctx={ctx} />}</div>
-      </div>
+      <BottomSheet open={Boolean(modal)} label={modal ? ({ combo: 'Cambiar grupos', revisions: 'Versiones del día', addToGroup: 'Añadir ejercicio', replace: 'Cambiar ejercicio', saveSession: 'Guardar sesión', libInfo: 'Información del ejercicio', addCustom: 'Nuevo ejercicio', summary: 'Resumen', importPreview: 'Importar respaldo' }[modal.type]) : 'Ventana'} onClose={() => setModal(null)}>
+        {modal && <Sheet key={`${curDate}:${JSON.stringify(modal)}`} modal={modal} ctx={ctx} />}
+      </BottomSheet>
     </>
   );
 }

@@ -7,6 +7,8 @@ export const zConnection = z.object({
   version: z.number().int().nonnegative(),
   lastSync: z.string(),
   syncedSessions: z.record(z.string(), z.string()).optional(),
+  sessionReview: z.record(z.string(), z.string()).optional(),
+  sessionReviewOrigin: z.enum(['observed', 'confirmed']).optional(),
 });
 export type SyncConnection = z.infer<typeof zConnection>;
 function deviceId(): string {

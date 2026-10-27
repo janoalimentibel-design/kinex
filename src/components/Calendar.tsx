@@ -1,4 +1,5 @@
 // Calendario mensual: días entrenados marcados; tocar un día lo abre en Hoy.
+import { IconChevron } from './icons';
 import { useState } from 'react';
 import { MES } from '../data/exercises';
 import { trainedDaysOfMonth } from '../logic/stats';
@@ -35,9 +36,9 @@ export default function Calendar({ ctx }: { ctx: Ctx }) {
   return (
     <div className="cal">
       <div className="cal-head">
-        <button className="cal-nav" onClick={() => move(-1)}>‹</button>
+        <button className="cal-nav" aria-label="Mes anterior" onClick={() => move(-1)}><IconChevron direction="left" /></button>
         <span className="cal-title">{MES[month]} {year}</span>
-        <button className="cal-nav" onClick={() => move(1)}>›</button>
+        <button className="cal-nav" aria-label="Mes siguiente" onClick={() => move(1)}><IconChevron direction="right" /></button>
       </div>
       <div className="cal-grid">
         {DOW.map((d) => <span key={d} className="cal-dow">{d}</span>)}

@@ -29,7 +29,7 @@ export default function CompletionPrompt({ ctx, complete, active, signature }: {
   return <dialog ref={dialog} className="completion-dialog" aria-labelledby="completion-title" onCancel={e => { e.preventDefault(); close(); }}>
     <h3 id="completion-title">Entrenamiento completado</h3>
     <p>Terminaste todos los ejercicios de esta sesión. Enviá la última copia a tu Drive privado para la próxima revisión.</p>
-    <button className="btn btn-primary" disabled={ctx.sync.busy} onClick={() => void ctx.sync.send()}>{ctx.sync.busy ? 'Enviando…' : 'Enviar datos'}</button>
+    <button className="btn btn-primary" disabled={ctx.sync.busy} onClick={() => void ctx.sync.send(true, ctx.curDate)}>{ctx.sync.busy ? 'Enviando…' : 'Enviar datos'}</button>
     <p role="status">{ctx.sync.status}</p>
     <button className="btn btn-soft" onClick={close}>Volver a la sesión</button>
   </dialog>;

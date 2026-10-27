@@ -27,7 +27,7 @@ export default function Library({ ctx }: { ctx: Ctx }) {
       <div className="sectionhead">
         <div>
           <h2>Biblioteca</h2>
-          <p>Ejercicios por músculo, con intención interna de recuperación y rendimiento. Las fotos limpias se integran como assets individuales, no como flyers.</p>
+          <p>Buscá ejercicios por grupo muscular y consultá su técnica, fotos y variantes.</p>
         </div>
         <button className="addbtn" onClick={() => ctx.setModal({ type: 'addCustom' })}>+ Nuevo</button>
       </div>

@@ -18,7 +18,7 @@ test('desde historial se recorren semanas, se busca una fecha y se vuelve a hoy 
   await expect(page.locator('.dlabel')).toContainText('26 OCT');
   await page.getByLabel('Buscar día', { exact: true }).fill('2026-09-15');
   await expect(page.locator('.dlabel')).toContainText('15 SEP');
-  await page.getByRole('button', { name: 'Hoy', exact: true }).click();
+  await page.locator('.week-navigation').getByRole('button', { name: 'Hoy', exact: true }).click();
   await expect(page.locator('.dlabel')).toContainText('26 OCT');
   await expect(page.locator('.day.active')).toContainText('26');
   expect(await page.locator('.weekwrap').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
@@ -50,15 +50,15 @@ test('editar un día enviado requiere confirmar la sobrescritura y cancelar cons
   await page.getByRole('button', { name: 'Guardar sesión', exact: true }).click();
   await page.locator('.nav button', { hasText: 'Plan' }).click();
   const before = calls;
-  await expect(page.getByTestId('sync-feedback')).toContainText(/pendiente/i);
+  await expect(page.getByTestId('sync-feedback')).toContainText(/Cambios guardados en este dispositivo/i);
   await page.evaluate(() => window.dispatchEvent(new Event('online')));
-  await expect(page.getByTestId('sync-feedback')).toContainText(/pendiente/i);
+  await expect(page.getByTestId('sync-feedback')).toContainText(/Cambios guardados en este dispositivo/i);
   expect(calls).toBe(before);
   expect(latestPayload).toContain('Registro inicial');
   let acceptReplacement = false;
   let confirmations = 0;
   page.on('dialog', async dialog => {
-    expect(dialog.message()).toContain('ya se envió');
+    expect(dialog.message()).toContain('ya habías enviado');
     if (acceptReplacement) await dialog.accept();
     else await dialog.dismiss();
     confirmations++;
