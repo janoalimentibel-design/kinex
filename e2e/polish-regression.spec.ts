@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-test.use({ serviceWorkers: 'block' });
+test.use({ serviceWorkers: 'block', locale: 'es-ES' });
 const endpoint = 'https://script.google.com/macros/s/test/exec';
 
 async function seedLegacyHistory(page: Page) {
@@ -132,10 +132,7 @@ for (const size of [{ width: 320, height: 720 }, { width: 390, height: 844 }, { 
   });
 }
 
-test('revisión visual sintética de vistas, formulario y diálogo en claro y oscuro', async ({ page }) => {
-  const { mkdir } = await import('node:fs/promises');
-  const output = '/private/tmp/kinex-v347-review';
-  await mkdir(output, { recursive: true });
+test('revisión visual sintética de vistas, formulario y diálogo en claro y oscuro', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   for (const theme of ['light', 'dark']) {
@@ -149,7 +146,7 @@ test('revisión visual sintética de vistas, formulario y diálogo en claro y os
       await page.evaluate(() => scrollTo(0, 0));
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       await page.locator('img:visible').evaluateAll(async images => { await Promise.all(images.filter(image => { const box = image.getBoundingClientRect(); return box.top < innerHeight && box.bottom > 0; }).map(image => (image as HTMLImageElement).decode().catch(() => undefined))); });
-      await page.screenshot({ path: `${output}/${theme}-${label.toLowerCase()}-390.png` });
+      await page.screenshot({ path: testInfo.outputPath(`${theme}-${label.toLowerCase()}-390.png`) });
     }
     await page.locator('.nav button', { hasText: 'Hoy' }).click();
     await page.locator('.activity-log').scrollIntoViewIfNeeded();
@@ -162,12 +159,12 @@ test('revisión visual sintética de vistas, formulario y diálogo en claro y os
     const saveActivity = page.getByRole('button', { name: 'Guardar actividad y calorías', exact: true });
     if (await saveActivity.isEnabled()) { await saveActivity.click(); await expect(saveActivity).toBeDisabled(); }
     await page.locator('.activity-log').evaluate(element => { const header = document.querySelector('.topbar')?.getBoundingClientRect().height ?? 100; scrollTo(0, scrollY + element.getBoundingClientRect().top - header - 12); });
-    await page.screenshot({ path: `${output}/${theme}-actividad-390.png` });
+    await page.screenshot({ path: testInfo.outputPath(`${theme}-actividad-390.png`) });
     await page.locator('.activity-summary').scrollIntoViewIfNeeded();
-    await page.screenshot({ path: `${output}/${theme}-actividad-resumen-390.png` });
+    await page.screenshot({ path: testInfo.outputPath(`${theme}-actividad-resumen-390.png`) });
     await page.getByRole('button', { name: 'Marcar hecha' }).click();
     await expect(page.locator('.sheet')).toBeInViewport();
-    await page.screenshot({ path: `${output}/${theme}-guardar-dialog-390.png` });
+    await page.screenshot({ path: testInfo.outputPath(`${theme}-guardar-dialog-390.png`) });
     await page.getByRole('button', { name: 'Guardar sesión', exact: true }).click();
   }
 });
@@ -229,18 +226,16 @@ test('hoja de guardar ofrece cierre, mantiene foco dentro y devuelve foco al abr
   await expect(trigger).toBeFocused();
 });
 
-test('capturas compactas de calendario y panel de apariencia a 320px', async ({ page }) => {
+test('capturas compactas de calendario y panel de apariencia a 320px', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('/');
-  const { mkdir } = await import('node:fs/promises');
-  await mkdir('/private/tmp/kinex-v347-review', { recursive: true });
   for (const theme of ['light', 'dark']) {
     const trigger = page.getByRole('button', { name: 'Cambiar apariencia', exact: true });
     await trigger.click();
     await page.getByLabel('Apariencia', { exact: true }).selectOption(theme);
     expect((await page.getByLabel('Apariencia', { exact: true }).boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    await page.screenshot({ path: `/private/tmp/kinex-v347-review/${theme}-appearance-panel-320.png` });
+    await page.screenshot({ path: testInfo.outputPath(`${theme}-appearance-panel-320.png`) });
     await trigger.click();
-    await page.screenshot({ path: `/private/tmp/kinex-v347-review/${theme}-calendar-320.png` });
+    await page.screenshot({ path: testInfo.outputPath(`${theme}-calendar-320.png`) });
   }
 });

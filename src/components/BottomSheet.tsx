@@ -38,7 +38,7 @@ export default function BottomSheet({ open, label, onClose, children }: {
     };
   }, [open]);
   return <dialog ref={dialog} className={`modal bottom-sheet-modal ${open ? 'show' : ''}`} aria-label={label}
-    onCancel={event => { event.preventDefault(); onClose(); }}
+    onCancel={event => { if (event.target === event.currentTarget) { event.preventDefault(); onClose(); } }}
     onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
     <div className="sheet">
       <div className="sheet-toolbar"><button type="button" className="sheet-close" aria-label="Cerrar ventana" onClick={onClose}>
