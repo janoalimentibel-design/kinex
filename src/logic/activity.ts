@@ -14,7 +14,7 @@ export function completedIds(session: Session): string[] {
 }
 
 export function hasActivity(session: Session): boolean {
-  return session.saved || completedIds(session).length > 0 || Boolean(session.aerobicActivities?.length) || session.trainingCalories !== undefined;
+  return session.saved || completedIds(session).length > 0 || Boolean(session.aerobicActivities?.length) || session.trainingCalories !== undefined || session.gymMinutes !== undefined;
 }
 
 export function activityGroups(session: Session, all: Record<string, CatalogExercise> = CATALOG): GroupId[] {

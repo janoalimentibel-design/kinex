@@ -2,16 +2,20 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { z } from 'zod';
 import { zAerobicActivity, type Session } from '../db/schema';
 import { activitySignature, activityTotals } from '../logic/aerobic';
+import DaySyncStatus from './DaySyncStatus';
 import type { Ctx } from './types';
 
 const zRow = z.object({ id: z.string(), type: z.string(), minutes: z.string(), calories: z.string(), distanceKm: z.string() });
-const zDraft = z.object({ rows: z.array(zRow), training: z.string(), includes: z.boolean(), baseline: z.string() });
+const zDraft = z.object({ rows: z.array(zRow), training: z.string(), gym: z.string().default(''), includes: z.boolean(), baseline: z.string().transform(baseline => {
+  try { const legacy = JSON.parse(baseline); if (Array.isArray(legacy) && legacy.length === 3) return JSON.stringify([...legacy, null]); } catch { /* Preserve unknown signatures for conflict detection. */ }
+  return baseline;
+}) });
 type Draft = z.infer<typeof zDraft>;
 const PREFIX = 'kinex:activity-draft:v1:';
 const memoryDrafts = new Map<string, Draft>();
 const value = (number: number | undefined) => number === undefined ? '' : String(number);
 function fromSession(session: Session): Draft {
-  return { rows: (session.aerobicActivities ?? []).map(item => ({ ...item, minutes: value(item.minutes), calories: value(item.calories), distanceKm: value(item.distanceKm) })), training: value(session.trainingCalories), includes: session.trainingCaloriesIncludeAerobic ?? false, baseline: activitySignature(session) };
+  return { rows: (session.aerobicActivities ?? []).map(item => ({ ...item, minutes: value(item.minutes), calories: value(item.calories), distanceKm: value(item.distanceKm) })), training: value(session.trainingCalories), gym: value(session.gymMinutes), includes: session.trainingCaloriesIncludeAerobic ?? false, baseline: activitySignature(session) };
 }
 function number(raw: string, label: string, required = false): number | undefined {
   const text = raw.trim().replace(',', '.');
@@ -63,11 +67,14 @@ export default function ActivityLog({ ctx }: { ctx: Ctx }) {
     try {
       const aerobicActivities = draft.rows.map((row, index) => zAerobicActivity.parse({ id: row.id, type: row.type, minutes: number(row.minutes, `Actividad ${index + 1}, minutos`, true), calories: number(row.calories, `Actividad ${index + 1}, calorías`), distanceKm: number(row.distanceKm, `Actividad ${index + 1}, kilómetros`) }));
       const trainingCalories = number(draft.training, 'Calorías del entrenamiento');
+      const gymMinutes = number(draft.gym, 'Minutos totales en gimnasio');
+      if (gymMinutes !== undefined && gymMinutes > 1440) throw new Error('Minutos totales en gimnasio: el máximo es 1440 por día.');
       saving.current = true; setBusy(true);
-      await ctx.saveActivityData(date, { aerobicActivities, trainingCalories, trainingCaloriesIncludeAerobic: draft.includes }, draft.baseline);
+      await ctx.saveActivityData(date, { aerobicActivities, gymMinutes, trainingCalories, trainingCaloriesIncludeAerobic: draft.includes }, draft.baseline);
       if (JSON.stringify(memoryDrafts.get(date)) === JSON.stringify(draft)) memoryDrafts.delete(date);
       try {
-        if (sessionStorage.getItem(key) === JSON.stringify(draft)) sessionStorage.removeItem(key);
+        const storedDraft = sessionStorage.getItem(key);
+        if (storedDraft && JSON.stringify(zDraft.parse(JSON.parse(storedDraft))) === JSON.stringify(draft)) sessionStorage.removeItem(key);
         window.dispatchEvent(new Event('kinex-activity-draft'));
       } catch { /* Data is committed even if draft cleanup is unavailable. */ }
       if (mounted.current) { setDirty(false); setMessage('Actividad y calorías guardadas en este dispositivo.'); }
@@ -79,11 +86,13 @@ export default function ActivityLog({ ctx }: { ctx: Ctx }) {
     }
   };
   const totals = activityTotals(ctx.session);
-  return <section className="activity-log suggestion-card" aria-labelledby="activity-title">
+  return <section id="activity-log" tabIndex={-1} className="activity-log suggestion-card" aria-labelledby="activity-title">
     <h3 id="activity-title">Actividad y calorías</h3>
-    <p>Registrá lo que mida tu reloj, incluso en días sin fuerza. Calorías y kilómetros son opcionales.</p>
+    <p>Registrá lo que mida tu reloj, incluso en días sin fuerza. El tiempo total en gimnasio, las calorías y los kilómetros son opcionales.</p>
     <form className="activity-form" onSubmit={event => void save(event)}>
       <fieldset disabled={busy}>
+        <label>Minutos totales en gimnasio<input aria-label="Minutos totales en gimnasio" inputMode="decimal" value={draft.gym} onChange={event => change({ ...draft, gym: event.target.value })} /></label>
+        <p>Todo el tiempo que estuviste en el gimnasio, incluida la bici y los descansos. Se registra por separado: no se suma a los minutos de aeróbico.</p>
         {draft.rows.map((row, index) => <article className="activity-entry" key={row.id}>
           <h4>Actividad aeróbica {index + 1}</h4>
           <div className="activity-fields">
@@ -112,6 +121,7 @@ export default function ActivityLog({ ctx }: { ctx: Ctx }) {
     {dirty && <p role="status">Borrador sin guardar{!durable ? ': no se pudo proteger; guardalo antes de recargar.' : '. Se conserva al cambiar de día.'}</p>}
     {dirty && draft.baseline !== signature && <p role="alert">Los datos guardados cambiaron. Tu borrador está protegido; revisá el día antes de descartarlo y volver a editar.</p>}
     {error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}
-    <div className="activity-summary"><p>Guardado: {totals.minutes} min de aeróbico · {totals.distanceKm === null ? 'km sin registrar' : `${totals.distanceKm} km`} · {totals.aerobicCalories === null ? 'kcal aeróbicas sin registrar' : `${totals.aerobicCalories} kcal aeróbicas`}</p><p>Total guardado del día: {totals.totalCalories === null ? 'sin calorías registradas' : `${totals.totalCalories} kcal`}. Los valores opcionales vacíos no se estiman.</p></div>
+    <div className="activity-summary"><p>Gimnasio: {totals.gymMinutes === null ? 'sin minutos registrados' : `${totals.gymMinutes} min`} · Aeróbico: {totals.aerobicMinutes === null ? 'sin minutos registrados' : `${totals.aerobicMinutes} min`}</p><p>Entrenamiento: {totals.trainingCalories === null ? 'kcal sin registrar' : `${totals.trainingCalories} kcal`} · Aeróbico: {totals.aerobicCalories === null ? 'kcal sin registrar' : `${totals.aerobicCalories} kcal`} · {totals.distanceKm === null ? 'km sin registrar' : `${totals.distanceKm} km`}</p><p>Total guardado del día: {totals.totalCalories === null ? 'sin calorías registradas' : `${totals.totalCalories} kcal`}. Los valores opcionales vacíos no se estiman.</p></div>
+    <DaySyncStatus ctx={ctx} dirty={dirty} />
   </section>;
 }

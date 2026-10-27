@@ -14,13 +14,14 @@ export function sessionFingerprint(session: Session): string | null {
   for (const item of session.exerciseLog ?? []) if (item.completed && session.completed?.[item.id] !== false) done.add(item.id);
   const sets = Object.fromEntries(Object.entries(session.setLogs ?? {}).filter(([, rows]) => rows.length));
   const aerobic = [...(session.aerobicActivities ?? [])].sort((a, b) => a.id.localeCompare(b.id));
-  if (!session.saved && !done.size && !Object.keys(sets).length && !aerobic.length && session.trainingCalories === undefined) return null;
+  if (!session.saved && !done.size && !Object.keys(sets).length && !aerobic.length && session.trainingCalories === undefined && session.gymMinutes === undefined) return null;
   return stable({
     saved: Boolean(session.saved), done: [...done].sort(), sets,
     metrics: session.metrics ?? null,
     // Some older explicitly saved workouts only recorded groups, without exercise IDs.
     groups: session.saved && !done.size && !Object.keys(sets).length ? [...session.groups].sort() : undefined,
     aerobic,
+    gymMinutes: session.gymMinutes,
     trainingCalories: session.trainingCalories,
     trainingCaloriesIncludeAerobic: session.trainingCalories === undefined ? undefined : Boolean(session.trainingCaloriesIncludeAerobic),
   });
@@ -52,4 +53,16 @@ export function reviewBaseline(connection: SyncConnection, sessions: Session[]) 
 export function changedRecordedDates(baseline: Record<string, string>, sessions: Session[]): string[] {
   const current = sessionBaselines(sessions);
   return Object.keys(baseline).filter(date => baseline[date] !== current[date]).sort();
+}
+
+
+export type DaySyncState = 'disconnected' | 'local' | 'pending' | 'sent' | 'unverified';
+/** A local observation is never described as a confirmed upload. */
+export function daySyncState(connection: SyncConnection | null, session: Session | undefined, date: string): DaySyncState {
+  if (!connection) return 'disconnected';
+  const review = reviewBaseline(connection, session ? [session] : []);
+  if (review.origin === 'observed') return 'unverified';
+  const last = review.baseline[date];
+  if (last === undefined) return 'local';
+  return session && sessionFingerprint(session) === last ? 'sent' : 'pending';
 }

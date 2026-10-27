@@ -8,7 +8,7 @@ import { buildExerciseList, isoDate } from '../logic/session';
 import { metricSeries, sessionsPerWeek, weeklyStreak } from '../logic/stats';
 import { activityGroups, activityLog, hasActivity } from '../logic/activity';
 import Calendar from './Calendar';
-import { activityTotals } from '../logic/aerobic';
+import { activityTotals, summarizeActivity } from '../logic/aerobic';
 import { listActivityDrafts } from './ActivityLog';
 import { MetricLines, WeekBars } from './charts';
 import { colorOf } from './media';
@@ -17,6 +17,7 @@ import type { Ctx } from './types';
 export default function History({ ctx }: { ctx: Ctx }) {
   const { data, allEx } = ctx;
   const fileRef = useRef<HTMLInputElement>(null);
+  const [summaryRange, setSummaryRange] = useState<'week' | 'month' | 'all'>('week');
   const [activityDrafts, setActivityDrafts] = useState(listActivityDrafts);
   useEffect(() => {
     const refresh = () => { setActivityDrafts(listActivityDrafts()); };
@@ -38,6 +39,8 @@ export default function History({ ctx }: { ctx: Ctx }) {
   }
   const max = Math.max(1, ...Object.values(vol));
   const todayIso = isoDate(now);
+  const summary = summarizeActivity(Object.values(data.sessions), summaryRange, todayIso);
+  const shown = (value: number | null, unit: string) => value === null ? 'Sin registrar' : `${value.toLocaleString('es-ES', { maximumFractionDigits: 2 })} ${unit}`;
   const streak = weeklyStreak(data.sessions, todayIso);
   const metrics = metricSeries(data.sessions, 12);
   const weekCounts = sessionsPerWeek(data.sessions, 8, todayIso);
@@ -84,6 +87,21 @@ export default function History({ ctx }: { ctx: Ctx }) {
         </div>
       )}
 
+      <section className="activity-period-summary" aria-labelledby="activity-period-title">
+        <div className="activity-period-heading"><h3 id="activity-period-title">Tiempo y calorías</h3>
+          <label><span className="visually-hidden">Período del resumen</span><select aria-label="Período del resumen" value={summaryRange} onChange={event => setSummaryRange(event.target.value as typeof summaryRange)}><option value="week">Esta semana</option><option value="month">Este mes</option><option value="all">Todo</option></select></label>
+        </div>
+        <dl className="activity-metrics">
+          <div><dt>Tiempo en gimnasio</dt><dd data-testid="summary-gym-minutes">{shown(summary.gymMinutes, 'min')}</dd></div>
+          <div><dt>Tiempo aeróbico</dt><dd data-testid="summary-aerobic-minutes">{shown(summary.aerobicMinutes, 'min')}</dd></div>
+          <div><dt>Calorías entrenamiento</dt><dd>{shown(summary.trainingCalories, 'kcal')}</dd></div>
+          <div><dt>Calorías aeróbicas</dt><dd>{shown(summary.aerobicCalories, 'kcal')}</dd></div>
+          <div><dt>Calorías totales</dt><dd data-testid="summary-total-calories">{shown(summary.totalCalories, 'kcal')}</dd></div>
+          <div><dt>Distancia aeróbica</dt><dd>{shown(summary.distanceKm, 'km')}</dd></div>
+        </dl>
+        <p>Hasta hoy. Semana de lunes a domingo; mes calendario. Gimnasio y aeróbico son tiempos separados: no se suman. Las calorías totales respetan si el entrenamiento ya incluye el aeróbico.</p>
+        <p>{summary.days} días con registro · tiempo de gimnasio en {summary.gymRecordedDays} días · aeróbico en {summary.aerobicRecordedDays} días · calorías en {summary.calorieRecordedDays} días. Solo se suman los datos registrados; los campos vacíos no se estiman.</p>
+      </section>
       <Calendar ctx={ctx} />
       {activityDrafts.length > 0 && <div className="activity-draft-summary"><b>Borradores de actividad sin guardar</b><p>No están incluidos en el backup ni en los datos enviados.</p>{activityDrafts.map(date => <button className="btn btn-soft" key={date} onClick={() => { ctx.setCurDate(date); ctx.setView('today'); }}>{date} · Actividad y calorías</button>)}</div>}
 
@@ -137,6 +155,7 @@ export default function History({ ctx }: { ctx: Ctx }) {
                 <div className="hrow">
                   Lumbar {s.metrics?.lumbarBefore ?? '-'}→{s.metrics?.lumbarAfter ?? '-'} · Rodilla {s.metrics?.knee ?? '-'} · Energía {s.metrics?.energy ?? '-'}
                 </div>
+                <div className="hrow">Gimnasio: {shown(totals.gymMinutes, 'min')} · Aeróbico: {shown(totals.aerobicMinutes, 'min')}</div>
                 {(s.aerobicActivities ?? []).map(item => <div className="hrow" key={item.id}><b>{item.type}</b> · {item.minutes} min · {item.calories === undefined ? 'kcal sin registrar' : `${item.calories} kcal`} · {item.distanceKm === undefined ? 'km sin registrar' : `${item.distanceKm} km`}</div>)}
                 {s.trainingCalories !== undefined && <div className="hrow">Entrenamiento: {s.trainingCalories} kcal{s.trainingCaloriesIncludeAerobic ? ' · incluye aeróbico' : ''}</div>}
                 {(Boolean(s.aerobicActivities?.length) || s.trainingCalories !== undefined) && <div className="hrow">Total registrado: {totals.totalCalories === null ? 'kcal sin registrar' : `${totals.totalCalories} kcal`}</div>}

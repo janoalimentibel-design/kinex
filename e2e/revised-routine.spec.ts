@@ -26,7 +26,7 @@ test('current-week delivery preserves the real private backup and persists on mo
     db.close();
   }, backup.data);
   await page.reload();
-  await expect(page.locator('.version')).toHaveText('v3.47');
+  await expect(page.locator('.version')).toHaveText('v3.48');
   await expect(page.locator('.program-title')).toHaveText('Semana revisada · Espalda + Bíceps');
   await expect(page.locator('.ex .nm')).toHaveText([
     'Dominadas estrictas', 'Remo en máquina sentado', 'Curl de bíceps con mancuerna', 'Curl martillo con mancuernas',

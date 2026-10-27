@@ -1078,11 +1078,17 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   chinup: {
-    thumb: './assets/exercises/chinup/thumb.webp',
+    thumb: './assets/exercises/chinup-v348/thumb.webp',
+    note: 'Ambas palmas hacia vos y barra fija. El agarre se mantiene igual en las tres fases.',
     phases: {
-      Inicio: './assets/exercises/chinup/inicio.webp',
-      Medio: './assets/exercises/chinup/medio.webp',
-      Final: './assets/exercises/chinup/final.webp',
+      Inicio: './assets/exercises/chinup-v348/inicio.webp',
+      Medio: './assets/exercises/chinup-v348/medio.webp',
+      Final: './assets/exercises/chinup-v348/final.webp',
+    },
+    instructions: {
+      Inicio: 'Barra fija, las dos palmas hacia tu cara y manos al ancho de hombros. Brazos estirados y pies sin apoyo.',
+      Medio: 'Doblá los codos y elevá el cuerpo sin balanceo. No gires una mano: las dos mantienen el agarre supino.',
+      Final: 'Mentón a la altura de la barra o apenas por encima, sin sacar el cuello. Después bajá lento hasta el inicio.',
     },
   },
   bear_hold: {

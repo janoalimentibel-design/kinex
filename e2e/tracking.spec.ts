@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+test.use({ serviceWorkers: 'block' });
 test('profile persists after reload and sync only acknowledges confirmed uploads', async ({ page }) => {
   await page.goto('/');
   await page.locator('.nav button', { hasText: 'Plan' }).click();
@@ -25,7 +26,7 @@ test('profile persists after reload and sync only acknowledges confirmed uploads
   await expect(page.getByTestId('sync-feedback')).toContainText('Desconectado.');
 });
 
-test('completion offers sending, never claims upload while disconnected, hides on undo', async ({ page }) => {
+test('completion reviews optional metrics, never claims upload while disconnected, hides on undo', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.ex .chk').first()).toBeVisible();
   await expect(page.getByTestId('training-complete')).toHaveCount(0);
@@ -36,11 +37,11 @@ test('completion offers sending, never claims upload while disconnected, hides o
   const prompt = page.getByRole('dialog', { name: 'Entrenamiento completado' });
   await expect(prompt).toBeVisible();
   await expect(prompt).toBeInViewport();
-  await prompt.getByRole('button', { name: 'Enviar datos', exact: true }).click();
-  await expect(prompt).toContainText('Sin conectar:');
-  await prompt.getByRole('button', { name: 'Volver a la sesión' }).click();
-  await expect(banner).toContainText('Sin conectar:');
-  await expect(banner).not.toContainText('Enviado a Drive:');
+  await prompt.getByRole('button', { name: 'Revisar actividad y calorías', exact: true }).click();
+  const activity = page.locator('.activity-log');
+  await expect(activity).toContainText('Drive no está conectado.');
+  await expect(activity.getByRole('button', { name: 'Enviar cambios', exact: true })).toHaveCount(0);
+  await expect(activity).not.toContainText('enviados a Drive.');
   await checks.first().click();
   await expect(banner).toHaveCount(0);
 });
@@ -67,8 +68,10 @@ test('failed upload remains pending and a manual retry sends the completed sessi
   fail = false;
   const prompt = page.getByRole('dialog', { name: 'Entrenamiento completado' });
   await expect(prompt).toBeInViewport();
-  await prompt.getByRole('button', { name: 'Enviar datos', exact: true }).click();
-  await expect(prompt).toContainText('Enviado a Drive:');
+  await prompt.getByRole('button', { name: 'Revisar actividad y calorías', exact: true }).click();
+  const activity = page.locator('.activity-log');
+  await activity.getByRole('button', { name: 'Enviar cambios', exact: true }).click();
+  await expect(activity).toContainText('Datos guardados de este día enviados a Drive.');
   expect(snapshot?.data.sessions.some(s => Object.values(s.completed).length > 0 && Object.values(s.completed).every(Boolean))).toBe(true);
 });
 
@@ -127,7 +130,7 @@ test('seven selected exercises trigger a visible finish dialog despite removed u
   await page.getByRole('button', { name: 'Marcar Elevación lateral con banda', exact: true }).click();
   const prompt = page.getByRole('dialog', { name: 'Entrenamiento completado' });
   await expect(prompt).toBeInViewport();
-  await expect(prompt.getByRole('button', { name: 'Enviar datos', exact: true })).toBeInViewport();
+  await expect(prompt.getByRole('button', { name: 'Revisar actividad y calorías', exact: true })).toBeInViewport();
   await prompt.getByRole('button', { name: 'Volver a la sesión' }).click();
   await page.reload();
   await expect(prompt).not.toBeVisible();

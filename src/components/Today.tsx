@@ -1,6 +1,7 @@
 import { RETIRED_EXERCISES } from '../data/gym';
 import CompletionPrompt from './CompletionPrompt';
 import ActivityLog from './ActivityLog';
+import { reviewActivity } from './DaySyncStatus';
 // Vista Hoy — port de renderStrip/renderDay/renderGroups/renderExercise de A2.8.
 import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
@@ -181,11 +182,8 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
         {list.length > 0 && done === list.length && (
           <div className="suggestion-card" data-testid="training-complete">
             <h3>Entrenamiento completado</h3>
-            <p>Enviá la última copia de tu historial, plan y perfil a tu Drive privado para la próxima revisión.</p>
-            <button className="btn btn-primary" disabled={ctx.sync.busy} onClick={() => void ctx.sync.send(true, ctx.curDate)}>
-              {ctx.sync.busy ? 'Enviando…' : 'Enviar datos'}
-            </button>
-            <p role="status">{ctx.sync.status}</p>
+            <p>Ejercicios guardados en este dispositivo. Podés completar los minutos y las calorías del reloj antes de enviar los datos.</p>
+            <button className="btn btn-primary" onClick={reviewActivity}>Revisar actividad y calorías</button>
           </div>
         )}
 

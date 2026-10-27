@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { db } from '../db/instance';
 import type { AppData } from '../db/bootstrap';
-import { parsePairing, upload } from './protocol';
-import { changedRecordedDates, reviewBaseline, sessionBaselines } from './sessionReview';
+import { parsePairing, upload, type SyncConnection } from './protocol';
+import { changedRecordedDates, daySyncState, reviewBaseline, sessionBaselines } from './sessionReview';
 import type { Session } from '../db/schema';
 
 export function usePrivateSync(data: AppData | null) {
   const [status, setStatus] = useState('Sin conectar');
+  const [connection, setConnection] = useState<SyncConnection | null>(null);
+  const currentData = useRef(data);
+  currentData.current = data;
   const [busy, setBusy] = useState(false);
   const [pendingOverwrite, setPendingOverwrite] = useState(false);
   const [pendingDates, setPendingDates] = useState<string[]>([]);
@@ -24,7 +27,8 @@ export function usePrivateSync(data: AppData | null) {
         const transfer = async () => {
           if (baselineReady.current) await baselineReady.current;
           const current = await db.kv.get('syncConnection');
-          if (current?.key !== 'syncConnection') { setStatus('Sin conectar: abrí Plan → Perfil y seguimiento privado.'); return; }
+          if (current?.key !== 'syncConnection') { setConnection(null); setStatus('Sin conectar: abrí Plan → Perfil y seguimiento privado.'); return; }
+          setConnection(current.value);
           let sessionSignatures: Record<string, string> = {};
           let sessions: Session[] = [];
           const payload = await db.transaction('r', db.sessions, db.customExercises, db.kv, async () => {
@@ -68,9 +72,11 @@ export function usePrivateSync(data: AppData | null) {
             return true;
           });
           if (saved && mounted.current && !abort.signal.aborted) {
-            setPendingOverwrite(false);
-            setPendingDates([]);
-            setStatus(`Enviado a Drive: ${new Date(next.lastSync).toLocaleString()}`);
+            setConnection(next);
+            const remaining = changedRecordedDates(next.sessionReview, Object.values(currentData.current?.sessions ?? {}));
+            setPendingOverwrite(remaining.length > 0);
+            setPendingDates(remaining);
+            setStatus(remaining.length ? 'Hay cambios nuevos guardados en este dispositivo, pendientes de enviar.' : `Enviado a Drive: ${new Date(next.lastSync).toLocaleString()}`);
           }
         };
         if (navigator.locks?.request) await navigator.locks.request('kinex-private-upload', { signal: abort.signal }, transfer);
@@ -96,9 +102,12 @@ export function usePrivateSync(data: AppData | null) {
       const observed = Object.values(data.sessions);
       baselineReady.current = db.transaction('rw', db.kv, async () => {
         const active = await db.kv.get('syncConnection');
-        if (active?.key !== 'syncConnection' || (active.value.sessionReview && active.value.sessionReviewOrigin)) return;
+        if (active?.key !== 'syncConnection') { if (mounted.current) setConnection(null); return; }
+        if (active.value.sessionReview && active.value.sessionReviewOrigin) { if (mounted.current) setConnection(active.value); return; }
         const review = reviewBaseline(active.value, observed);
-        await db.kv.put({ key: 'syncConnection', value: { ...active.value, sessionReview: review.baseline, sessionReviewOrigin: review.origin } });
+        const initialized = { ...active.value, sessionReview: review.baseline, sessionReviewOrigin: review.origin };
+        await db.kv.put({ key: 'syncConnection', value: initialized });
+        if (mounted.current) setConnection(initialized);
       });
       // Failure remains retryable; never invent a successful upload.
       void baselineReady.current.catch(() => { baselineReady.current = null; });
@@ -124,15 +133,20 @@ export function usePrivateSync(data: AppData | null) {
     controller.current?.abort();
     if (running.current) await running.current;
     await db.kv.put({ key: 'syncConnection', value: connection });
+    setConnection(connection);
     await send();
   };
   const disconnect = async () => {
     controller.current?.abort();
     if (running.current) await running.current;
     await db.kv.delete('syncConnection');
+    setConnection(null);
     setPendingOverwrite(false);
     setPendingDates([]);
     setStatus('Desconectado. La copia ya enviada permanece en tu Drive.');
   };
-  return { status, busy, pendingOverwrite, pendingDates, send, connect, disconnect };
+  const localPending = connection && data ? changedRecordedDates(reviewBaseline(connection, Object.values(data.sessions)).baseline, Object.values(data.sessions)) : pendingDates;
+  const getDaySyncState = (date: string) => daySyncState(connection, data?.sessions[date], date);
+  const currentStatus = localPending.length && status.startsWith('Enviado a Drive:') ? 'Cambios guardados en este dispositivo, pendientes de enviar.' : status;
+  return { status: currentStatus, busy, connected: Boolean(connection), pendingOverwrite: connection && data ? localPending.length > 0 : pendingOverwrite, pendingDates: localPending, getDaySyncState, send, connect, disconnect };
 }

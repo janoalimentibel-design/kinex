@@ -63,3 +63,22 @@ test('la biblioteca retira ejercicios descartados y ofrece las incorporaciones y
     await expect(page.locator('.libcard')).toHaveCount(1);
   }
 });
+
+test('chin-up supino muestra las tres fases vigentes y Escape conserva la ficha abierta', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.nav button', { hasText: 'Biblioteca' }).click();
+  await page.locator('.search').fill('Dominadas supinas');
+  await page.locator('.libcard', { hasText: 'Chin-Ups' }).click();
+  await expect(page.locator('.lib-gallery .phase-lab-inline')).toHaveText(['Inicio', 'Medio', 'Final']);
+  for (const [label, file] of [['Inicio', 'inicio'], ['Medio', 'medio'], ['Final', 'final']]) {
+    const button = page.getByRole('button', { name: `Ampliar Dominadas supinas (Chin-Ups) · ${label}`, exact: true });
+    await expect(button.locator('img')).toHaveAttribute('src', new RegExp(`/assets/exercises/chinup-v348/${file}[.]webp$`));
+    await button.click();
+    const zoom = page.getByRole('dialog', { name: `Dominadas supinas (Chin-Ups) · ${label} ampliada`, exact: true });
+    await expect(zoom).toBeVisible();
+    await expect.poll(() => zoom.locator('.zoom-photo').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+    await page.keyboard.press('Escape');
+    await expect(zoom).not.toBeVisible();
+    await expect(page.locator('.lib-gallery')).toBeVisible();
+  }
+});

@@ -70,6 +70,7 @@ export type AerobicActivity = z.infer<typeof zAerobicActivity>;
 
 export const zSession = zSessionV1.extend({
   aerobicActivities: z.array(zAerobicActivity).refine(items => new Set(items.map(item => item.id)).size === items.length, 'Actividad duplicada').optional(),
+  gymMinutes: z.number().finite().min(0).max(1440).optional(),
   trainingCalories: z.number().finite().min(0).optional(),
   trainingCaloriesIncludeAerobic: z.boolean().optional(),
   // Las sesiones nuevas pueden ser de un único grupo para registrar cardio solo.

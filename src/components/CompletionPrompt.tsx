@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { reviewActivity } from './DaySyncStatus';
 import type { Ctx } from './types';
 
 /** A modal keeps the finish action visible even at the bottom of a long workout. */
@@ -28,9 +29,9 @@ export default function CompletionPrompt({ ctx, complete, active, signature }: {
   };
   return <dialog ref={dialog} className="completion-dialog" aria-labelledby="completion-title" onCancel={e => { e.preventDefault(); close(); }}>
     <h3 id="completion-title">Entrenamiento completado</h3>
-    <p>Terminaste todos los ejercicios de esta sesión. Enviá la última copia a tu Drive privado para la próxima revisión.</p>
-    <button className="btn btn-primary" disabled={ctx.sync.busy} onClick={() => void ctx.sync.send(true, ctx.curDate)}>{ctx.sync.busy ? 'Enviando…' : 'Enviar datos'}</button>
-    <p role="status">{ctx.sync.status}</p>
+    <p>Los ejercicios marcados quedan guardados en este dispositivo. Si querés, completá tus minutos y calorías antes de enviar los datos. Completar los ejercicios no completa esos campos.</p>
+    <button className="btn btn-primary" onClick={() => { close(); reviewActivity(); }}>Revisar actividad y calorías</button>
+    <p>Si Drive está conectado, los datos ya guardados pueden enviarse automáticamente. Los minutos y calorías que todavía no guardaste no se incluyen.</p>
     <button className="btn btn-soft" onClick={close}>Volver a la sesión</button>
   </dialog>;
 }
