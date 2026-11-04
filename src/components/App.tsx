@@ -44,6 +44,32 @@ export default function App() {
   const [modal, setModal] = useState<ModalState>(null);
   const [rest, setRest] = useState<RestState | null>(null);
 
+  // An installed PWA can stay open across missed days. Refresh adaptive drafts
+  // when returning to it, using the committed history from the data writer.
+  useEffect(() => {
+    let lastDay = isoDate(new Date());
+    const refresh = (foreground = false) => {
+      if (document.visibilityState === 'hidden') return;
+      const today = isoDate(new Date());
+      const changedDay = today !== lastDay;
+      if (!foreground && !changedDay) return;
+      if (!writer.current) return;
+      if (changedDay) setCurDate(selected => selected === lastDay ? today : selected);
+      lastDay = today;
+      void writer.current(current => rebalancePending(current, today))
+        .catch(() => setStorageError('No se pudo actualizar la sugerencia. Tus datos se conservan; volvé a abrir la app.'));
+    };
+    const foreground = () => refresh(true);
+    const timer = window.setInterval(() => refresh(), 30_000);
+    window.addEventListener('focus', foreground);
+    document.addEventListener('visibilitychange', foreground);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', foreground);
+      document.removeEventListener('visibilitychange', foreground);
+    };
+  }, []);
+
   // Cuenta regresiva del descanso; al llegar a 0 vibra y se cierra sola.
   useEffect(() => {
     if (!rest) return;
@@ -199,7 +225,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.49</div>
+            <div className="version">v3.50</div>
           </div>
         </div>
       </div>

@@ -47,13 +47,17 @@ export interface NextSessionSuggestion {
 
 // Calendar neighbours include the other side of a week boundary and future
 // pinned routines. A completed replacement can belong to a different group.
-export function adjacentGroups(date: string, sessions: Record<string, Session>, all?: ExerciseMap): Set<GroupId> {
+export function adjacentGroups(date: string, sessions: Record<string, Session>, all?: ExerciseMap, referenceDate = date): Set<GroupId> {
   const groups = new Set<GroupId>();
   for (const offset of [-1, 1]) {
     const day = new Date(`${date}T12:00:00`);
     day.setDate(day.getDate() + offset);
     const neighbour = sessions[isoDate(day)];
-    if (!neighbour) continue;
+    if (!neighbour || (isoDate(day) < referenceDate && !hasActivity(neighbour))) continue;
+    if (hasActivity(neighbour)) {
+      for (const group of activityGroups(neighbour, all)) if (group !== 'aerobico') groups.add(group);
+      continue;
+    }
     const chosen = (neighbour.selectedExercises ?? neighbour.programmed ?? []).map(id => (all ?? CATALOG)[id]?.group).filter((group): group is GroupId => Boolean(group));
     for (const group of [...neighbour.groups, ...chosen, ...activityGroups(neighbour, all)]) {
       if (group !== 'aerobico') groups.add(group);
@@ -62,35 +66,48 @@ export function adjacentGroups(date: string, sessions: Record<string, Session>, 
   return groups;
 }
 
-export function suggestedGroups(date: string, sessions: Record<string, Session> = {}, _plan?: Plan, all?: ExerciseMap): [GroupId, GroupId] {
+export function suggestedGroups(date: string, sessions: Record<string, Session> = {}, _plan?: Plan, all?: ExerciseMap, referenceDate = date): [GroupId, GroupId] {
   // El cardio cotidiano del usuario no debe secuestrar la sesión de fuerza.
   // Aeróbico se registra únicamente cuando el usuario lo elige como sesión aparte.
-  const blocked = adjacentGroups(date, sessions, all);
-  let pool = COMBOS.filter((pair) => pair.every((group) => !blocked.has(group)));
-  // Neighbours may reserve groups absent from the usual pair combinations.
-  // Keep the no-repeat rule instead of silently falling back to a conflict.
-  if (!pool.length) {
-    const available = (['pierna', 'espalda', 'pecho', 'hombro', 'bicep', 'tricep', 'core'] as GroupId[]).filter((g) => !blocked.has(g));
-    pool = available.flatMap((a, i) => available.slice(i + 1).map((b): [GroupId, GroupId] => [a, b]));
-  }
-  // Pathological imported sessions can record every group across neighbours.
-  // The caller can expose that conflict; avoid crashing historical views.
-  if (!pool.length) pool = COMBOS;
-  const preferredIndex = (new Date(`${date}T12:00:00`).getDay() + 1) % COMBOS.length;
+  const strengthGroups: GroupId[] = ['pierna', 'espalda', 'pecho', 'hombro', 'bicep', 'tricep', 'core'];
   const start = weekStart(date);
   const groupLoad = new Map<GroupId, number>();
-
-  // Cuenta sólo la semana calendario en curso. Una modificación anterior —sin
-  // guardar todavía— también cuenta, para que el próximo día se reequilibre.
   for (const [otherDate, session] of Object.entries(sessions)) {
+    // A past suggestion is not a workout. Missed days leave their muscles pending.
     if (otherDate < start || otherDate >= date) continue;
-    for (const group of hasActivity(session) ? activityGroups(session, all) : session.groups) groupLoad.set(group, (groupLoad.get(group) ?? 0) + 1);
+    const groups = hasActivity(session) ? activityGroups(session, all)
+      : otherDate >= referenceDate ? session.groups : [];
+    for (const group of groups) groupLoad.set(group, (groupLoad.get(group) ?? 0) + 1);
   }
+  const allPairs = strengthGroups.flatMap((a, i) => strengthGroups.slice(i + 1)
+    .map((b): [GroupId, GroupId] => [a, b]));
+  const repeated = (pair: [GroupId, GroupId]) => pair.filter(group => groupLoad.has(group)).length;
+  const minimumRepeats = Math.min(...allPairs.map(repeated));
+  const pendingPairs = allPairs.filter(pair => repeated(pair) === minimumRepeats);
+  const blocked = adjacentGroups(date, sessions, all, referenceDate);
+  // Future drafts must move around actual work, never force a weekly repeat.
+  let available = pendingPairs.filter(pair => pair.every(group => !blocked.has(group)));
+  if (!available.length) {
+    const yesterday = new Date(`${date}T12:00:00`);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const previous = sessions[isoDate(yesterday)];
+    const performedYesterday = new Set(previous
+      ? hasActivity(previous) ? activityGroups(previous, all) : isoDate(yesterday) >= referenceDate ? previous.groups : []
+      : []);
+    available = pendingPairs.filter(pair => pair.every(group => !performedYesterday.has(group)));
+  }
+  if (!available.length) available = pendingPairs;
+  // Keep familiar combinations when they cover as many pending muscles as any pair.
+  const familiar = COMBOS.filter(pair => available.some(other => pair.every(group => other.includes(group))));
+  const pool = familiar.length ? familiar : available;
+  const preferredIndex = (new Date(`${date}T12:00:00`).getDay() + 1) % COMBOS.length;
 
   const ranked = pool.map((combo, index) => {
     const used = (groupLoad.get(combo[0]) ?? 0) + (groupLoad.get(combo[1]) ?? 0);
     const samePair = Object.entries(sessions).some(([otherDate, session]) => {
-      return otherDate >= start && otherDate < date && session.groups.includes(combo[0]) && session.groups.includes(combo[1]);
+      const groups = hasActivity(session) ? activityGroups(session, all)
+        : otherDate >= referenceDate ? session.groups : [];
+      return otherDate >= start && otherDate < date && groups.includes(combo[0]) && groups.includes(combo[1]);
     });
     // Se conserva una preferencia semanal estable solo como desempate.
     const originalIndex = COMBOS.findIndex((pair) => pair[0] === combo[0] && pair[1] === combo[1]);
@@ -129,7 +146,7 @@ export function nextSessionSuggestion(date: string, sessions: Record<string, Ses
   return {
     groups,
     reason: saved
-      ? `Considera tus ${saved} sesiones con actividad registrada. Los ejercicios tildados cuentan sin guardar un formulario. El aeróbico va aparte si hoy querés registrarlo.`
+      ? `Prioriza los músculos pendientes de esta semana según tus ejercicios registrados. Los días sin actividad no cuentan como entrenamiento y los músculos pendientes pasan al próximo día que vayas. El aeróbico va aparte si hoy querés registrarlo.`
       : `Es una combinación inicial equilibrada. Al guardar entrenamientos, la siguiente sugerencia rota según tu historial. El aeróbico va aparte si hoy querés registrarlo.`,
   };
 }

@@ -103,7 +103,7 @@ test('Core propone un bloque mínimo de cuatro y los grupos anteriores reequilib
   const session = { ...createSession('2026-07-07'), groups: ['pierna', 'core'] as ['pierna', 'core'] };
   expect(buildExerciseList(session, CATALOG, {}).filter((entry) => entry.group === 'core')).toHaveLength(4);
 
-  const monday = { ...createSession('2026-07-06'), groups: ['pierna', 'core'] as ['pierna', 'core'] };
+  const monday = { ...createSession('2026-07-06'), saved: true, groups: ['pierna', 'core'] as ['pierna', 'core'] };
   expect(suggestedGroups('2026-07-07', { '2026-07-06': monday })).not.toEqual(['pierna', 'core']);
 });
 
@@ -113,8 +113,8 @@ test('la semana programada cubre los siete grupos antes de repetir y la sugerenc
   expect(pairs).toHaveLength(4);
   expect(new Set(groups)).toEqual(new Set(['pierna', 'espalda', 'pecho', 'hombro', 'bicep', 'tricep', 'core']));
 
-  const monday = { ...createSession('2026-09-07'), groups: ['espalda', 'core'] as ['espalda', 'core'] };
-  const tuesday = { ...createSession('2026-09-08'), groups: ['pierna', 'hombro'] as ['pierna', 'hombro'] };
+  const monday = { ...createSession('2026-09-07'), saved: true, groups: ['espalda', 'core'] as ['espalda', 'core'] };
+  const tuesday = { ...createSession('2026-09-08'), saved: true, groups: ['pierna', 'hombro'] as ['pierna', 'hombro'] };
   expect(suggestedGroups('2026-09-11', { '2026-09-07': monday, '2026-09-08': tuesday })).toEqual(['pecho', 'bicep']);
 });
 
