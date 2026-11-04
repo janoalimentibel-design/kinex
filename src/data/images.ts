@@ -1000,11 +1000,12 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   kickback_band: {
-    thumb: './assets/exercises/kickback-band/thumb.webp',
+    note: 'De frente al anclaje. El codo queda fijo y la mano se aleja del punto de sujeción al extender.',
+    thumb: './assets/exercises/kickback-band-v352/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/kickback-band/inicio.webp',
-      Medio: './assets/exercises/kickback-band/medio.webp',
-      Final: './assets/exercises/kickback-band/final.webp',
+      Inicio: './assets/exercises/kickback-band-v352/inicio.webp',
+      Medio: './assets/exercises/kickback-band-v352/medio.webp',
+      Final: './assets/exercises/kickback-band-v352/final.webp',
     },
   },
   tke: {

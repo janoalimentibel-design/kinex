@@ -57,7 +57,7 @@ const GALLERIES: [string, string, number?, string?][] = [
   ['Wall Angels', 'wall-angels'],
   ['Elevación lateral con banda', 'lateral-raise-band'],
   ['Extensión de tríceps con banda', 'triceps-extension-band'],
-  ['Kickback con banda', 'kickback-band'],
+  ['Kickback con banda', 'kickback-band-v352'],
   ['Terminal Knee Extension con banda', 'tke'],
   ['Estocada caminando', 'lunge-walk'],
   ['Face Pull', 'face-pull-h'],
