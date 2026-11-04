@@ -12,7 +12,7 @@ test('las vistas y controles principales siguen presentes', () => {
     .map((f) => fs.readFileSync(new URL('../src/components/' + f, import.meta.url), 'utf8'))
     .join('\n');
   for (const id of ['view-today', 'view-lib', 'view-hist', 'view-plan', 'view-requests']) expect(sources).toContain(id);
-  for (const label of ['Marcar hecha', 'Exportar backup', 'Importar', 'Copiar resumen', 'Enviar a GitHub']) expect(sources).toContain(label);
+  for (const label of ['Sensaciones y notas', 'Exportar backup', 'Importar', 'Copiar resumen', 'Enviar a GitHub']) expect(sources).toContain(label);
 });
 
 test('formatos y grupos mantienen el contrato de A2.6', () => {

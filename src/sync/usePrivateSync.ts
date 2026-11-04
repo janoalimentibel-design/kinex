@@ -14,20 +14,22 @@ export function usePrivateSync(data: AppData | null) {
   const [pendingOverwrite, setPendingOverwrite] = useState(false);
   const [pendingDates, setPendingDates] = useState<string[]>([]);
   const baselineReady = useRef<Promise<void> | null>(null);
-  const running = useRef<Promise<void> | null>(null);
+  const running = useRef<Promise<boolean> | null>(null);
   const controller = useRef<AbortController | null>(null);
   const mounted = useRef(true);
-  const send = useCallback((manual = true, date?: string) => {
+  const send = useCallback((manual = true, date?: string): Promise<boolean> => {
+    // Uploads are only initiated by an explicit user action.
+    if (!manual) return Promise.resolve(false);
     if (running.current) return running.current;
     const abort = new AbortController();
     controller.current = abort;
     setBusy(true);
-    const work = async () => {
+    const work = async (): Promise<boolean> => {
       try {
-        const transfer = async () => {
+        const transfer = async (): Promise<boolean> => {
           if (baselineReady.current) await baselineReady.current;
           const current = await db.kv.get('syncConnection');
-          if (current?.key !== 'syncConnection') { setConnection(null); setStatus('Sin conectar: abrí Plan → Perfil y seguimiento privado.'); return; }
+          if (current?.key !== 'syncConnection') { setConnection(null); setStatus('Sin conectar: abrí Plan → Perfil y seguimiento privado.'); return false; }
           setConnection(current.value);
           let sessionSignatures: Record<string, string> = {};
           let sessions: Session[] = [];
@@ -47,11 +49,7 @@ export function usePrivateSync(data: AppData | null) {
           setPendingOverwrite(changedDates.length > 0);
           setPendingDates(changedDates);
           const requiresFirstReview = review.origin === 'observed';
-          if (!manual && (requiresFirstReview || changedDates.length)) {
-            setStatus(changedDates.length ? 'Cambios guardados en este dispositivo. Podés enviarlos cuando quieras.' : 'Conectado a Drive.');
-            return;
-          }
-          if (manual && (requiresFirstReview || changedDates.length)) {
+          if (requiresFirstReview || changedDates.length) {
             const selected = date && changedDates.includes(date) ? date : changedDates[0];
             const label = selected ? new Date(`${selected}T12:00:00`).toLocaleDateString('es', { day: 'numeric', month: 'long' }) : '';
             const question = requiresFirstReview
@@ -59,7 +57,7 @@ export function usePrivateSync(data: AppData | null) {
               : `Cambiaste el registro del ${label}, que ya habías enviado.${changedDates.length > 1 ? ` También hay cambios en otros ${changedDates.length - 1} días.` : ''} ¿Querés volver a enviar los datos y actualizar la copia de Drive?`;
             if (!window.confirm(question)) {
               setStatus('Cambios guardados en este dispositivo. La copia de Drive se conserva.');
-              return;
+              return false;
             }
           }
           setStatus('Enviando datos a Drive…');
@@ -78,12 +76,17 @@ export function usePrivateSync(data: AppData | null) {
             setPendingDates(remaining);
             setStatus(remaining.length ? 'Hay cambios nuevos guardados en este dispositivo, pendientes de enviar.' : `Enviado a Drive: ${new Date(next.lastSync).toLocaleString()}`);
           }
+          if (!saved && mounted.current && !abort.signal.aborted) {
+            setStatus('No se pudo confirmar el envío en este dispositivo: cambió la conexión. Revisá la conexión antes de reintentar.');
+          }
+          return saved && !abort.signal.aborted;
         };
-        if (navigator.locks?.request) await navigator.locks.request('kinex-private-upload', { signal: abort.signal }, transfer);
-        else await transfer(); // Server revisions still reject conflicting writes.
+        if (navigator.locks?.request) return await navigator.locks.request('kinex-private-upload', { signal: abort.signal }, transfer);
+        return await transfer(); // Server revisions still reject conflicting writes.
       } catch (error) {
         if (mounted.current && !abort.signal.aborted) setStatus(error instanceof Error && (error.message.startsWith('Conflicto') || error.message.startsWith('Google no respondió') || error.message.startsWith('Drive rechazó'))
           ? error.message : 'Pendiente: no se confirmó el envío. Tus datos siguen guardados en este dispositivo. Podés reintentar.');
+        return false;
       } finally {
         running.current = null;
         if (mounted.current) setBusy(false);
@@ -103,38 +106,35 @@ export function usePrivateSync(data: AppData | null) {
       baselineReady.current = db.transaction('rw', db.kv, async () => {
         const active = await db.kv.get('syncConnection');
         if (active?.key !== 'syncConnection') { if (mounted.current) setConnection(null); return; }
-        if (active.value.sessionReview && active.value.sessionReviewOrigin) { if (mounted.current) setConnection(active.value); return; }
+        if (active.value.sessionReview && active.value.sessionReviewOrigin) {
+          if (mounted.current) {
+            setConnection(active.value);
+            setStatus('Conectado a Drive. El envío es manual: tocá «Guardar y enviar entrenamiento» cuando termines.');
+          }
+          return;
+        }
         const review = reviewBaseline(active.value, observed);
         const initialized = { ...active.value, sessionReview: review.baseline, sessionReviewOrigin: review.origin };
         await db.kv.put({ key: 'syncConnection', value: initialized });
-        if (mounted.current) setConnection(initialized);
+        if (mounted.current) {
+          setConnection(initialized);
+          setStatus('Conectado a Drive. El envío es manual: tocá «Guardar y enviar entrenamiento» cuando termines.');
+        }
       });
       // Failure remains retryable; never invent a successful upload.
       void baselineReady.current.catch(() => { baselineReady.current = null; });
     }
-    // Do not abort an upload when a new local change arrives: retain its server revision.
-    let stopped = false;
-    const timer = setTimeout(async () => {
-      if (running.current) await running.current;
-      if (stopped) return;
-      const connection = await db.kv.get('syncConnection');
-      if (!stopped && connection) void send(false);
-    }, 1500);
-    return () => { stopped = true; clearTimeout(timer); };
-  }, [data, send]);
-  useEffect(() => {
-    const retry = async () => { if (await db.kv.get('syncConnection')) void send(false); };
-    const timer = setInterval(retry, 60000);
-    window.addEventListener('online', retry);
-    return () => { clearInterval(timer); window.removeEventListener('online', retry); };
-  }, [send]);
+    // Local edits update review state only. Sending requires the manual action.
+  }, [data]);
   const connect = async (text: string) => {
     const connection = parsePairing(text);
     controller.current?.abort();
     if (running.current) await running.current;
     await db.kv.put({ key: 'syncConnection', value: connection });
     setConnection(connection);
-    await send();
+    setPendingOverwrite(false);
+    setPendingDates([]);
+    setStatus('Conectado a Drive. El envío es manual: tocá «Guardar y enviar entrenamiento» cuando termines.');
   };
   const disconnect = async () => {
     controller.current?.abort();

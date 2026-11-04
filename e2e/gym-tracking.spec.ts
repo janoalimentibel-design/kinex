@@ -4,94 +4,11 @@ test.use({ serviceWorkers: 'block', locale: 'es-ES' });
 const endpoint = 'https://script.google.com/macros/s/test/exec';
 const activity = (page: Page) => page.locator('.activity-log');
 async function save(page: Page) {
-  const button = activity(page).getByRole('button', { name: 'Guardar actividad y calorías', exact: true });
+  const button = activity(page).getByRole('button', { name: 'Guardar entrenamiento', exact: true });
   await button.click();
-  await expect(button).toBeDisabled();
-  await expect(activity(page)).toContainText('Actividad y calorías guardadas en este dispositivo.');
+  await expect(button).toBeEnabled();
+  await expect(activity(page)).toContainText('Entrenamiento guardado en este dispositivo.');
 }
-async function connect(page: Page) {
-  await page.locator('.nav button', { hasText: 'Plan' }).click();
-  await page.getByText('Perfil y seguimiento privado', { exact: true }).click();
-  await page.getByLabel('Código de conexión personal').fill(JSON.stringify({ endpoint, token: 'a'.repeat(64) }));
-  await page.getByRole('button', { name: 'Conectar y enviar mis datos', exact: true }).click();
-  await expect(page.getByTestId('sync-feedback')).toContainText('Enviado a Drive:');
-  await page.locator('.nav button', { hasText: 'Hoy' }).click();
-}
-
-test('primera copia automática no incluye campos vacíos; guardar minutos y kcal requiere confirmar otra copia', async ({ page }, testInfo) => {
-  await page.clock.install({ time: new Date('2026-10-27T12:00:00') });
-  let uploads = 0;
-  let payload: any;
-  let failing = false;
-  await page.route(endpoint, async route => {
-    uploads++;
-    if (failing) { await route.abort(); return; }
-    payload = JSON.parse(JSON.parse(route.request().postData()!).payload);
-    await route.fulfill({ json: { ok: true, version: uploads }, headers: { 'Access-Control-Allow-Origin': '*' } });
-  });
-  await page.goto('/');
-  await connect(page);
-  const checks = page.locator('.ex .chk');
-  for (let index = 0; index < await checks.count(); index++) await checks.nth(index).click();
-  await page.clock.runFor(2500);
-  await expect.poll(() => payload.data.sessions.some((session: any) => Object.values(session.completed).length && Object.values(session.completed).every(Boolean))).toBe(true);
-  const first = payload.data.sessions.find((session: any) => session.date === '2026-10-27');
-  expect(first.gymMinutes).toBeUndefined();
-  expect(first.trainingCalories).toBeUndefined();
-  const completion = page.getByRole('dialog', { name: 'Entrenamiento completado', exact: true });
-  await completion.getByRole('button', { name: 'Revisar actividad y calorías', exact: true }).click();
-  await expect(activity(page)).toContainText('Datos guardados de este día enviados a Drive.');
-  await page.getByLabel('Minutos totales en gimnasio', { exact: true }).fill('80');
-  await page.getByLabel('Calorías del entrenamiento', { exact: true }).fill('400');
-  await page.getByRole('button', { name: 'Añadir actividad aeróbica', exact: true }).click();
-  await page.getByLabel('Minutos 1', { exact: true }).fill('20');
-  await page.getByLabel('Calorías 1', { exact: true }).fill('125');
-  await page.getByLabel('Incluyen la actividad aeróbica', { exact: true }).check();
-  const before = uploads;
-  await expect(activity(page).locator('.day-sync-status')).toContainText('Borrador sin guardar');
-  await expect(activity(page).locator('.day-sync-status')).not.toContainText('Datos guardados de este día enviados');
-  await expect(activity(page).getByRole('button', { name: 'Enviar cambios', exact: true })).toBeDisabled();
-  await save(page);
-  await page.clock.runFor(2000);
-  await expect(activity(page)).toContainText('Pendientes de enviar a Drive.');
-  await expect(activity(page).locator('.activity-summary')).toContainText('Gimnasio: 80 min · Aeróbico: 20 min');
-  await expect(activity(page).locator('.activity-summary')).toContainText('Total guardado del día: 400 kcal');
-  expect(uploads).toBe(before);
-  await page.reload();
-  await page.clock.runFor(2000);
-  await expect(page.getByLabel('Minutos totales en gimnasio', { exact: true })).toHaveValue('80');
-  await expect(activity(page)).toContainText('Pendientes de enviar a Drive.');
-  let accept = false;
-  let confirmations = 0;
-  page.on('dialog', async dialog => {
-    expect(dialog.message()).toContain('ya habías enviado');
-    if (accept) await dialog.accept(); else await dialog.dismiss();
-    confirmations++;
-  });
-  const send = activity(page).getByRole('button', { name: 'Enviar cambios', exact: true });
-  await send.click();
-  await expect.poll(() => confirmations).toBe(1);
-  expect(uploads).toBe(before);
-  await expect(send).toBeEnabled();
-  accept = true; failing = true;
-  await send.click();
-  await expect.poll(() => uploads).toBe(before + 1);
-  await expect(send).toBeEnabled();
-  await expect(activity(page)).toContainText('Pendientes de enviar a Drive.');
-  await expect(activity(page).locator('.day-sync-status [role=alert]')).toContainText('Pendiente: no se confirmó el envío');
-  await activity(page).locator('.day-sync-status').scrollIntoViewIfNeeded();
-  await page.screenshot({ path: testInfo.outputPath('gym-upload-error.png') });
-  failing = false;
-  await send.click();
-  await expect.poll(() => uploads).toBe(before + 2);
-  await expect(activity(page)).toContainText('Datos guardados de este día enviados a Drive.');
-  expect(payload.data.sessions.find((session: any) => session.date === '2026-10-27')).toMatchObject({ gymMinutes: 80, trainingCalories: 400, trainingCaloriesIncludeAerobic: true });
-  await activity(page).scrollIntoViewIfNeeded();
-  await page.screenshot({ path: testInfo.outputPath('gym-form.png') });
-  await activity(page).locator('.day-sync-status').scrollIntoViewIfNeeded();
-  await page.screenshot({ path: testInfo.outputPath('gym-saved-sent.png') });
-});
-
 test('resumen semanal, mensual y total excluye futuro, separa cardio y conserva cero frente a vacío', async ({ page }, testInfo) => {
   await page.clock.install({ time: new Date('2026-10-27T12:00:00') });
   await page.goto('/');

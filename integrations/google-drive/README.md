@@ -10,8 +10,9 @@ los scopes del manifiesto: archivos creados por la aplicación y solicitudes HTT
 Los archivos no se comparten públicamente. No usar DriveApp ni permisos globales.
 
 En KINEX → Plan, introducir como código personal un JSON con endpoint (URL /exec
-del despliegue) y token. Al pulsar Conectar se autoriza el envío del historial,
-plan y perfil. La clave se almacena en IndexedDB, fuera de respaldos/exportaciones.
+del despliegue) y token. Conectar guarda la conexión. El envío se inicia manualmente desde «Guardar y
+enviar entrenamiento» al final de Hoy, o «Enviar datos a Drive» en Plan. Se envía
+una copia del historial, plan y perfil guardados. La clave se almacena en IndexedDB, fuera de respaldos/exportaciones.
 Cada nueva conexión crea una copia independiente; no hay importación automática.
 Desconectar detiene próximos envíos, no revoca un envío ya recibido ni borra Drive.
 Para revocar la clave del servidor, cambiar KINEX_TOKEN o retirar el despliegue.
@@ -21,8 +22,9 @@ redirecciones y CORS), verificar un archivo privado con datos de prueba, buscarl
 y leerlo por el conector de Drive, conectar el teléfono y confirmar su primer
 envío. Las pruebas locales no demuestran que Google permita el flujo desplegado.
 Si CORS impide confirmar respuestas, no usar no-cors ni marcarlo sincronizado.
-La sincronización funciona con la app abierta; no garantiza envíos en segundo
-plano ni una revisión automática por un entrenador. Las recomendaciones requieren
+El envío es manual y requiere la app abierta; no hay envíos automáticos al
+marcar ejercicios, editar, conectar, reabrir ni recuperar internet. Tampoco implica
+una revisión automática por un entrenador. Las recomendaciones requieren
 consultar la copia más reciente y confirmar las indicaciones clínicas.
 
 Validación del 12 de octubre de 2026: POST ficticio recibido y leído por el

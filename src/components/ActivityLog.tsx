@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { z } from 'zod';
 import { zAerobicActivity, type Session } from '../db/schema';
 import { activitySignature, activityTotals } from '../logic/aerobic';
@@ -45,6 +45,8 @@ export default function ActivityLog({ ctx }: { ctx: Ctx }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [deliveryAttempted, setDeliveryAttempted] = useState(false);
   const saving = useRef(false);
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
@@ -54,43 +56,61 @@ export default function ActivityLog({ ctx }: { ctx: Ctx }) {
   const change = (next: Draft) => {
     if (saving.current) return;
     memoryDrafts.set(date, next);
-    setDraft(next); setDirty(true); setError(''); setMessage('');
+    setDraft(next); setDirty(true); setError(''); setMessage(''); setDeliveryAttempted(false);
     try { sessionStorage.setItem(key, JSON.stringify(next)); setDurable(true); }
     catch { setDurable(false); }
     window.dispatchEvent(new Event('kinex-activity-draft'));
   };
   const update = (id: string, field: keyof Draft['rows'][number], text: string) => change({ ...draft, rows: draft.rows.map(row => row.id === id ? { ...row, [field]: text } : row) });
-  const save = async (event: FormEvent) => {
+  const save = async (event: SyntheticEvent, deliver: boolean) => {
     event.preventDefault();
-    if (saving.current) return;
-    setError(''); setMessage('');
+    if (saving.current || ctx.sync.busy) return;
+    setError(''); setMessage(''); setDeliveryAttempted(false);
+    let committed = false;
     try {
       const aerobicActivities = draft.rows.map((row, index) => zAerobicActivity.parse({ id: row.id, type: row.type, minutes: number(row.minutes, `Actividad ${index + 1}, minutos`, true), calories: number(row.calories, `Actividad ${index + 1}, calorías`), distanceKm: number(row.distanceKm, `Actividad ${index + 1}, kilómetros`) }));
       const trainingCalories = number(draft.training, 'Calorías del entrenamiento');
       const gymMinutes = number(draft.gym, 'Minutos totales en gimnasio');
       if (gymMinutes !== undefined && gymMinutes > 1440) throw new Error('Minutos totales en gimnasio: el máximo es 1440 por día.');
       saving.current = true; setBusy(true);
-      await ctx.saveActivityData(date, { aerobicActivities, gymMinutes, trainingCalories, trainingCaloriesIncludeAerobic: draft.includes }, draft.baseline);
+      const activity = { aerobicActivities, gymMinutes, trainingCalories, trainingCaloriesIncludeAerobic: draft.includes };
+      // This also waits for queued exercise checks before reading the upload snapshot.
+      await ctx.saveActivityData(date, activity, draft.baseline);
+      committed = true;
       if (JSON.stringify(memoryDrafts.get(date)) === JSON.stringify(draft)) memoryDrafts.delete(date);
       try {
         const storedDraft = sessionStorage.getItem(key);
         if (storedDraft && JSON.stringify(zDraft.parse(JSON.parse(storedDraft))) === JSON.stringify(draft)) sessionStorage.removeItem(key);
         window.dispatchEvent(new Event('kinex-activity-draft'));
       } catch { /* Data is committed even if draft cleanup is unavailable. */ }
-      if (mounted.current) { setDirty(false); setMessage('Actividad y calorías guardadas en este dispositivo.'); }
+      if (mounted.current) {
+        setDirty(false);
+        setDraft({ ...draft, baseline: activitySignature(activity) });
+        setMessage('Entrenamiento guardado en este dispositivo.');
+      }
+      if (deliver) {
+        if (mounted.current) { setSending(true); setDeliveryAttempted(true); }
+        const sent = await ctx.sync.send(true, date);
+        if (mounted.current) setMessage(sent
+          ? 'Entrenamiento guardado y enviado a Drive.'
+          : 'Entrenamiento guardado en este dispositivo. No se confirmó el envío; podés volver a intentarlo.');
+      }
     } catch (reason) {
-      if (mounted.current) setError(reason instanceof z.ZodError ? 'Completá el tipo y los minutos de cada actividad con valores válidos.' : reason instanceof Error ? reason.message : 'No se pudo guardar. Tu borrador se conserva.');
+      if (mounted.current) setError(committed
+        ? 'Entrenamiento guardado en este dispositivo. No se pudo confirmar el envío; podés volver a intentarlo.'
+        : reason instanceof z.ZodError ? 'Completá el tipo y los minutos de cada actividad con valores válidos.' : reason instanceof Error ? reason.message : 'No se pudo guardar. Tu borrador se conserva.');
     } finally {
       saving.current = false;
-      if (mounted.current) setBusy(false);
+      if (mounted.current) { setBusy(false); setSending(false); }
     }
   };
   const totals = activityTotals(ctx.session);
   return <section id="activity-log" tabIndex={-1} className="activity-log suggestion-card" aria-labelledby="activity-title">
-    <h3 id="activity-title">Actividad y calorías</h3>
+    <h3 id="activity-title">Completar entrenamiento</h3>
     <p>Registrá lo que mida tu reloj, incluso en días sin fuerza. El tiempo total en gimnasio, las calorías y los kilómetros son opcionales.</p>
-    <form className="activity-form" onSubmit={event => void save(event)}>
-      <fieldset disabled={busy}>
+    <p>Los ejercicios se guardan al marcarlos. Cuando termines de completar todo, {ctx.sync.connected ? 'guardá y enviá el entrenamiento' : 'guardá el entrenamiento en este dispositivo'} con el botón de abajo.</p>
+    <form className="activity-form" onSubmit={event => void save(event, ctx.sync.connected)}>
+      <fieldset disabled={busy || ctx.sync.busy}>
         <label>Minutos totales en gimnasio<input aria-label="Minutos totales en gimnasio" inputMode="decimal" value={draft.gym} onChange={event => change({ ...draft, gym: event.target.value })} /></label>
         <p>Todo el tiempo que estuviste en el gimnasio, incluida la bici y los descansos. Se registra por separado: no se suma a los minutos de aeróbico.</p>
         {draft.rows.map((row, index) => <article className="activity-entry" key={row.id}>
@@ -108,7 +128,8 @@ export default function ActivityLog({ ctx }: { ctx: Ctx }) {
         <label>Calorías del entrenamiento (kcal)<input aria-label="Calorías del entrenamiento" inputMode="decimal" value={draft.training} onChange={event => change({ ...draft, training: event.target.value })} /></label>
         <label className="activity-checkbox"><input type="checkbox" checked={draft.includes} onChange={event => change({ ...draft, includes: event.target.checked })} />Incluyen la actividad aeróbica</label>
         <p>Si el reloj ya incluye el cardio en las calorías del entrenamiento, marcá esta opción para contarlo una sola vez.</p>
-        <div className="activity-actions"><button className="btn btn-primary" type="submit" disabled={!dirty}>{busy ? 'Guardando…' : 'Guardar actividad y calorías'}</button>
+        <div className="activity-actions"><button className="btn btn-primary" type="submit">{sending ? 'Enviando…' : busy ? 'Guardando…' : ctx.sync.connected ? 'Guardar y enviar entrenamiento' : 'Guardar entrenamiento'}</button>
+          {ctx.sync.connected && <button type="button" className="btn btn-soft" onClick={event => void save(event, false)}>Guardar en este dispositivo</button>}
           {dirty && <button type="button" className="btn btn-soft" onClick={() => {
             if (!window.confirm('¿Descartar el borrador de actividad y recuperar los datos guardados de este día?')) return;
             memoryDrafts.delete(date);
@@ -120,8 +141,8 @@ export default function ActivityLog({ ctx }: { ctx: Ctx }) {
     </form>
     {dirty && <p role="status">Borrador sin guardar{!durable ? ': no se pudo proteger; guardalo antes de recargar.' : '. Se conserva al cambiar de día.'}</p>}
     {dirty && draft.baseline !== signature && <p role="alert">Los datos guardados cambiaron. Tu borrador está protegido; revisá el día antes de descartarlo y volver a editar.</p>}
-    {error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}
+    {error && <p role="alert">{error}</p>}{message && (message !== 'Entrenamiento guardado y enviado a Drive.' || ctx.sync.getDaySyncState(date) === 'sent') && <p role="status">{message}</p>}
     <div className="activity-summary"><p>Gimnasio: {totals.gymMinutes === null ? 'sin minutos registrados' : `${totals.gymMinutes} min`} · Aeróbico: {totals.aerobicMinutes === null ? 'sin minutos registrados' : `${totals.aerobicMinutes} min`}</p><p>Entrenamiento: {totals.trainingCalories === null ? 'kcal sin registrar' : `${totals.trainingCalories} kcal`} · Aeróbico: {totals.aerobicCalories === null ? 'kcal sin registrar' : `${totals.aerobicCalories} kcal`} · {totals.distanceKm === null ? 'km sin registrar' : `${totals.distanceKm} km`}</p><p>Total guardado del día: {totals.totalCalories === null ? 'sin calorías registradas' : `${totals.totalCalories} kcal`}. Los valores opcionales vacíos no se estiman.</p></div>
-    <DaySyncStatus ctx={ctx} dirty={dirty} />
+    <DaySyncStatus ctx={ctx} dirty={dirty} showSendButton={false} deliveryAttempted={deliveryAttempted} />
   </section>;
 }

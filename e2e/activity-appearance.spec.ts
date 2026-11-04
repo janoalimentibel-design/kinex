@@ -10,10 +10,10 @@ async function openAppearance(page: Page) {
 }
 
 async function saveActivities(page: Page) {
-  const save = page.getByRole('button', { name: 'Guardar actividad y calorías', exact: true });
+  const save = page.getByRole('button', { name: /^(Guardar entrenamiento|Guardar en este dispositivo)$/, exact: true });
   await save.click();
-  await expect(save).toBeDisabled();
-  await expect(page.getByText('Actividad y calorías guardadas en este dispositivo.', { exact: true })).toBeVisible();
+  await expect(save).toBeEnabled();
+  await expect(page.getByText('Entrenamiento guardado en este dispositivo.', { exact: true })).toBeVisible();
 }
 
 test('cardio en una fecha pasada permite varios registros, correcciones, eliminación y backup sin fuerza ficticia', async ({ page }) => {
@@ -134,7 +134,8 @@ test('corregir cardio ya enviado pide consentimiento y envía las calorías nuev
   await page.locator('.nav button', { hasText: 'Plan' }).click();
   await page.getByText('Perfil y seguimiento privado', { exact: true }).click();
   await page.getByLabel('Código de conexión personal').fill(JSON.stringify({ endpoint: 'https://script.google.com/macros/s/test/exec', token: 'a'.repeat(64) }));
-  await page.getByRole('button', { name: 'Conectar y enviar mis datos', exact: true }).click();
+  await page.getByRole('button', { name: 'Conectar Drive', exact: true }).click();
+  await page.getByRole('button', { name: 'Enviar datos a Drive', exact: true }).click();
   await expect(page.getByTestId('sync-feedback')).toContainText('Enviado a Drive:');
   await page.locator('.nav button', { hasText: 'Hoy' }).click();
   await page.getByLabel('Calorías 1', { exact: true }).fill('130');
@@ -146,7 +147,7 @@ test('corregir cardio ya enviado pide consentimiento y envía las calorías nuev
     expect(dialog.message()).toContain('ya habías enviado');
     await dialog.accept();
   });
-  await page.getByRole('button', { name: 'Reintentar envío', exact: true }).click();
+  await page.getByRole('button', { name: 'Enviar datos a Drive', exact: true }).click();
   await confirmation;
   await expect.poll(() => calls).toBe(before + 1);
   expect(JSON.parse(payload).data.sessions.some((s: { aerobicActivities?: { calories: number }[] }) => s.aerobicActivities?.[0]?.calories === 130)).toBe(true);

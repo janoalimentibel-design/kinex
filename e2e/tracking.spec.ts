@@ -17,62 +17,27 @@ test('profile persists after reload and sync only acknowledges confirmed uploads
     await route.fulfill({ json: { ok: true, version: 1 }, headers: { 'Access-Control-Allow-Origin': '*' } });
   });
   await page.getByLabel('Cargar código desde archivo').setInputFiles({ name: 'CONEXION-KINEX.txt', mimeType: 'text/plain', buffer: Buffer.from(JSON.stringify({ endpoint: 'https://script.google.com/macros/s/test/exec', token: 'a'.repeat(64) })) });
-  await expect(page.getByText('Código cargado. Tocá Conectar y enviar mis datos.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Código cargado. Tocá Conectar Drive.', { exact: true })).toBeVisible();
   expect(received).toBe('');
-  await page.getByRole('button', { name: 'Conectar y enviar mis datos' }).click();
+  await page.getByRole('button', { name: 'Conectar Drive' }).click();
+  expect(received).toBe('');
+  await page.getByRole('button', { name: 'Enviar datos a Drive', exact: true }).click();
   await expect(page.getByTestId('sync-feedback')).toContainText('Enviado a Drive:');
   expect(JSON.parse(JSON.parse(received).payload).data.profile.goals).toBe('Objetivo de prueba');
   await page.getByRole('button', { name: 'Desconectar', exact: true }).click();
   await expect(page.getByTestId('sync-feedback')).toContainText('Desconectado.');
 });
 
-test('completion reviews optional metrics, never claims upload while disconnected, hides on undo', async ({ page }) => {
+test('completion remains in the session without a popup or false upload claims while disconnected', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.ex .chk').first()).toBeVisible();
+  const checks = page.locator('.ex .chk');
+  await expect(checks.first()).toBeVisible();
+  for (let i = 0; i < await checks.count(); i++) await checks.nth(i).click();
   await expect(page.getByTestId('training-complete')).toHaveCount(0);
-  const checks = page.locator('.ex .chk');
-  for (let i = 0; i < await checks.count(); i++) await checks.nth(i).click();
-  const banner = page.getByTestId('training-complete');
-  await expect(banner).toBeVisible();
-  const prompt = page.getByRole('dialog', { name: 'Entrenamiento completado' });
-  await expect(prompt).toBeVisible();
-  await expect(prompt).toBeInViewport();
-  await prompt.getByRole('button', { name: 'Revisar actividad y calorías', exact: true }).click();
-  const activity = page.locator('.activity-log');
-  await expect(activity).toContainText('Drive no está conectado.');
-  await expect(activity.getByRole('button', { name: 'Enviar cambios', exact: true })).toHaveCount(0);
-  await expect(activity).not.toContainText('enviados a Drive.');
-  await checks.first().click();
-  await expect(banner).toHaveCount(0);
-});
-
-test('failed upload remains pending and a manual retry sends the completed session', async ({ page }) => {
-  await page.goto('/');
-  await page.locator('.nav button', { hasText: 'Plan' }).click();
-  await page.getByText('Perfil y seguimiento privado', { exact: true }).click();
-  let fail = true;
-  let snapshot: { data: { sessions: { completed: Record<string, boolean> }[] } } | undefined;
-  await page.route('https://script.google.com/macros/s/test/exec', async route => {
-    if (fail) { await route.abort(); return; }
-    snapshot = JSON.parse(JSON.parse(route.request().postData()!).payload);
-    await route.fulfill({ json: { ok: true, version: 1 } });
-  });
-  await page.getByLabel('Código de conexión personal').fill(JSON.stringify({ endpoint: 'https://script.google.com/macros/s/test/exec', token: 'a'.repeat(64) }));
-  await page.getByRole('button', { name: 'Conectar y enviar mis datos' }).click();
-  await expect(page.getByTestId('sync-feedback')).toContainText('Pendiente: no se confirmó');
-  await page.locator('.nav button', { hasText: 'Hoy' }).click();
-  const checks = page.locator('.ex .chk');
-  for (let i = 0; i < await checks.count(); i++) await checks.nth(i).click();
-  const banner = page.getByTestId('training-complete');
-  await expect(banner).toBeVisible();
-  fail = false;
-  const prompt = page.getByRole('dialog', { name: 'Entrenamiento completado' });
-  await expect(prompt).toBeInViewport();
-  await prompt.getByRole('button', { name: 'Revisar actividad y calorías', exact: true }).click();
-  const activity = page.locator('.activity-log');
-  await activity.getByRole('button', { name: 'Enviar cambios', exact: true }).click();
-  await expect(activity).toContainText('Datos guardados de este día enviados a Drive.');
-  expect(snapshot?.data.sessions.some(s => Object.values(s.completed).length > 0 && Object.values(s.completed).every(Boolean))).toBe(true);
+  await expect(page.getByRole('dialog', { name: 'Entrenamiento completado' })).toHaveCount(0);
+  await expect(page.locator('.activity-log')).toContainText('Drive no está conectado.');
+  await expect(page.getByRole('button', { name: 'Guardar entrenamiento', exact: true })).toBeVisible();
+  await expect(page.locator('.activity-log')).not.toContainText('enviados a Drive.');
 });
 
 test('a key-only input reports the correction beside Connect without sending data', async ({ page }) => {
@@ -80,10 +45,10 @@ test('a key-only input reports the correction beside Connect without sending dat
   await page.locator('.nav button', { hasText: 'Plan' }).click();
   await page.getByText('Perfil y seguimiento privado', { exact: true }).click();
   await page.getByLabel('Código de conexión personal').fill('a'.repeat(64));
-  await page.getByRole('button', { name: 'Conectar y enviar mis datos', exact: true }).click();
+  await page.getByRole('button', { name: 'Conectar Drive', exact: true }).click();
   await expect(page.getByTestId('connection-feedback')).toContainText('Cargaste solo la clave');
   await expect(page.getByTestId('connection-feedback')).toBeInViewport();
-  await expect(page.getByRole('button', { name: 'Conectar y enviar mis datos', exact: true })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Conectar Drive', exact: true })).toBeEnabled();
 });
 
 test('connect works without Web Locks or randomUUID and retry preserves the same device', async ({ page }) => {
@@ -103,14 +68,16 @@ test('connect works without Web Locks or randomUUID and retry preserves the same
   await page.locator('.nav button', { hasText: 'Plan' }).click();
   await page.getByText('Perfil y seguimiento privado', { exact: true }).click();
   await page.getByLabel('Código de conexión personal').fill(JSON.stringify({ endpoint: 'https://script.google.com/macros/s/test/exec', token: 'a'.repeat(64) }));
-  await page.getByRole('button', { name: 'Conectar y enviar mis datos', exact: true }).click();
+  await page.getByRole('button', { name: 'Conectar Drive', exact: true }).click();
+  expect(calls).toBe(0);
+  await page.getByRole('button', { name: 'Enviar datos a Drive', exact: true }).click();
   await expect(page.getByTestId('sync-feedback')).toContainText('Enviado a Drive:');
   expect(device).toMatch(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
-  await page.getByRole('button', { name: 'Reintentar envío', exact: true }).click();
+  await page.getByRole('button', { name: 'Enviar datos a Drive', exact: true }).click();
   await expect.poll(() => calls).toBe(2);
 });
 
-test('seven selected exercises trigger a visible finish dialog despite removed unfinished log entries', async ({ page }) => {
+test('seven selected exercises finish without a popup despite removed unfinished log entries', async ({ page }) => {
   await page.clock.install({ time: new Date('2026-10-17T12:00:00') });
   await page.goto('/');
   await expect(page.locator('.logo')).toBeVisible();
@@ -128,13 +95,14 @@ test('seven selected exercises trigger a visible finish dialog despite removed u
   await expect(page.locator('.ex .chk')).toHaveCount(7);
   await expect(page.getByRole('dialog', { name: 'Entrenamiento completado' })).not.toBeVisible();
   await page.getByRole('button', { name: 'Marcar Elevación lateral con banda', exact: true }).click();
-  const prompt = page.getByRole('dialog', { name: 'Entrenamiento completado' });
-  await expect(prompt).toBeInViewport();
-  await expect(prompt.getByRole('button', { name: 'Revisar actividad y calorías', exact: true })).toBeInViewport();
-  await prompt.getByRole('button', { name: 'Volver a la sesión' }).click();
+  await expect(page.getByRole('dialog', { name: 'Entrenamiento completado' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Guardar entrenamiento', exact: true })).toBeVisible();
+  await expect.poll(() => page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>(resolve => { const r = indexedDB.open('kinex'); r.onsuccess = () => resolve(r.result); });
+    const r = db.transaction('sessions').objectStore('sessions').get('2026-10-17');
+    const session = await new Promise<any>(resolve => { r.onsuccess = () => resolve(r.result); }); db.close(); return session?.completed?.lat_raise_band;
+  })).toBe(true);
   await page.reload();
-  await expect(prompt).not.toBeVisible();
-  await page.getByRole('button', { name: 'Marcar Elevación lateral con banda', exact: true }).click();
-  await page.getByRole('button', { name: 'Marcar Elevación lateral con banda', exact: true }).click();
-  await expect(prompt).toBeInViewport();
+  await expect(page.getByRole('dialog', { name: 'Entrenamiento completado' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Marcar Elevación lateral con banda', exact: true })).toHaveAttribute('aria-pressed', 'true');
 });

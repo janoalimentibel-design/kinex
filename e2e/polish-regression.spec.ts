@@ -26,7 +26,7 @@ async function seedLegacyHistory(page: Page) {
 }
 
 async function editToday(page: Page) {
-  await page.getByRole('button', { name: 'Marcar hecha' }).click();
+  await page.getByRole('button', { name: 'Sensaciones y notas' }).click();
   await page.locator('.sheet .field', { hasText: 'Notas' }).locator('textarea').fill('Corrección sintética');
   await page.getByRole('button', { name: 'Guardar sesión', exact: true }).click();
   await page.clock.runFor(2000);
@@ -70,7 +70,7 @@ test('editar un día antiguo conserva confirmación contextual, cancelación y f
   await page.clock.runFor(2000);
   await page.locator('.nav button', { hasText: 'Plan' }).click();
   await page.getByText('Perfil y seguimiento privado', { exact: true }).click();
-  const retry = page.getByRole('button', { name: 'Reintentar envío', exact: true });
+  const retry = page.getByRole('button', { name: 'Enviar datos a Drive', exact: true });
   let accept = false;
   let confirmations = 0;
   page.on('dialog', async dialog => {
@@ -156,13 +156,13 @@ test('revisión visual sintética de vistas, formulario y diálogo en claro y os
       await page.getByLabel('Calorías 1', { exact: true }).fill('125');
       await page.getByLabel('Kilómetros 1', { exact: true }).fill('6.2');
     }
-    const saveActivity = page.getByRole('button', { name: 'Guardar actividad y calorías', exact: true });
-    if (await saveActivity.isEnabled()) { await saveActivity.click(); await expect(saveActivity).toBeDisabled(); }
+    const saveActivity = page.getByRole('button', { name: 'Guardar entrenamiento', exact: true });
+    if (await saveActivity.isEnabled()) { await saveActivity.click(); await expect(saveActivity).toBeEnabled(); }
     await page.locator('.activity-log').evaluate(element => { const header = document.querySelector('.topbar')?.getBoundingClientRect().height ?? 100; scrollTo(0, scrollY + element.getBoundingClientRect().top - header - 12); });
     await page.screenshot({ path: testInfo.outputPath(`${theme}-actividad-390.png`) });
     await page.locator('.activity-summary').scrollIntoViewIfNeeded();
     await page.screenshot({ path: testInfo.outputPath(`${theme}-actividad-resumen-390.png`) });
-    await page.getByRole('button', { name: 'Marcar hecha' }).click();
+    await page.getByRole('button', { name: 'Sensaciones y notas' }).click();
     await expect(page.locator('.sheet')).toBeInViewport();
     await page.screenshot({ path: testInfo.outputPath(`${theme}-guardar-dialog-390.png`) });
     await page.getByRole('button', { name: 'Guardar sesión', exact: true }).click();
@@ -188,7 +188,7 @@ test('selector de apariencia permite teclado, Escape devuelve foco y tocar fuera
 
 test('hoja de guardar ofrece cierre, mantiene foco dentro y devuelve foco al abrir y cerrar', async ({ page }) => {
   await page.goto('/');
-  const trigger = page.getByRole('button', { name: 'Marcar hecha' });
+  const trigger = page.getByRole('button', { name: 'Sensaciones y notas' });
   await trigger.click();
   const dialog = page.locator('dialog.modal.show');
   await expect(dialog).toBeVisible();

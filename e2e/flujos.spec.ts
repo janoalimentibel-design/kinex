@@ -34,7 +34,7 @@ test('sesión completa: checks, guardar métricas, historial y persistencia tras
   await page.locator('.ex .chk').first().click();
   await expect(page.locator('.proglab')).toHaveText(/^1 de \d+ ejercicios/);
 
-  await page.getByRole('button', { name: 'Marcar hecha' }).click();
+  await page.getByRole('button', { name: 'Sensaciones y notas' }).click();
   const sheet = page.locator('.sheet');
   await sheet.locator('.field', { hasText: 'Lumbar antes' }).locator('input').fill('2');
   await sheet.locator('.field', { hasText: 'Lumbar después' }).locator('input').fill('1');
@@ -72,7 +72,7 @@ test('próxima semana cubre todos los grupos y rota ejercicios desde el historia
   await openApp(page);
   // Deja una sesión real para que el generador tenga historial que considerar.
   await page.locator('.ex .chk').first().click();
-  await page.getByRole('button', { name: 'Marcar hecha' }).click();
+  await page.getByRole('button', { name: 'Sensaciones y notas' }).click();
   await page.getByRole('button', { name: 'Guardar sesión' }).click();
 
   await nav(page, 'Plan');
@@ -97,7 +97,7 @@ test('ejercicio personalizado: se crea y aparece en la Biblioteca', async ({ pag
 test('exportar backup y reimportarlo con vista previa restaura los datos', async ({ page }) => {
   await openApp(page);
   await page.locator('.ex .chk').first().click();
-  await page.getByRole('button', { name: 'Marcar hecha' }).click();
+  await page.getByRole('button', { name: 'Sensaciones y notas' }).click();
   await page.getByRole('button', { name: 'Guardar sesión' }).click();
   await expect(page.locator('.streak .n')).toHaveText('1');
 

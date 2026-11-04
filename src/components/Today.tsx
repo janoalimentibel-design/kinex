@@ -1,7 +1,5 @@
 import { RETIRED_EXERCISES } from '../data/gym';
-import CompletionPrompt from './CompletionPrompt';
 import ActivityLog from './ActivityLog';
-import { reviewActivity } from './DaySyncStatus';
 // Vista Hoy — port de renderStrip/renderDay/renderGroups/renderExercise de A2.8.
 import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
@@ -41,7 +39,7 @@ function timeLabel(seconds: number): string {
   return seconds % 60 === 0 ? `${seconds / 60} min` : `${seconds}s`;
 }
 
-export default function Today({ ctx, notice, warnings, dismissNotice, active }: {
+export default function Today({ ctx, notice, warnings, dismissNotice }: {
   ctx: Ctx;
   active: boolean;
   notice: string | null;
@@ -72,7 +70,6 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
 
   return (
     <>
-      <CompletionPrompt ctx={ctx} active={active && curDate === today} complete={list.length > 0 && done === list.length} signature={list.map(e => e.id).join(',')} />
       <div className="weekwrap">
         <div className="weekhead">
           <h2>Tu semana</h2>
@@ -175,17 +172,9 @@ export default function Today({ ctx, notice, warnings, dismissNotice, active }: 
 
         <div className="actions">
           <button className="btn btn-ghost" onClick={() => ctx.setModal({ type: 'combo' })}>☰ Cambiar grupos</button>
-          <button className="btn btn-primary" onClick={() => ctx.setModal({ type: 'saveSession' })}>✓ Marcar hecha</button>
+          <button className="btn btn-ghost" onClick={() => ctx.setModal({ type: 'saveSession' })}>Sensaciones y notas</button>
           <button className="btn btn-ghost" onClick={() => ctx.setModal({ type: 'revisions' })}>Deshacer / versiones del día</button>
         </div>
-
-        {list.length > 0 && done === list.length && (
-          <div className="suggestion-card" data-testid="training-complete">
-            <h3>Entrenamiento completado</h3>
-            <p>Ejercicios guardados en este dispositivo. Podés completar los minutos y las calorías del reloj antes de enviar los datos.</p>
-            <button className="btn btn-primary" onClick={reviewActivity}>Revisar actividad y calorías</button>
-          </div>
-        )}
 
         <div className="prog">
           <div className="bar"><div className="fill" style={{ width: `${pct}%` }}></div></div>
