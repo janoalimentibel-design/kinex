@@ -1025,11 +1025,11 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   face_pull_h: {
-    thumb: './assets/exercises/face-pull-h/thumb.webp',
+    thumb: './assets/exercises/face-pull/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/face-pull-h/inicio.webp',
-      Medio: './assets/exercises/face-pull-h/medio.webp',
-      Final: './assets/exercises/face-pull-h/final.webp',
+      Inicio: './assets/exercises/face-pull/inicio.webp',
+      Medio: './assets/exercises/face-pull/medio.webp',
+      Final: './assets/exercises/face-pull/final.webp',
     },
   },
   ytw: {

@@ -6,7 +6,7 @@ export const GYM_EQUIPMENT = [
   'Bandas elásticas y peso corporal', 'Bicicleta estática', 'Remo ergómetro confirmado por el usuario',
 ];
 // Retain catalog records and assets so old sessions/imports remain readable.
-export const RETIRED_EXERCISES = new Set(['knee_pushup', 'diamond_reg', 'diamond_tri', 'bracing_90', 'pullup_band', 'chin_assist', 'leg_ext', 'bench_crunch']);
+export const RETIRED_EXERCISES = new Set(['knee_pushup', 'diamond_reg', 'diamond_tri', 'bracing_90', 'pullup_band', 'chin_assist', 'leg_ext', 'bench_crunch', 'band_pulldown', 'towel_hold']);
 export const UNCONFIRMED_EQUIPMENT = new Set([
   'leg_ext', 'calf_machine', 'hack_squat', 'leg_press_incline', 'seated_leg_curl', 'lying_leg_curl',
   'hip_abduction_machine', 'seated_row_machine', 'barbell_row', 'cable_crossover',
