@@ -4,6 +4,7 @@
 import { mkdirSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 
+// Retired exercises are covered by retired-nov6.spec.ts: they must be absent from Biblioteca.
 const GALLERIES: [string, string, number?, string?][] = [
   ['Tibialis Raise', 'tibialis-v3', 3],
   ['Polea alta tras nuca / a la espalda', 'lat-pulldown-back', 3],
@@ -17,7 +18,6 @@ const GALLERIES: [string, string, number?, string?][] = [
   ['Hollow Hold regresado', 'hollow-regressed', 1],
   ['Curl isométrico con banda', 'curl-isometric', 1],
   ['Hang supino', 'supine-hang', 1],
-  ['Toalla Hold / Grip Hold', 'towel-hold', 1],
   ['Flexiones', 'flexiones'],
   ['Dominadas estrictas', 'dominadas'],
   ['Step-Up bajo', 'step-up-bajo'],
@@ -27,7 +27,6 @@ const GALLERIES: [string, string, number?, string?][] = [
   ['Balance a una pierna', 'balance-una-pierna'],
   ['Gemelos en máquina', 'gemelos-maquina'],
   ['Active Hang', 'active-hang', 1],
-  ['Band Lat Pulldown', 'band-lat-pulldown'],
   ['Band Pull-Apart', 'band-pull-apart-espalda'],
   ['Sit-to-Stand', 'sit-to-stand'],
   ['Remo con banda', 'band-row'],
