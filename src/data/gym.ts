@@ -12,8 +12,9 @@ export const UNCONFIRMED_EQUIPMENT = new Set([
   'hip_abduction_machine', 'seated_row_machine', 'barbell_row', 'cable_crossover',
   'cable_glute_kickback', 'step_bajo', 'step_medio', 'caminata_inclinada', 'eliptico', 'decline_db_press',
 ]);
-// Bench flexion awaits the user's clinical limits; keep it available as an explained option.
-export const MANUAL_ONLY_EXERCISES = new Set(['bench_crunch', 'decline_bench_crunch', 'decline_bench_reach', 'decline_bench_hold']);
+// Reviewed additions remain manual choices; catalog availability does not change the routine.
+// Bench/cable flexion also awaits the user's clinical limits.
+export const MANUAL_ONLY_EXERCISES = new Set(['bench_crunch', 'decline_bench_crunch', 'decline_bench_reach', 'decline_bench_hold', 'concentration_curl', 'cable_overhead_triceps', 'decline_barbell_press', 'neutral_lat_pulldown', 'front_raise_db', 'seated_calf_raise_db', 'kneeling_cable_crunch']);
 export function automaticInGym(id: string): boolean {
   return !RETIRED_EXERCISES.has(id) && !UNCONFIRMED_EQUIPMENT.has(id) && !MANUAL_ONLY_EXERCISES.has(id);
 }

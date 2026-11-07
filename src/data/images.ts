@@ -14,6 +14,97 @@ export interface ExerciseImages {
 }
 
 export const REAL_IMAGES: Record<string, ExerciseImages> = {
+  concentration_curl: {
+    thumb: './assets/exercises/concentration-curl-v354/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/concentration-curl-v354/inicio.webp',
+      Medio: './assets/exercises/concentration-curl-v354/medio.webp',
+      Final: './assets/exercises/concentration-curl-v354/final.webp',
+    },
+    instructions: {
+      Inicio: 'Sentado, brazo apoyado por dentro del muslo y mancuerna abajo.',
+      Medio: 'Doblá el codo sin despegar el brazo del muslo.',
+      Final: 'Acercá la mancuerna al hombro y después bajá despacio.',
+    },
+  },
+  cable_overhead_triceps: {
+    thumb: './assets/exercises/cable-overhead-triceps-v354/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/cable-overhead-triceps-v354/inicio.webp',
+      Medio: './assets/exercises/cable-overhead-triceps-v354/medio.webp',
+      Final: './assets/exercises/cable-overhead-triceps-v354/final.webp',
+    },
+    instructions: {
+      Inicio: 'Polea baja detrás; manos detrás de la cabeza y codos hacia arriba.',
+      Medio: 'Extendé los codos manteniendo los brazos junto a la cabeza.',
+      Final: 'Terminá con los brazos extendidos arriba; volvé doblando los codos.',
+    },
+  },
+  decline_barbell_press: {
+    thumb: './assets/exercises/decline-barbell-press-v354/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/decline-barbell-press-v354/inicio.webp',
+      Medio: './assets/exercises/decline-barbell-press-v354/medio.webp',
+      Final: './assets/exercises/decline-barbell-press-v354/final.webp',
+    },
+    instructions: {
+      Inicio: 'Cabeza más baja que la cadera, pies sujetos y barra cerca del pecho bajo.',
+      Medio: 'Empujá la barra hacia arriba sin despegar la espalda del banco.',
+      Final: 'Extendé los brazos sin bloquear fuerte los codos y bajá controlando.',
+    },
+  },
+  neutral_lat_pulldown: {
+    thumb: './assets/exercises/neutral-lat-pulldown-v354/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/neutral-lat-pulldown-v354/inicio.webp',
+      Medio: './assets/exercises/neutral-lat-pulldown-v354/medio.webp',
+      Final: './assets/exercises/neutral-lat-pulldown-v354/final.webp',
+    },
+    instructions: {
+      Inicio: 'Sentado con muslos sujetos, palmas enfrentadas y brazos arriba.',
+      Medio: 'Bajá los codos sin balancear el torso.',
+      Final: 'Acercá el agarre al pecho alto y volvé despacio.',
+    },
+  },
+  front_raise_db: {
+    thumb: './assets/exercises/front-raise-db-v354/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/front-raise-db-v354/inicio.webp',
+      Medio: './assets/exercises/front-raise-db-v354/medio.webp',
+      Final: './assets/exercises/front-raise-db-v354/final.webp',
+    },
+    instructions: {
+      Inicio: 'De pie, mancuernas delante de los muslos.',
+      Medio: 'Elevá los brazos al frente sin impulsarte con el torso.',
+      Final: 'Llegá aproximadamente a la altura de los hombros y bajá despacio.',
+    },
+  },
+  seated_calf_raise_db: {
+    thumb: './assets/exercises/seated-calf-raise-db-v354/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/seated-calf-raise-db-v354/inicio.webp',
+      Medio: './assets/exercises/seated-calf-raise-db-v354/medio.webp',
+      Final: './assets/exercises/seated-calf-raise-db-v354/final.webp',
+    },
+    instructions: {
+      Inicio: 'Sentado, rodillas dobladas y mancuernas sobre los muslos.',
+      Medio: 'Elevá los talones manteniendo el antepié apoyado.',
+      Final: 'Pausá con los talones arriba y bajá sin rebotar.',
+    },
+  },
+  kneeling_cable_crunch: {
+    thumb: './assets/exercises/kneeling-cable-crunch-v354/thumb.webp',
+    phases: {
+      Inicio: './assets/exercises/kneeling-cable-crunch-v354/inicio.webp',
+      Medio: './assets/exercises/kneeling-cable-crunch-v354/medio.webp',
+      Final: './assets/exercises/kneeling-cable-crunch-v354/final.webp',
+    },
+    instructions: {
+      Inicio: 'De rodillas frente a la polea alta, sujetá la cuerda junto a la cabeza.',
+      Medio: 'Acercá las costillas a la pelvis al curvar el tronco.',
+      Final: 'Terminá la contracción sin sentarte sobre los talones y volvé despacio.',
+    },
+  },
   decline_bench_crunch: {
     thumb: './assets/exercises/decline-bench-crunch-v344/thumb.webp',
     visiblePhases: ['Inicio', 'Final'],
