@@ -58,7 +58,7 @@ test('la biblioteca retira ejercicios descartados y ofrece las incorporaciones y
     await page.locator('.search').fill(name);
     await expect(page.locator('.libcard')).toHaveCount(0);
   }
-  for (const name of ['Extensión de cuádriceps en accesorio de banco', 'Remo con mancuernas y pecho apoyado', 'Press de pecho con mancuernas en el suelo', 'Press de banca declinado con mancuernas', 'Apertura inversa con pecho apoyado', 'Curl de bíceps sentado en banco inclinado', 'Patada de tríceps con mancuerna y apoyo', 'Crunch en banco abdominal inclinado', 'Crunch en banco inclinado con brazos al frente', 'Sostén abdominal en banco inclinado', 'Elevación de talones de pie con apoyo']) {
+  for (const name of ['Extensión de cuádriceps en accesorio de banco', 'Remo con mancuernas y pecho apoyado', 'Press de pecho con mancuernas en el suelo', 'Press de banca declinado con mancuernas', 'Apertura inversa con pecho apoyado', 'Curl de bíceps sentado en banco inclinado', 'Patada de tríceps con mancuerna y apoyo', 'Crunch en banco abdominal inclinado', 'Crunch en banco inclinado con brazos al frente', 'Sostén abdominal en banco inclinado', 'Gemelos de pie con apoyo (elevación de talones)']) {
     await page.locator('.search').fill(name);
     await expect(page.locator('.libcard')).toHaveCount(1);
   }

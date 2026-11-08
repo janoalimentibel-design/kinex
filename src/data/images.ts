@@ -1208,12 +1208,18 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   spanish_squat: {
-    thumb: './assets/exercises/spanish-squat/thumb.webp',
+    thumb: './assets/exercises/spanish-squat-v355/thumb.webp',
+    visiblePhases: ['Inicio', 'Final'],
     phases: {
-      Inicio: './assets/exercises/spanish-squat/inicio.webp',
-      Medio: './assets/exercises/spanish-squat/medio.webp',
-      Final: './assets/exercises/spanish-squat/final.webp',
+      Inicio: './assets/exercises/spanish-squat-v355/preparacion.webp',
+      Medio: './assets/exercises/spanish-squat-v355/mantener.webp',
+      Final: './assets/exercises/spanish-squat-v355/mantener.webp',
     },
+    instructions: {
+      Inicio: 'Preparación: anclaje delante, banda detrás de ambas rodillas y pies apoyados.',
+      Final: 'Sostén: sentate hacia atrás y mantené la postura, sin subir y bajar.',
+    },
+    note: 'Isométrico: la primera foto muestra la preparación; la segunda, la postura que se mantiene.',
   },
   dead_hang: {
     display: 'hold',

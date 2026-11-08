@@ -1,0 +1,121 @@
+import { expect, test } from 'vitest';
+import { CATALOG } from '../src/data/exercises';
+import { automaticInGym } from '../src/data/gym';
+import { toAppData, toExportData, type AppData } from '../src/db/bootstrap';
+import { parseBackup, serializeBackup } from '../src/db/backup';
+import { createDefaultPlan, emptyTrainingProfile, type Session } from '../src/db/schema';
+import { createSession, buildExerciseList } from '../src/logic/session';
+import { rebalancePending } from '../src/logic/rebalance';
+import { applyPublishedRoutine } from '../src/logic/publishedRoutine';
+import { applyNov9Routine, NOV9_DAYS, NOV9_ID } from '../src/logic/routineNov9';
+
+// Synthetic activity only; no personal backup or profile is used.
+function fixture(): AppData {
+  const previous = { ...createSession('2026-10-29'), completed: { pushup: true } };
+  return {
+    plan: { ...createDefaultPlan(), routineRevision: '2026-10-26-r1', rule: 'Synthetic personal rule' },
+    profile: emptyTrainingProfile(), custom: {}, sessions: { [previous.date]: previous },
+  };
+}
+
+test('starts with legs on Monday, covers seven groups and uses confirmed equipment without manufacturing activity', () => {
+  const before = fixture(), snapshot = JSON.stringify(before);
+  const after = rebalancePending(applyPublishedRoutine(before, '2026-11-09'), '2026-11-09');
+  expect(JSON.stringify(before)).toBe(snapshot);
+  expect(after.plan.routineRevision).toBe(NOV9_ID);
+  expect(after.profile).toBe(before.profile);
+  expect(after.custom).toBe(before.custom);
+  expect(after.plan.rule).toBe(before.plan.rule);
+  expect(after.sessions['2026-10-29']).toBe(before.sessions['2026-10-29']);
+  expect(NOV9_DAYS.map(day => day.date)).toEqual(['2026-11-09', '2026-11-10', '2026-11-12', '2026-11-14']);
+  expect(after.sessions['2026-11-09'].groups).toEqual(['pierna', 'hombro']);
+  expect(new Set(NOV9_DAYS.flatMap(day => day.groups))).toEqual(new Set(['pierna', 'hombro', 'pecho', 'tricep', 'espalda', 'bicep', 'core']));
+  for (const day of NOV9_DAYS) {
+    const session = after.sessions[day.date];
+    expect(session.programmed).toEqual(day.ids);
+    expect(buildExerciseList(session, CATALOG, after.sessions).map(item => item.id)).toEqual(day.ids);
+    expect(session.saved).toBe(false);
+    expect(session.completed).toEqual({});
+    expect(session.setLogs).toBeUndefined();
+    expect(new Set(day.ids).size).toBe(day.ids.length);
+    for (const id of day.ids) {
+      expect(CATALOG[id], id).toBeDefined();
+      expect(session.groups, id).toContain(CATALOG[id].group);
+      expect(id === 'seated_calf_raise_db' || automaticInGym(id), id).toBe(true);
+      expect(['standing_calf_raise', 'calf_machine', 'band_pulldown', 'towel_hold']).not.toContain(id);
+    }
+  }
+  for (const date of ['2026-11-11', '2026-11-13', '2026-11-15']) expect(after.sessions[date]).toBeUndefined();
+});
+
+test.each([
+  ['completed', { completed: { bird_dog: true } }],
+  ['saved', { saved: true }],
+  ['locked', { planner: { source: 'adaptive', week: '2026-11-09', locked: true } }],
+  ['uncompleted set notes', { setLogs: { bird_dog: [{ reps: 6, load: 10, rpe: null, done: false }] } }],
+  ['edited', { manuallyEdited: true }],
+  ['replacement', { replacements: { bird_dog: 'pallof' } }],
+  ['extra', { extras: ['pallof'] }],
+  ['explicitly empty', { selectedExercises: [] }],
+  ['selected', { selectedExercises: ['bird_dog'] }],
+  ['programmed', { programmed: ['bird_dog'], programTitle: 'Synthetic external program' }],
+  ['partial sets', { setLogs: { bird_dog: [{ reps: 6, load: null, rpe: null, done: true }, { reps: 6, load: null, rpe: null, done: false }] } }],
+  ['historical name', { exerciseLog: [{ id: 'bird_dog', name: 'Synthetic historical name', group: 'core', completed: true }] }],
+] as [string, Partial<Session>][])('preserves %s when loading the new week', (_label, patch) => {
+  const before = fixture();
+  const existing = { ...createSession('2026-11-09'), groups: ['core'] as Session['groups'], ...patch };
+  before.sessions[existing.date] = existing;
+  const after = applyNov9Routine(before, '2026-11-09', true);
+  expect(after.sessions[existing.date]).toBe(existing);
+  expect(after.sessions['2026-11-10'].programmed).toEqual(NOV9_DAYS[1].ids);
+});
+
+test('late delivery preserves past sessions and never fabricates missed training', () => {
+  const before = fixture();
+  const existing = { ...createSession('2026-11-10'), selectedExercises: [] };
+  before.sessions[existing.date] = existing;
+  const after = applyNov9Routine(before, '2026-11-12', true);
+  expect(after.sessions['2026-11-09']).toBeUndefined();
+  expect(after.sessions[existing.date]).toBe(existing);
+  expect(after.sessions['2026-11-12'].programmed).toEqual(NOV9_DAYS[2].ids);
+});
+
+test('only recent activity enables automatic delivery and force stays inside the week', () => {
+  const empty = { ...fixture(), sessions: {} };
+  expect(applyNov9Routine(empty, '2026-11-09')).toBe(empty);
+  expect(applyNov9Routine(empty, '2026-11-09', true).plan.routineRevision).toBe(NOV9_ID);
+  for (const date of ['2026-11-07', '2026-11-16']) expect(applyNov9Routine(fixture(), date, true)).toEqual(fixture());
+  const stale = { ...empty, sessions: { '2026-09-01': { ...createSession('2026-09-01'), saved: true } } };
+  expect(applyNov9Routine(stale, '2026-11-09')).toBe(stale);
+});
+
+test('reload and a v2 backup roundtrip preserve the delivered routine and its history', () => {
+  const after = applyNov9Routine(fixture(), '2026-11-09');
+  expect(applyNov9Routine(after, '2026-11-09', true)).toBe(after);
+  const restored = toAppData(parseBackup(serializeBackup(toExportData(after), new Date('2026-11-09T12:00:00Z'))).data);
+  expect(restored).toEqual(after);
+  expect(applyPublishedRoutine(restored, '2026-11-10')).toBe(restored);
+});
+
+
+test('an untouched adaptive draft and an adjacent Sunday draft cannot displace requested Monday legs', () => {
+  const before = fixture();
+  before.sessions['2026-11-08'] = { ...createSession('2026-11-08'), groups: ['pierna', 'hombro'], programmed: ['glute_bridge'], planner: { source: 'adaptive', week: '2026-10-26' } };
+  before.sessions['2026-11-09'] = { ...createSession('2026-11-09'), groups: ['espalda', 'bicep'], programmed: ['pullup'], planner: { source: 'adaptive', week: '2026-11-09' } };
+  const after = rebalancePending(applyPublishedRoutine(before, '2026-11-09'), '2026-11-09');
+  expect(after.sessions['2026-11-09'].groups).toEqual(['pierna', 'hombro']);
+  expect(after.sessions['2026-11-09'].programmed).toEqual(NOV9_DAYS[0].ids);
+  expect(after.sessions['2026-11-09'].planner).toBeUndefined();
+  expect(after.sessions['2026-11-08']).toBe(before.sessions['2026-11-08']);
+});
+
+test('Sunday preview delivers the next week without replacing today or downgrading on reload', () => {
+  const before = fixture();
+  const sunday = { ...createSession('2026-11-08'), completed: { bird_dog: true } };
+  before.sessions[sunday.date] = sunday;
+  const after = applyPublishedRoutine(before, '2026-11-08');
+  expect(after.plan.routineRevision).toBe(NOV9_ID);
+  expect(after.sessions[sunday.date]).toBe(sunday);
+  expect(after.sessions['2026-11-09'].programmed).toEqual(NOV9_DAYS[0].ids);
+  expect(applyPublishedRoutine(after, '2026-11-08', true)).toBe(after);
+});

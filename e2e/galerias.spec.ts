@@ -69,7 +69,7 @@ const GALLERIES: [string, string, number?, string?][] = [
   ['Bear Hold', 'bear-hold'],
   ['Flexiones de tríceps brazos pegados', 'triceps-pushup'],
   ['Farmer Carry con mochila', 'farmer-carry'],
-  ['Spanish Squat isométrico', 'spanish-squat'],
+  ['Spanish Squat isométrico', 'spanish-squat-v355', 2],
   ['Dead Hang', 'dead-hang', 1],
   ['Scapular Push-Up', 'scap-pushup-v2-v342', 2],
   ['Flexión excéntrica controlada', 'ecc-pushup'],
@@ -92,7 +92,7 @@ const GALLERIES: [string, string, number?, string?][] = [
   ["Crunch en banco abdominal inclinado", "decline-bench-crunch-v344", 2],
   ["Crunch en banco inclinado con brazos al frente", "decline-bench-reach-v344", 2],
   ["Sostén abdominal en banco inclinado", "decline-bench-hold-v344", 1],
-  ["Elevación de talones de pie con apoyo", "standing-calf-raise-v343", 2],
+  ["Gemelos de pie con apoyo (elevación de talones)", "standing-calf-raise-v343", 2],
 ];
 
 const OUT = new URL('../verification/a3-fase2/', import.meta.url).pathname;

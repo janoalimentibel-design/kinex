@@ -7,6 +7,7 @@ import type { Plan, Session } from '../db/schema';
 import { buildExerciseList, createSession, nextSessionSuggestion, weeklyCoveragePairs } from '../logic/session';
 import { activityGroups, completedIds, hasActivity } from '../logic/activity';
 import { ROUTINE_END, ROUTINE_ID, ROUTINE_START } from '../logic/publishedRoutine';
+import { NOV9_AVAILABLE, NOV9_DAYS, NOV9_END, NOV9_ID } from '../logic/routineNov9';
 import { NOV2_AVAILABLE, NOV2_DAYS, NOV2_END, NOV2_ID } from '../logic/routineNov2';
 import { OCT26_AVAILABLE, OCT26_DAYS, OCT26_END, OCT26_ID } from '../logic/routineOct26';
 import { isoDate } from '../logic/session';
@@ -27,7 +28,9 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
   const sessions = Object.values(data.sessions).filter(hasActivity);
   const suggestion = nextSessionSuggestion(ctx.curDate, data.sessions, plan);
   const scheduledSessions = Object.values(data.sessions)
-    .filter((session) => plan.routineRevision === NOV2_ID && plan.week === '2–8 nov'
+    .filter((session) => plan.routineRevision === NOV9_ID && plan.week === '9–15 nov'
+      ? NOV9_DAYS.some(day => day.date === session.date)
+      : plan.routineRevision === NOV2_ID && plan.week === '2–8 nov'
       ? NOV2_DAYS.some(day => day.date === session.date)
       : plan.routineRevision === OCT26_ID && plan.week === '26 oct – 1 nov'
       ? OCT26_DAYS.some(day => day.date === session.date)
@@ -140,7 +143,22 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
         </div>
         <button className="mini" onClick={() => ctx.setView('requests')}>✎ Pedidos</button>
       </div>
-      {isoDate(new Date()) >= NOV2_AVAILABLE && isoDate(new Date()) <= NOV2_END && (
+      {isoDate(new Date()) >= NOV9_AVAILABLE && isoDate(new Date()) <= NOV9_END && (
+        <div className="suggestion-card" data-testid="reviewed-routine-nov9">
+          <div className="t">Rutina semanal · 9–15 nov</div>
+          <h3>Lunes: piernas y hombros</h3>
+          <p>Martes: pecho y tríceps. Jueves: espalda y bíceps. Sábado: piernas y core. Miércoles, viernes y domingo quedan para recuperación.</p>
+          <p>Se conservan el historial y los días que ya empezaste, guardaste, editaste o programaste. Las sesiones conservadas pueden diferir de esta propuesta.</p>
+          <p>Usá cargas controladas, dejando 2–3 repeticiones en reserva. Las cargas no aumentan automáticamente. Empezá por el extremo inferior del rango de repeticiones de cada ficha.</p>
+          <p>Gemelos sentado con mancuerna reemplaza la elevación de pie. Banco y mancuernas, sin suponer una máquina de gemelos.</p>
+          <p>Pará si aparece molestia lumbar o irradiada. Bici o caminata suave como complemento opcional.</p>
+          <button className="btn btn-primary" disabled={loadingRoutine} onClick={() => void loadReviewed()}>
+            {loadingRoutine ? 'Guardando rutina…' : plan.routineRevision === NOV9_ID ? 'Abrir próximo día de la rutina' : 'Cargar semana del 9 de noviembre'}
+          </button>
+          {routineError && <p role="alert">{routineError}</p>}
+        </div>
+      )}
+      {isoDate(new Date()) >= NOV2_AVAILABLE && isoDate(new Date()) <= NOV2_END && isoDate(new Date()) < NOV9_AVAILABLE && (
         <div className="suggestion-card" data-testid="reviewed-routine-nov2">
           <div className="t">Rutina semanal · 2–8 nov</div>
           <h3>Lunes: piernas y hombros</h3>
@@ -224,7 +242,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
         </div>
         {scheduledSessions.length > 0 && (
           <div className="festival-routine">
-            <div className="t">{plan.routineRevision === ROUTINE_ID || plan.routineRevision === OCT26_ID || plan.routineRevision === NOV2_ID ? 'Sesiones programadas' : 'Próxima semana cargada'}</div>
+            <div className="t">{plan.routineRevision === ROUTINE_ID || plan.routineRevision === OCT26_ID || plan.routineRevision === NOV2_ID || plan.routineRevision === NOV9_ID ? 'Sesiones programadas' : 'Próxima semana cargada'}</div>
             <p>Abrí cada día para ver los ejercicios. Los días realizados se conservan, aunque difieran de la propuesta nueva.</p>
             {scheduledSessions.map((session) => (
               <button key={session.date} className="routine-session" onClick={() => { ctx.setCurDate(session.date); ctx.setView('today'); }}>

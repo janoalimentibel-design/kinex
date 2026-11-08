@@ -111,8 +111,9 @@ export default function ActivityLog({ ctx }: { ctx: Ctx }) {
     <p>Los ejercicios se guardan al marcarlos. Cuando termines de completar todo, {ctx.sync.connected ? 'guardá y enviá el entrenamiento' : 'guardá el entrenamiento en este dispositivo'} con el botón de abajo.</p>
     <form className="activity-form" onSubmit={event => void save(event, ctx.sync.connected)}>
       <fieldset disabled={busy || ctx.sync.busy}>
-        <label>Minutos totales en gimnasio<input aria-label="Minutos totales en gimnasio" inputMode="decimal" value={draft.gym} onChange={event => change({ ...draft, gym: event.target.value })} /></label>
-        <p>Todo el tiempo que estuviste en el gimnasio, incluida la bici y los descansos. Se registra por separado: no se suma a los minutos de aeróbico.</p>
+        <label>Minutos totales en gimnasio<input aria-label="Minutos totales en gimnasio" aria-describedby="gym-minutes-help" inputMode="decimal" value={draft.gym} onChange={event => change({ ...draft, gym: event.target.value })} /></label>
+        <p id="gym-minutes-help">Sí: incluí todos los minutos que estuviste en el gimnasio, también la bici y los descansos. Abajo registrá además los minutos, calorías y kilómetros de la bici.</p>
+        <p>Ejemplo: si estuviste 60 minutos en total y dentro de ese tiempo hiciste 20 de bici, poné 60 acá y 20 en la actividad Bici. Tu tiempo total sigue siendo 60 minutos, no 80.</p>
         {draft.rows.map((row, index) => <article className="activity-entry" key={row.id}>
           <h4>Actividad aeróbica {index + 1}</h4>
           <div className="activity-fields">
