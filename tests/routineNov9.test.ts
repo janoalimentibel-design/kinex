@@ -7,7 +7,7 @@ import { createDefaultPlan, emptyTrainingProfile, type Session } from '../src/db
 import { createSession, buildExerciseList } from '../src/logic/session';
 import { rebalancePending } from '../src/logic/rebalance';
 import { applyPublishedRoutine } from '../src/logic/publishedRoutine';
-import { applyNov9Routine, NOV9_DAYS, NOV9_ID } from '../src/logic/routineNov9';
+import { applyNov9Routine, NOV9_DAYS, NOV9_ID, NOV9_PREVIOUS_DAYS, NOV9_PREVIOUS_ID } from '../src/logic/routineNov9';
 
 // Synthetic activity only; no personal backup or profile is used.
 function fixture(): AppData {
@@ -18,7 +18,7 @@ function fixture(): AppData {
   };
 }
 
-test('starts with legs on Monday, covers seven groups and uses confirmed equipment without manufacturing activity', () => {
+test('starts with chest on Monday, covers seven groups and uses confirmed equipment without manufacturing activity', () => {
   const before = fixture(), snapshot = JSON.stringify(before);
   const after = rebalancePending(applyPublishedRoutine(before, '2026-11-09'), '2026-11-09');
   expect(JSON.stringify(before)).toBe(snapshot);
@@ -28,7 +28,7 @@ test('starts with legs on Monday, covers seven groups and uses confirmed equipme
   expect(after.plan.rule).toBe(before.plan.rule);
   expect(after.sessions['2026-10-29']).toBe(before.sessions['2026-10-29']);
   expect(NOV9_DAYS.map(day => day.date)).toEqual(['2026-11-09', '2026-11-10', '2026-11-12', '2026-11-14']);
-  expect(after.sessions['2026-11-09'].groups).toEqual(['pierna', 'hombro']);
+  expect(after.sessions['2026-11-09'].groups).toEqual(['pecho', 'tricep']);
   expect(new Set(NOV9_DAYS.flatMap(day => day.groups))).toEqual(new Set(['pierna', 'hombro', 'pecho', 'tricep', 'espalda', 'bicep', 'core']));
   for (const day of NOV9_DAYS) {
     const session = after.sessions[day.date];
@@ -98,12 +98,12 @@ test('reload and a v2 backup roundtrip preserve the delivered routine and its hi
 });
 
 
-test('an untouched adaptive draft and an adjacent Sunday draft cannot displace requested Monday legs', () => {
+test('an untouched adaptive draft and an adjacent Sunday draft cannot displace requested Monday chest', () => {
   const before = fixture();
   before.sessions['2026-11-08'] = { ...createSession('2026-11-08'), groups: ['pierna', 'hombro'], programmed: ['glute_bridge'], planner: { source: 'adaptive', week: '2026-10-26' } };
   before.sessions['2026-11-09'] = { ...createSession('2026-11-09'), groups: ['espalda', 'bicep'], programmed: ['pullup'], planner: { source: 'adaptive', week: '2026-11-09' } };
   const after = rebalancePending(applyPublishedRoutine(before, '2026-11-09'), '2026-11-09');
-  expect(after.sessions['2026-11-09'].groups).toEqual(['pierna', 'hombro']);
+  expect(after.sessions['2026-11-09'].groups).toEqual(['pecho', 'tricep']);
   expect(after.sessions['2026-11-09'].programmed).toEqual(NOV9_DAYS[0].ids);
   expect(after.sessions['2026-11-09'].planner).toBeUndefined();
   expect(after.sessions['2026-11-08']).toBe(before.sessions['2026-11-08']);
@@ -118,4 +118,75 @@ test('Sunday preview delivers the next week without replacing today or downgradi
   expect(after.sessions[sunday.date]).toBe(sunday);
   expect(after.sessions['2026-11-09'].programmed).toEqual(NOV9_DAYS[0].ids);
   expect(applyPublishedRoutine(after, '2026-11-08', true)).toBe(after);
+});
+
+function previousRoutine(): AppData {
+  const data = fixture();
+  data.plan.routineRevision = NOV9_PREVIOUS_ID;
+  for (const day of NOV9_PREVIOUS_DAYS) data.sessions[day.date] = {
+    ...createSession(day.date), groups: day.groups.slice(), programmed: day.ids.slice(), format: 'ext', programTitle: 'Rutina semanal · 9–15 nov',
+  };
+  return data;
+}
+
+test('migrates untouched r1 after unsaved Sunday activity and stays stable on reload', () => {
+  const before = previousRoutine();
+  before.sessions['2026-11-08'] = { ...createSession('2026-11-08'), completed: { glute_bridge: true, bird_dog: true }, saved: false };
+  const snapshot = structuredClone(before);
+  const after = rebalancePending(applyPublishedRoutine(before, '2026-11-09'), '2026-11-09');
+  expect(before).toEqual(snapshot);
+  expect(after.plan.routineRevision).toBe(NOV9_ID);
+  for (const day of NOV9_DAYS) expect(after.sessions[day.date].programmed).toEqual(day.ids);
+  expect(after.sessions['2026-11-08']).toBe(before.sessions['2026-11-08']);
+  expect(rebalancePending(applyPublishedRoutine(after, '2026-11-09'), '2026-11-09')).toBe(after);
+});
+
+test.each([
+  { completed: { bench_leg_extension: true } }, { completed: { bench_leg_extension: false } },
+  { manuallyEdited: true }, { selectedExercises: [] }, { mode: 'sinpeso' }, { format: 'base' }, { extraTarget: 'g1' },
+  { checkin: { lumbar: 0, knee: 0, energy: 'alta', timeMinutes: 20 } },
+  { metrics: { lumbarBefore: 0, lumbarAfter: 0, knee: 0, energy: 'alta', notes: 'Synthetic note' } },
+  { setLogs: { bench_leg_extension: [{ reps: 6, load: 9, rpe: null, done: false }] } },
+  { exerciseLog: [{ id: 'bench_leg_extension', name: 'Synthetic', group: 'pierna', completed: false }] },
+  { replacements: { bench_leg_extension: 'glute_bridge' } }, { extras: ['tibialis'] },
+  { planner: { source: 'adaptive', week: '2026-11-09' } }, { programTitle: 'Someone else' },
+] as Partial<Session>[])('migration preserves r1 with any recorded or explicit change: %j', patch => {
+  const before = previousRoutine();
+  before.sessions['2026-11-09'] = { ...before.sessions['2026-11-09'], ...patch };
+  const after = applyPublishedRoutine(before, '2026-11-09');
+  expect(after.sessions['2026-11-09']).toBe(before.sessions['2026-11-09']);
+  expect(after.sessions['2026-11-10'].groups).toEqual(['espalda', 'bicep']);
+});
+
+test('r2 detects new adjacent unsaved work and rebalance cannot undo its repair', () => {
+  const before = applyNov9Routine(fixture(), '2026-11-08');
+  before.sessions['2026-11-08'] = { ...createSession('2026-11-08'), completed: { pushup: true }, saved: false };
+  const after = rebalancePending(applyPublishedRoutine(before, '2026-11-09'), '2026-11-09');
+  expect(after.sessions['2026-11-09'].groups).not.toContain('pecho');
+  expect(after.sessions['2026-11-09'].programmed).not.toContain('pushup');
+  expect(after.sessions['2026-11-08']).toBe(before.sessions['2026-11-08']);
+  expect(rebalancePending(applyPublishedRoutine(after, '2026-11-09'), '2026-11-09')).toBe(after);
+});
+
+test('later revisions never degrade on the overlapping Sunday', () => {
+  const before = previousRoutine();
+  before.plan.routineRevision = '2026-11-09-r3';
+  expect(applyPublishedRoutine(before, '2026-11-08', true)).toBe(before);
+});
+
+test.each([
+  { manuallyEdited: true }, { selectedExercises: [] }, { completed: { bird_dog: false } },
+  { setLogs: { bird_dog: [{ reps: 6, load: 3, rpe: null, done: false }] } },
+  { metrics: { lumbarBefore: 0, lumbarAfter: 0, knee: 0, energy: 'alta', notes: 'Synthetic' } },
+  { checkin: { lumbar: 0, knee: 0, energy: 'alta', timeMinutes: 20 } },
+] as Partial<Session>[])('does not readjust a repaired proposal after an explicit edit or recorded payload: %j', patch => {
+  let before = applyNov9Routine(fixture(), '2026-11-08');
+  before.sessions['2026-11-11'] = { ...createSession('2026-11-11'), completed: { glute_bridge: true } };
+  before = rebalancePending(before, '2026-11-11');
+  expect(before.sessions['2026-11-12'].programTitle).toBe('Próxima semana · Ajustada a la actividad registrada');
+  const existing = { ...before.sessions['2026-11-12'], ...patch };
+  before.sessions['2026-11-12'] = existing;
+  before.sessions['2026-11-11'] = { ...createSession('2026-11-11'), completed: { pushup: true, bird_dog: true, dumbbell_shoulder_press: true } };
+  const after = rebalancePending(applyPublishedRoutine(before, '2026-11-11'), '2026-11-11');
+  expect(after.sessions['2026-11-12']).toBe(existing);
 });

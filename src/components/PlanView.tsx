@@ -146,9 +146,9 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
       {isoDate(new Date()) >= NOV9_AVAILABLE && isoDate(new Date()) <= NOV9_END && (
         <div className="suggestion-card" data-testid="reviewed-routine-nov9">
           <div className="t">Rutina semanal · 9–15 nov</div>
-          <h3>Lunes: piernas y hombros</h3>
-          <p>Martes: pecho y tríceps. Jueves: espalda y bíceps. Sábado: piernas y core. Miércoles, viernes y domingo quedan para recuperación.</p>
-          <p>Se conservan el historial y los días que ya empezaste, guardaste, editaste o programaste. Las sesiones conservadas pueden diferir de esta propuesta.</p>
+          <h3>Lunes: pecho y tríceps</h3>
+          <p>Propuesta base: martes espalda y bíceps. Jueves piernas y hombros. Sábado: piernas y core. Miércoles, viernes y domingo quedan para recuperación.</p>
+          <p>Se conservan el historial y los días que ya empezaste, guardaste, editaste o programaste. Si registraste actividad el día anterior, los días pendientes se ajustan. Abajo ves los ejercicios vigentes. Un día que ya empezaste se conserva: podés editarlo sin borrar sus registros.</p>
           <p>Usá cargas controladas, dejando 2–3 repeticiones en reserva. Las cargas no aumentan automáticamente. Empezá por el extremo inferior del rango de repeticiones de cada ficha.</p>
           <p>Gemelos sentado con mancuerna reemplaza la elevación de pie. Banco y mancuernas, sin suponer una máquina de gemelos.</p>
           <p>Pará si aparece molestia lumbar o irradiada. Bici o caminata suave como complemento opcional.</p>
