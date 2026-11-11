@@ -7,7 +7,7 @@ import { createDefaultPlan, emptyTrainingProfile, type Session } from '../src/db
 import { createSession, buildExerciseList } from '../src/logic/session';
 import { rebalancePending } from '../src/logic/rebalance';
 import { applyPublishedRoutine } from '../src/logic/publishedRoutine';
-import { applyNov9Routine, NOV9_DAYS, NOV9_ID, NOV9_PREVIOUS_DAYS, NOV9_PREVIOUS_ID } from '../src/logic/routineNov9';
+import { applyNov9Routine, NOV9_DAYS, NOV9_ID, NOV9_PREVIOUS_DAYS, NOV9_PREVIOUS_ID, NOV9_SECOND_ID, NOV9_SECOND_DAYS } from '../src/logic/routineNov9';
 
 // Synthetic activity only; no personal backup or profile is used.
 function fixture(): AppData {
@@ -170,7 +170,7 @@ test('r2 detects new adjacent unsaved work and rebalance cannot undo its repair'
 
 test('later revisions never degrade on the overlapping Sunday', () => {
   const before = previousRoutine();
-  before.plan.routineRevision = '2026-11-09-r3';
+  before.plan.routineRevision = '2026-11-09-r4';
   expect(applyPublishedRoutine(before, '2026-11-08', true)).toBe(before);
 });
 
@@ -189,4 +189,52 @@ test.each([
   before.sessions['2026-11-11'] = { ...createSession('2026-11-11'), completed: { pushup: true, bird_dog: true, dumbbell_shoulder_press: true } };
   const after = rebalancePending(applyPublishedRoutine(before, '2026-11-11'), '2026-11-11');
   expect(after.sessions['2026-11-12']).toBe(existing);
+});
+
+function secondRoutine(): AppData {
+  const data = fixture();
+  data.plan.routineRevision = NOV9_SECOND_ID;
+  for (const day of NOV9_SECOND_DAYS) data.sessions[day.date] = {
+    ...createSession(day.date), groups: day.groups.slice(), programmed: day.ids.slice(), format: 'ext', programTitle: 'Rutina semanal · 9–15 nov',
+  };
+  return data;
+}
+
+test('revised Tuesday pairs a supinated bar curl with one neutral hammer without adding volume', () => {
+  const before = secondRoutine();
+  const after = applyPublishedRoutine(before, '2026-11-10');
+  const ids = buildExerciseList(after.sessions['2026-11-10'], CATALOG, after.sessions).map(entry => entry.id);
+  expect(ids.filter(id => CATALOG[id].group === 'bicep')).toEqual(['barbell_curl', 'hammer_curl_db']);
+  expect(ids).toHaveLength(before.sessions['2026-11-10'].programmed!.length);
+  for (const date of ['2026-11-09', '2026-11-12', '2026-11-14']) expect(after.sessions[date]).toBe(before.sessions[date]);
+  expect(automaticInGym('barbell_curl')).toBe(true);
+  expect(CATALOG.barbell_curl.sets).toBe(CATALOG.dumbbell_curl.sets);
+  expect(applyPublishedRoutine(after, '2026-11-10')).toBe(after);
+});
+
+test('biceps revision preserves a past Tuesday exactly and never rewrites performed exercise IDs', () => {
+  const before = secondRoutine();
+  const session = before.sessions['2026-11-10'];
+  const after = applyPublishedRoutine(before, '2026-11-11');
+  expect(after.sessions['2026-11-10']).toBe(session);
+  expect(session.programmed).toContain('dumbbell_curl');
+  expect(after.plan.routineRevision).toBe(NOV9_ID);
+});
+
+test.each([
+  { completed: { dumbbell_curl: true } },
+  { saved: true },
+  { manuallyEdited: true },
+  { selectedExercises: ['dumbbell_curl', 'hammer_curl_db'] },
+  { replacements: { dumbbell_curl: 'cable_curl' } },
+  { setLogs: { dumbbell_curl: [{ reps: 10, load: 5, rpe: null, done: false }] } },
+  { exerciseLog: [{ id: 'dumbbell_curl', name: 'Synthetic curl record', group: 'bicep', completed: true }] },
+] as Partial<Session>[])('biceps migration leaves Tuesday activity and explicit choices intact: %j', patch => {
+  const before = secondRoutine();
+  const session = { ...before.sessions['2026-11-10'], ...patch };
+  before.sessions['2026-11-10'] = session;
+  const snapshot = structuredClone(before);
+  const after = applyPublishedRoutine(before, '2026-11-10');
+  expect(before).toEqual(snapshot);
+  expect(after.sessions['2026-11-10']).toBe(session);
 });

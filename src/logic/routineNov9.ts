@@ -5,7 +5,8 @@ import { activityGroups, hasActivity } from './activity';
 import { buildExerciseList, createSession, isoDate, suggestedGroups } from './session';
 
 export const NOV9_PREVIOUS_ID = '2026-11-09-r1';
-export const NOV9_ID = '2026-11-09-r2';
+export const NOV9_SECOND_ID = '2026-11-09-r2';
+export const NOV9_ID = '2026-11-09-r3';
 export const NOV9_START = '2026-11-09';
 export const NOV9_END = '2026-11-15';
 export const NOV9_AVAILABLE = '2026-11-08';
@@ -16,12 +17,16 @@ export const NOV9_PREVIOUS_DAYS: { date: string; groups: GroupId[]; ids: string[
   { date: '2026-11-14', groups: ['pierna', 'core'], ids: ['romanian_deadlift', 'tibialis', 'dead_bug', 'side_plank', 'pallof'] },
 ];
 
-export const NOV9_DAYS: { date: string; groups: GroupId[]; ids: string[] }[] = [
+export const NOV9_SECOND_DAYS: { date: string; groups: GroupId[]; ids: string[] }[] = [
   { date: '2026-11-09', groups: ['pecho', 'tricep'], ids: ['bench_press', 'pec_deck', 'pushup', 'straight_bar_pressdown', 'overhead_triceps_db'] },
   { date: '2026-11-10', groups: ['espalda', 'bicep'], ids: ['pullup', 'cable_low_row', 'pull_apart_back', 'dumbbell_curl', 'hammer_curl_db'] },
   { date: '2026-11-12', groups: ['pierna', 'hombro'], ids: ['bench_leg_extension', 'glute_bridge', 'seated_calf_raise_db', 'dumbbell_shoulder_press', 'lateral_raise_db'] },
   { date: '2026-11-14', groups: ['pierna', 'core'], ids: ['romanian_deadlift', 'tibialis', 'dead_bug', 'side_plank', 'pallof'] },
 ];
+
+export const NOV9_DAYS = NOV9_SECOND_DAYS.map(day => ({
+  ...day, ids: day.ids.map(id => id === 'dumbbell_curl' ? 'barbell_curl' : id),
+}));
 
 
 const TITLE = 'Rutina semanal · 9–15 nov';
@@ -36,8 +41,8 @@ function hasUntouchedPayload(session: Session): boolean {
 }
 
 /** Fingerprint only application-owned, wholly untouched published sessions. */
-export function isUntouchedNov9Session(session: Session, previous = false): boolean {
-  const day = (previous ? NOV9_PREVIOUS_DAYS : NOV9_DAYS).find(day => day.date === session.date);
+export function isUntouchedNov9Session(session: Session, previous: boolean | 'r2' = false): boolean {
+  const day = (previous === 'r2' ? NOV9_SECOND_DAYS : previous ? NOV9_PREVIOUS_DAYS : NOV9_DAYS).find(day => day.date === session.date);
   return Boolean(day && session.programTitle === TITLE && same(session.programmed, day.ids) && same(session.groups, day.groups) &&
     session.planner === undefined && hasUntouchedPayload(session));
 }
@@ -92,19 +97,21 @@ export function applyNov9Routine(data: AppData, today: string, force = false): A
   if (today < NOV9_AVAILABLE || today > NOV9_END) return data;
   if (data.plan.routineRevision === NOV9_ID) return reconcileNov9Activity(data, today);
   // A later revision must never be replaced by an older release.
-  if (data.plan.routineRevision?.startsWith('2026-11-09-r') && data.plan.routineRevision !== NOV9_PREVIOUS_ID) return data;
-  const migrating = data.plan.routineRevision === NOV9_PREVIOUS_ID;
+  if (data.plan.routineRevision?.startsWith('2026-11-09-r') && data.plan.routineRevision !== NOV9_PREVIOUS_ID && data.plan.routineRevision !== NOV9_SECOND_ID) return data;
+  const previous = data.plan.routineRevision === NOV9_SECOND_ID ? 'r2' : true;
+  const migrating = data.plan.routineRevision === NOV9_PREVIOUS_ID || data.plan.routineRevision === NOV9_SECOND_ID;
   const recentActivity = Object.values(data.sessions).some(session =>
     session.date >= '2026-10-26' && session.date < NOV9_START && hasActivity(session));
   if (!force && !recentActivity && !migrating) return data;
   const sessions = { ...data.sessions };
   for (const day of NOV9_DAYS) {
     const existing = sessions[day.date];
-    if (migrating && existing && !isUntouchedNov9Session(existing, true)) continue;
+    if (migrating && existing && !isUntouchedNov9Session(existing, previous)) continue;
+    if (migrating && existing && same(existing.programmed, day.ids) && same(existing.groups, day.groups)) continue;
     if (day.date < today || (existing && (
       Boolean(existing.metrics || existing.checkin || existing.exerciseLog?.length) || hasActivity(existing) || Object.values(existing.setLogs ?? {}).some(sets => sets.length > 0) || existing.saved || existing.manuallyEdited || existing.planner?.locked === true ||
       Object.keys(existing.replacements).length > 0 || existing.extras.length > 0 ||
-      existing.selectedExercises !== undefined || (Boolean(existing.programmed?.length) && existing.planner?.source !== 'adaptive' && !(migrating && isUntouchedNov9Session(existing, true)))
+      existing.selectedExercises !== undefined || (Boolean(existing.programmed?.length) && existing.planner?.source !== 'adaptive' && !(migrating && isUntouchedNov9Session(existing, previous)))
     ))) continue;
     sessions[day.date] = {
       ...createSession(day.date, data.sessions, data.plan),

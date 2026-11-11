@@ -57,7 +57,7 @@ test('recent history automatically loads chest today, replacing an untouched ada
   await page.reload();
   await expectChestToday(page);
   const loaded = await state(page);
-  expect(loaded.plan.routineRevision).toBe('2026-11-09-r2');
+  expect(loaded.plan.routineRevision).toBe('2026-11-09-r3');
   expect(loaded.sessions.find(s => s.date === '2026-11-09').programmed).toEqual(mondayIds);
   expect(loaded.sessions.find(s => s.date === history.date)).toEqual(history);
   await page.reload();
@@ -117,7 +117,7 @@ test('startup migrates an untouched r1 Monday after unsaved Sunday legs and core
   await page.reload();
   await expectChestToday(page);
   const loaded = await state(page);
-  expect(loaded.plan.routineRevision).toBe('2026-11-09-r2');
+  expect(loaded.plan.routineRevision).toBe('2026-11-09-r3');
   expect(loaded.sessions.find(session => session.date === sunday.date)).toEqual(sunday);
   await page.reload();
   await expectChestToday(page);

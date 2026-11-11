@@ -150,6 +150,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
           <p>Propuesta base: martes espalda y bíceps. Jueves piernas y hombros. Sábado: piernas y core. Miércoles, viernes y domingo quedan para recuperación.</p>
           <p>Se conservan el historial y los días que ya empezaste, guardaste, editaste o programaste. Si registraste actividad el día anterior, los días pendientes se ajustan. Abajo ves los ejercicios vigentes. Un día que ya empezaste se conserva: podés editarlo sin borrar sus registros.</p>
           <p>Usá cargas controladas, dejando 2–3 repeticiones en reserva. Las cargas no aumentan automáticamente. Empezá por el extremo inferior del rango de repeticiones de cada ficha.</p>
+          <p>Bíceps: curl con barra y palmas hacia arriba + martillo con mancuernas y palmas enfrentadas. La propuesta reemplaza el curl con giro de muñeca; el martes pasado y tus registros se conservan.</p>
           <p>Gemelos sentado con mancuerna reemplaza la elevación de pie. Banco y mancuernas, sin suponer una máquina de gemelos.</p>
           <p>Pará si aparece molestia lumbar o irradiada. Bici o caminata suave como complemento opcional.</p>
           <button className="btn btn-primary" disabled={loadingRoutine} onClick={() => void loadReviewed()}>
