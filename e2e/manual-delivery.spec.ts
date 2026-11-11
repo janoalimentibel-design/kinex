@@ -18,7 +18,12 @@ async function readToday(page: Page) {
 }
 async function complete(page: Page) {
   const checks = page.locator('.ex .chk');
-  for (let i = 0; i < await checks.count(); i++) await checks.nth(i).click();
+  const count = await checks.count();
+  for (let i = 0; i < count; i++) await checks.nth(i).click();
+  // A click queues an IndexedDB write. Start the form scenario only after its
+  // exercise fixture has committed and React displays the completed session.
+  await expect.poll(async () => Object.values((await readToday(page))?.completed ?? {}).filter(Boolean).length).toBe(count);
+  await expect(page.locator('.ex .chk[aria-pressed="true"]')).toHaveCount(count);
 }
 const send = (page: Page) => page.getByRole('button', { name: 'Guardar y enviar entrenamiento', exact: true });
 test.beforeEach(async ({ page }) => {
@@ -64,6 +69,8 @@ test('invalid values and failed local persistence cannot upload; a network failu
   await page.route(endpoint, async route => { calls++; if (failNetwork) await route.abort(); else await route.fulfill({ json: { ok: true, version: calls } }); });
   await page.goto('/'); await connect(page); await complete(page);
   await page.getByLabel('Minutos totales en gimnasio', { exact: true }).fill('-1');
+  await expect(page.getByLabel('Minutos totales en gimnasio', { exact: true })).toHaveValue('-1');
+  await expect(page.locator('.activity-log').getByRole('status').filter({ hasText: 'Borrador sin guardar' }).first()).toBeVisible();
   await send(page).click(); await expect(page.locator('.activity-log [role=alert]')).toContainText('Minutos'); expect(calls).toBe(0);
   await page.getByLabel('Minutos totales en gimnasio', { exact: true }).fill('75');
   await page.evaluate(() => {
