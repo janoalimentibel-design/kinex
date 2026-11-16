@@ -11,6 +11,15 @@ de datos e imágenes, pero su alcance de «solo imágenes», versiones y recuent
 históricos: no impiden corregir código ni realizar otros cambios solicitados.
 Consultar el código, los scripts y las pruebas actuales para verificar el estado.
 
+### Pedidos desde GitHub
+
+Aclaración explícita del usuario, 14 de noviembre de 2026: «revisá Git», «entrá a
+Git» y expresiones equivalentes incluyen leer los pedidos y sus comentarios,
+comprobar cuáles siguen pendientes y ejecutar los cambios solicitados. Completar
+pruebas, commit, push, despliegue y verificación de producción; un informe de
+pendientes no completa el pedido. Conservar los cambios locales ajenos y trabajar
+desde una copia limpia cuando haga falta. No repetir cambios ya incorporados.
+
 ## Tres roles reutilizables
 
 | Rol | Responsabilidad | Instrucciones |

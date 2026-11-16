@@ -6,7 +6,8 @@ import { buildExerciseList, createSession, isoDate, suggestedGroups } from './se
 
 export const NOV9_PREVIOUS_ID = '2026-11-09-r1';
 export const NOV9_SECOND_ID = '2026-11-09-r2';
-export const NOV9_ID = '2026-11-09-r3';
+export const NOV9_THIRD_ID = '2026-11-09-r3';
+export const NOV9_ID = '2026-11-09-r4';
 export const NOV9_START = '2026-11-09';
 export const NOV9_END = '2026-11-15';
 export const NOV9_AVAILABLE = '2026-11-08';
@@ -24,16 +25,20 @@ export const NOV9_SECOND_DAYS: { date: string; groups: GroupId[]; ids: string[] 
   { date: '2026-11-14', groups: ['pierna', 'core'], ids: ['romanian_deadlift', 'tibialis', 'dead_bug', 'side_plank', 'pallof'] },
 ];
 
-export const NOV9_DAYS = NOV9_SECOND_DAYS.map(day => ({
+export const NOV9_THIRD_DAYS = NOV9_SECOND_DAYS.map(day => ({
   ...day, ids: day.ids.map(id => id === 'dumbbell_curl' ? 'barbell_curl' : id),
 }));
+
+export const NOV9_DAYS = NOV9_THIRD_DAYS.map(day => day.date === '2026-11-14' ? {
+  ...day, ids: ['romanian_deadlift', 'tibialis', 'hanging_leg_raise', 'bear_hold', 'mountain_climber', 'pallof'],
+} : day);
 
 
 const TITLE = 'Rutina semanal · 9–15 nov';
 const same = (a: string[] | undefined, b: string[]) => a?.length === b.length && a.every((item, index) => item === b[index]);
 
-function hasUntouchedPayload(session: Session): boolean {
-  return session.mode === 'mix' && session.format === 'ext' && session.extraTarget === 'auto' &&
+function hasUntouchedPayload(session: Session, format: Session['format'] = 'ext'): boolean {
+  return session.mode === 'mix' && session.format === format && session.extraTarget === 'auto' &&
     !hasActivity(session) && !session.manuallyEdited && session.selectedExercises === undefined &&
     Object.keys(session.completed).length === 0 && Object.keys(session.replacements).length === 0 && session.extras.length === 0 &&
     Object.keys(session.setLogs ?? {}).length === 0 && !session.exerciseLog?.length && !session.checkin && !session.metrics &&
@@ -41,10 +46,10 @@ function hasUntouchedPayload(session: Session): boolean {
 }
 
 /** Fingerprint only application-owned, wholly untouched published sessions. */
-export function isUntouchedNov9Session(session: Session, previous: boolean | 'r2' = false): boolean {
-  const day = (previous === 'r2' ? NOV9_SECOND_DAYS : previous ? NOV9_PREVIOUS_DAYS : NOV9_DAYS).find(day => day.date === session.date);
+export function isUntouchedNov9Session(session: Session, previous: boolean | 'r2' | 'r3' = false): boolean {
+  const day = (previous === 'r3' ? NOV9_THIRD_DAYS : previous === 'r2' ? NOV9_SECOND_DAYS : previous ? NOV9_PREVIOUS_DAYS : NOV9_DAYS).find(day => day.date === session.date);
   return Boolean(day && session.programTitle === TITLE && same(session.programmed, day.ids) && same(session.groups, day.groups) &&
-    session.planner === undefined && hasUntouchedPayload(session));
+    session.planner === undefined && hasUntouchedPayload(session, day.ids.length === 5 ? 'ext' : 'long'));
 }
 
 /** The guard's adaptive marker remains eligible until the user records or edits anything. */
@@ -52,7 +57,8 @@ export function isUntouchedNov9Adjustment(session: Session): boolean {
   return session.programTitle === 'Próxima semana · Ajustada a la actividad registrada' &&
     session.planner?.source === 'adaptive' && session.planner.week === NOV9_START && !session.planner.locked &&
     Boolean(session.programmed?.length) && new Set(session.programmed).size === session.programmed?.length &&
-    session.programmed!.every(id => CATALOG[id] && session.groups.includes(CATALOG[id].group)) && hasUntouchedPayload(session);
+    session.programmed!.every(id => CATALOG[id] && session.groups.includes(CATALOG[id].group)) &&
+    (hasUntouchedPayload(session) || (session.programmed!.length >= 6 && hasUntouchedPayload(session, 'long')));
 }
 
 /** Real neighbouring work wins over an untouched published proposal, even unsaved checks. */
@@ -97,9 +103,9 @@ export function applyNov9Routine(data: AppData, today: string, force = false): A
   if (today < NOV9_AVAILABLE || today > NOV9_END) return data;
   if (data.plan.routineRevision === NOV9_ID) return reconcileNov9Activity(data, today);
   // A later revision must never be replaced by an older release.
-  if (data.plan.routineRevision?.startsWith('2026-11-09-r') && data.plan.routineRevision !== NOV9_PREVIOUS_ID && data.plan.routineRevision !== NOV9_SECOND_ID) return data;
-  const previous = data.plan.routineRevision === NOV9_SECOND_ID ? 'r2' : true;
-  const migrating = data.plan.routineRevision === NOV9_PREVIOUS_ID || data.plan.routineRevision === NOV9_SECOND_ID;
+  if (data.plan.routineRevision?.startsWith('2026-11-09-r') && ![NOV9_PREVIOUS_ID, NOV9_SECOND_ID, NOV9_THIRD_ID].includes(data.plan.routineRevision)) return data;
+  const previous = data.plan.routineRevision === NOV9_THIRD_ID ? 'r3' : data.plan.routineRevision === NOV9_SECOND_ID ? 'r2' : true;
+  const migrating = [NOV9_PREVIOUS_ID, NOV9_SECOND_ID, NOV9_THIRD_ID].includes(data.plan.routineRevision ?? '');
   const recentActivity = Object.values(data.sessions).some(session =>
     session.date >= '2026-10-26' && session.date < NOV9_START && hasActivity(session));
   if (!force && !recentActivity && !migrating) return data;
@@ -127,7 +133,7 @@ export function applyNov9Routine(data: AppData, today: string, force = false): A
       ...data.plan, routineRevision: NOV9_ID, week: '9–15 nov',
       focus: 'Fuerza equilibrada', secondary: 'Core · técnica controlada',
       objective: 'Propuesta: lunes pecho y tríceps; martes espalda y bíceps; jueves piernas y hombros; sábado: piernas y core. Miércoles, viernes y domingo: recuperación.',
-      notes: 'Usá cargas controladas, dejando 2–3 repeticiones en reserva. No se aumenta el peso automáticamente ni se fijan kilos: faltan registros de carga. Parar si aparece molestia lumbar o irradiada. Gemelos sentado con mancuerna reemplaza la elevación de pie: usa el banco y las mancuernas confirmados. Bici o remo como complemento opcional.',
+      notes: 'Core: cuatro opciones variadas, una avanzada, dos intermedias y una fácil; sin repetir los dos carries. La avanzada es una propuesta: reemplazala si no podés mantener control sin molestias. Usá cargas controladas, dejando 2–3 repeticiones en reserva. No se aumenta el peso automáticamente ni se fijan kilos: faltan registros de carga. Parar si aparece molestia lumbar o irradiada. Gemelos sentado con mancuerna reemplaza la elevación de pie: usa el banco y las mancuernas confirmados. Bici o remo como complemento opcional.',
     },
   }, today);
 }

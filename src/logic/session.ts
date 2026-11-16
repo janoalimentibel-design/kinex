@@ -1,11 +1,12 @@
 import { automaticInGym } from '../data/gym';
 // Lógica pura de sesiones — portada 1:1 de A2.8 (src/session.js + funciones de app.js).
 // Mismas reglas: 2 grupos por sesión, candidatos ordenados por nivel y nombre,
-// avanzados excluidos de la selección automática, extra del Extendido al grupo
+// avanzados excluidos salvo el bloque de core solicitado, extra del Extendido al grupo
 // menos trabajado en los últimos 7 días.
 import { CATALOG, COMBOS, FORMATS } from '../data/exercises';
 import type { CatalogExercise, Format, GroupId, Mode, Plan, Session } from '../db/schema';
 import { activityGroups, activityLog, completedIds, hasActivity } from './activity';
+import { automaticCoreExercise, selectCoreExercises } from './coreSelection';
 
 export type ExerciseMap = Record<string, CatalogExercise>;
 
@@ -241,8 +242,9 @@ function automaticExercises(
     .filter((exercise) => isModeCompatible(exercise, mode) && allow(exercise))
     .filter((exercise) => !AUTOMATIC_EXERCISE_EXCLUSIONS.has(exercise.id) && automaticInGym(exercise.id))
     .filter((exercise) => !excluded.includes(exercise.id));
-  const automatic = candidates(all, group, mode, false)
+  const automatic = candidates(all, group, mode, group === 'core')
     .filter(allow)
+    .filter((e) => group !== 'core' || automaticCoreExercise(e))
     .filter((e) => !AUTOMATIC_EXERCISE_EXCLUSIONS.has(e.id) && automaticInGym(e.id))
     .filter((e) => !excluded.includes(e.id) && !priority.some((forced) => forced.id === e.id))
     .map((exercise) => {
@@ -257,7 +259,8 @@ function automaticExercises(
     })
     .sort((a, b) => a.score - b.score || a.exercise.name.localeCompare(b.exercise.name))
     .map(({ exercise }) => exercise);
-  return [...priority, ...automatic].slice(0, amount);
+  const ranked = [...priority, ...automatic];
+  return group === 'core' ? selectCoreExercises(ranked, amount) : ranked.slice(0, amount);
 }
 
 export function recentGroupCount(sessions: Record<string, Session>, group: GroupId, now: Date = new Date()): number {
@@ -329,9 +332,11 @@ export function buildExerciseList(
     }
   }
   if (format.extraOne && session.groups.length === 2) {
+    // The requested abdominal block is four exercises in every format. Skip
+    // its Extended bonus without increasing the companion muscle's volume.
     const target = extendedTargetGroup(session, sessions, now);
     const already = entries.map((x) => x.id);
-    const extra = automaticExercises(all, target, session.mode, 1, sessions, session.date, allow, already)[0];
+    const extra = target === 'core' ? undefined : automaticExercises(all, target, session.mode, 1, sessions, session.date, allow, already)[0];
     if (extra) entries.push({ id: extra.id, group: target, src: 'extra-auto' });
   }
   for (const id of session.extras) {

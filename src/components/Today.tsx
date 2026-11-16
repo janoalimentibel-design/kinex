@@ -132,7 +132,7 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
           </div>
         </div>
 
-        <p className="sh-sub">Cambiar grupos, formato o modo genera otra lista. Lo ya realizado se conserva en Historial.</p>
+        <p className="sh-sub">Al cambiar de formato se conservan tus ejercicios elegidos. Si cambiás un músculo, se conservan los del músculo que sigue. Lo ya realizado queda en Historial.</p>
         <div className="segwrap">
           <div className="seglabel">Formato</div>
           <div className="segment">
@@ -184,6 +184,14 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
         <div className="list">
           {displayedGroups.map((g) => {
             const exs = list.filter((x) => x.group === g);
+            const difficulties = [
+              ['Avanzado', 'avanzado', 'avanzados'],
+              ['Progresivo', 'intermedio', 'intermedios'],
+              ['Inicial', 'fácil', 'fáciles'],
+            ].map(([level, singular, plural]) => {
+              const count = exs.filter(entry => allEx[entry.id]?.level === level).length;
+              return `${count} ${count === 1 ? singular : plural}`;
+            }).join(' · ');
             return (
               <div key={g}>
                 <div className="grp-head">
@@ -193,6 +201,14 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
                     <button className="mini" onClick={() => ctx.setModal({ type: 'addToGroup', group: g })}>+ ejercicio</button>
                   </div>
                 </div>
+                {g === 'core' && exs.length > 0 && (
+                  <p className="sh-sub" data-testid="core-difficulty-summary">
+                    Dificultad: {difficulties}.
+                  </p>
+                )}
+                {g === 'core' && session.mode === 'peso' && !session.manuallyEdited && !exs.some(entry => allEx[entry.id]?.level === 'Avanzado') && (
+                  <p className="sh-sub">En modo Con peso se muestran ejercicios con carga. Elegí Mixto para incluir la opción avanzada colgado.</p>
+                )}
                 {exs.map((entry) => (
                   <ExerciseCard
                     key={entry.id}
@@ -241,7 +257,7 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
           <div className="sub">{e.sets}×{e.reps} · desc <b>{e.rest}</b></div>
           <div className="badges">
             <span className="badge">{load}</span>
-            <span className={`badge ${e.level === 'Avanzado' ? 'adv' : 'auto'}`}>{e.level}</span>
+            <span className={`badge ${e.level === 'Avanzado' ? 'adv' : 'auto'}`}>{e.group === 'core' ? e.level === 'Inicial' ? 'Fácil' : e.level === 'Progresivo' ? 'Intermedio' : e.level : e.level}</span>
             {hasImage(entry.id) && <span className="badge auto">foto</span>}
             {entry.src === 'extra-auto' && <span className="badge">extra</span>}
             {entry.src === 'reemplazo' && <span className="badge">cambio</span>}

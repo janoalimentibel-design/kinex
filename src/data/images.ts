@@ -279,13 +279,18 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   supine_hang: {
-    display: 'hold',
-    thumb: './assets/exercises/supine-hang/thumb.webp',
+    thumb: './assets/exercises/supine-hang-v358/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/supine-hang/inicio.webp',
-      Medio: './assets/exercises/supine-hang/medio.webp',
-      Final: './assets/exercises/supine-hang/final.webp',
+      Inicio: './assets/exercises/supine-hang-v358/inicio.webp',
+      Medio: './assets/exercises/supine-hang-v358/medio.webp',
+      Final: './assets/exercises/supine-hang-v358/final.webp',
     },
+    instructions: {
+      Inicio: 'Preparación: pies sobre un cajón firme, brazos estirados y las dos palmas mirando hacia tu cara.',
+      Medio: 'Sostén: despegá los pies y quedate quieto, sin subir como en una dominada ni balancearte.',
+      Final: 'Salida: con ambos pies y todo el peso apoyados en el cajón, soltá la barra de una mano y luego de la otra.',
+    },
+    note: 'Es un ejercicio isométrico: no hay repeticiones de subida y bajada. Estas fotos muestran preparación, sostén y salida.',
   },
   towel_hold: {
     display: 'hold',
@@ -1100,12 +1105,18 @@ export const REAL_IMAGES: Record<string, ExerciseImages> = {
     },
   },
   tke: {
-    thumb: './assets/exercises/tke/thumb.webp',
+    thumb: './assets/exercises/tke-v358/thumb.webp',
     phases: {
-      Inicio: './assets/exercises/tke/inicio.webp',
-      Medio: './assets/exercises/tke/medio.webp',
-      Final: './assets/exercises/tke/final.webp',
+      Inicio: './assets/exercises/tke-v358/inicio.webp',
+      Medio: './assets/exercises/tke-v358/medio.webp',
+      Final: './assets/exercises/tke-v358/final.webp',
     },
+    instructions: {
+      Inicio: 'Preparación: anclaje delante, a altura de rodilla; la banda pasa por detrás de una sola rodilla.',
+      Medio: 'Empezá la repetición con esa rodilla apenas flexionada y el pie entero apoyado.',
+      Final: 'Enderezá la rodilla contra la banda sin levantar el talón ni llevarla más atrás de la posición recta. Volvé despacio a la flexión.',
+    },
+    note: 'TKE: extensión de los últimos grados de la rodilla. Prepará la banda una vez y repetí el recorrido corto entre rodilla algo flexionada y rodilla recta.',
   },
   lunge_walk: {
     thumb: './assets/exercises/lunge-walk/thumb.webp',

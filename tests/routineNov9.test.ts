@@ -7,7 +7,7 @@ import { createDefaultPlan, emptyTrainingProfile, type Session } from '../src/db
 import { createSession, buildExerciseList } from '../src/logic/session';
 import { rebalancePending } from '../src/logic/rebalance';
 import { applyPublishedRoutine } from '../src/logic/publishedRoutine';
-import { applyNov9Routine, NOV9_DAYS, NOV9_ID, NOV9_PREVIOUS_DAYS, NOV9_PREVIOUS_ID, NOV9_SECOND_ID, NOV9_SECOND_DAYS } from '../src/logic/routineNov9';
+import { applyNov9Routine, NOV9_DAYS, NOV9_ID, NOV9_PREVIOUS_DAYS, NOV9_PREVIOUS_ID, NOV9_SECOND_ID, NOV9_SECOND_DAYS, NOV9_THIRD_DAYS, NOV9_THIRD_ID } from '../src/logic/routineNov9';
 
 // Synthetic activity only; no personal backup or profile is used.
 function fixture(): AppData {
@@ -170,7 +170,7 @@ test('r2 detects new adjacent unsaved work and rebalance cannot undo its repair'
 
 test('later revisions never degrade on the overlapping Sunday', () => {
   const before = previousRoutine();
-  before.plan.routineRevision = '2026-11-09-r4';
+  before.plan.routineRevision = '2026-11-09-r5';
   expect(applyPublishedRoutine(before, '2026-11-08', true)).toBe(before);
 });
 
@@ -206,7 +206,8 @@ test('revised Tuesday pairs a supinated bar curl with one neutral hammer without
   const ids = buildExerciseList(after.sessions['2026-11-10'], CATALOG, after.sessions).map(entry => entry.id);
   expect(ids.filter(id => CATALOG[id].group === 'bicep')).toEqual(['barbell_curl', 'hammer_curl_db']);
   expect(ids).toHaveLength(before.sessions['2026-11-10'].programmed!.length);
-  for (const date of ['2026-11-09', '2026-11-12', '2026-11-14']) expect(after.sessions[date]).toBe(before.sessions[date]);
+  for (const date of ['2026-11-09', '2026-11-12']) expect(after.sessions[date]).toBe(before.sessions[date]);
+  expect(after.sessions['2026-11-14'].programmed).toEqual(NOV9_DAYS[3].ids);
   expect(automaticInGym('barbell_curl')).toBe(true);
   expect(CATALOG.barbell_curl.sets).toBe(CATALOG.dumbbell_curl.sets);
   expect(applyPublishedRoutine(after, '2026-11-10')).toBe(after);
@@ -237,4 +238,54 @@ test.each([
   const after = applyPublishedRoutine(before, '2026-11-10');
   expect(before).toEqual(snapshot);
   expect(after.sessions['2026-11-10']).toBe(session);
+});
+
+function thirdRoutine(): AppData {
+  const data = fixture();
+  data.plan.routineRevision = NOV9_THIRD_ID;
+  for (const day of NOV9_THIRD_DAYS) data.sessions[day.date] = {
+    ...createSession(day.date), groups: day.groups.slice(), programmed: day.ids.slice(), format: 'ext', programTitle: 'Rutina semanal · 9–15 nov',
+  };
+  return data;
+}
+
+test('core revision updates only the untouched current proposal and keeps four balanced abdominal choices', () => {
+  const before = thirdRoutine(), snapshot = structuredClone(before);
+  const after = applyPublishedRoutine(before, '2026-11-14');
+  expect(before).toEqual(snapshot);
+  for (const date of ['2026-11-09', '2026-11-10', '2026-11-12']) expect(after.sessions[date]).toBe(before.sessions[date]);
+  const entries = buildExerciseList(after.sessions['2026-11-14'], CATALOG, after.sessions);
+  const core = entries.filter(entry => entry.group === 'core').map(entry => CATALOG[entry.id]);
+  expect(core).toHaveLength(4);
+  expect(core.map(exercise => exercise.level)).toEqual(['Avanzado', 'Progresivo', 'Progresivo', 'Inicial']);
+  expect(entries.filter(entry => entry.group === 'pierna').map(entry => entry.id)).toEqual(['romanian_deadlift', 'tibialis']);
+  expect(after.plan.routineRevision).toBe(NOV9_ID);
+  expect(applyPublishedRoutine(after, '2026-11-14')).toBe(after);
+});
+
+test.each([
+  { completed: { dead_bug: true } }, { completed: { dead_bug: false } }, { saved: true },
+  { selectedExercises: ['farmer', 'suitcase'] }, { manuallyEdited: true },
+  { replacements: { dead_bug: 'bird_dog' } }, { extras: ['bird_dog'] },
+  { setLogs: { dead_bug: [{ reps: 6, load: null, rpe: null, done: false }] } },
+  { exerciseLog: [{ id: 'dead_bug', name: 'Synthetic historical name', group: 'core', completed: false }] },
+  { metrics: { lumbarBefore: 0, lumbarAfter: 0, knee: 0, energy: 'alta', notes: 'Synthetic' } },
+  { checkin: { lumbar: 0, knee: 0, energy: 'alta', timeMinutes: 20 } },
+  { mode: 'sinpeso' }, { format: 'base' },
+] as Partial<Session>[])('core delivery preserves any activity or explicit change: %j', patch => {
+  const before = thirdRoutine();
+  const session = { ...before.sessions['2026-11-14'], ...patch };
+  before.sessions[session.date] = session;
+  const after = applyPublishedRoutine(before, '2026-11-14');
+  expect(after.sessions[session.date]).toBe(session);
+});
+
+test('core delivery leaves past proposals and a backup roundtrip unchanged', () => {
+  const before = thirdRoutine();
+  const after = applyPublishedRoutine(before, '2026-11-15');
+  expect(after.sessions['2026-11-14']).toBe(before.sessions['2026-11-14']);
+  const delivered = applyPublishedRoutine(before, '2026-11-14');
+  const restored = toAppData(parseBackup(serializeBackup(toExportData(delivered))).data);
+  expect(restored).toEqual(delivered);
+  expect(applyPublishedRoutine(restored, '2026-11-14')).toBe(restored);
 });

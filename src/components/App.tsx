@@ -136,7 +136,7 @@ export default function App() {
     setCurDate: (date) => setCurDate(date),
     setView,
     setModal,
-    patchSession: (patch) => updateDay((previous) => editSession(previous, typeof patch === 'function' ? patch(previous) : patch)),
+    patchSession: (patch) => updateDay((previous, current) => editSession(previous, typeof patch === 'function' ? patch(previous) : patch, { ...CATALOG, ...current.custom }, current.sessions)),
     editExercise: (edit) => updateDay((previous, current) => editExercise(previous, edit, { ...CATALOG, ...current.custom }, current.sessions)),
     saveActivityData: (date, patch, expectedSignature) => {
       const captured = structuredClone(patch);
@@ -226,7 +226,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.57</div>
+            <div className="version">v3.58</div>
           </div>
         </div>
       </div>

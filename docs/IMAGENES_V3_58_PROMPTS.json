@@ -1,0 +1,33 @@
+{
+  "version": "3.58",
+  "date": "2026-11-16",
+  "tool": "image_gen incorporado; sin API/CLI externa",
+  "preserved_reviewed_assets": [
+    "assets-src/exercises/tke-v358/medio.png",
+    "assets-src/exercises/supine-hang-v358/inicio.png"
+  ],
+  "common_constraints": "Persona, ropa, gimnasio, luz y encuadre de la referencia. Foto vertical 1024x1536, anatomía correcta, sin texto, flechas, marcas ni collages. No inferir tolerancia clínica individual de las fotos.",
+  "new_assets": [
+    {
+      "path": "assets-src/exercises/tke-v358/inicio.png",
+      "reference": "assets-src/exercises/tke-v358/medio.png",
+      "prompt": "Use case: scientific-educational. Asset: ONE photorealistic vertical 2:3 exercise instruction photo, preparation phase for standing band terminal knee extension (TKE). Input image is identity, clothing, gym, camera framing and equipment reference. Preserve the same adult male with short dark hair and trimmed beard, black plain fitted t-shirt, charcoal shorts, black shoes with white soles, dark gym and black rack at left. He faces the rack to his front left. Change pose clearly: he bends forward slightly at hips and looks down; BOTH hands are visibly adjusting the PURPLE LOOP BAND just behind the crease of the FRONT knee, just above the top of the calf; hands near sides/back of knee. His front knee is modestly bent, front foot completely flat. Band remains securely looped around rack in FRONT at knee height, with two horizontal taut strands extending to back of ONE knee, not around ankle/calf. Other leg behind for balance. This is the setting-up moment, not a repetition, not hands on hips. Keep full person, rack anchor, hands, knee and both feet in frame. Real anatomical hands, two arms, two legs. No text, arrows, labels, logos, panels, collage or watermark. Camera same side profile 3/4, clear view of band attachment."
+    },
+    {
+      "path": "assets-src/exercises/supine-hang-v358/medio.png",
+      "reference": "assets-src/exercises/supine-hang-v358/inicio.png",
+      "prompt": "Use case: scientific-educational. Asset: ONE photorealistic vertical 2:3 exercise instruction photo of a SUPINATED STRAIGHT ARM HANG hold, not a chinup. Input photo is identity, clothing, gym, rack, box, camera and grip reference; preserve them. Same dark-haired bearded adult male, plain black shirt, charcoal shorts, black shoes with white soles. Both hands hold the same overhead horizontal straight bar at shoulder width, UNDERHAND/SUPINATED GRIP with BOTH palms facing his own face/body, both thumbs wrapped around bar. Keep both elbows fully straight and arms overhead. Body quietly suspended with shoulders controlled away from ears, torso upright, ribs down. DIFFERENCE from reference: knees flexed backward about 70 degrees so BOTH FEET are CLEARLY OFF THE BOX and hanging behind/above its top, with obvious air gap; box remains directly below him ready for support. Not a pull-up: chin stays far below bar, no elbow bend. All fingers and wrists anatomically correct; grip symmetric not mixed. Camera same front three-quarter view showing both hands and air gap at feet. Whole rack bar to box and feet visible. No text, arrows, logos, labels, panels, collage, watermark."
+    },
+    {
+      "path": "assets-src/exercises/supine-hang-v358/final.png",
+      "reference": "assets-src/exercises/supine-hang-v358/inicio.png",
+      "prompt": "Use case: scientific-educational. Asset: ONE photorealistic vertical 2:3 exercise instruction photo of the EXIT from a supinated straight-arm hang, AFTER both feet are supported. Input image is identity/clothing/gym/rack/box/camera reference; preserve them exactly. Same short-dark-haired bearded adult male, plain black t-shirt, charcoal shorts, black shoes with white soles. Both feet are fully flat and securely supported on the top of the same wide stable black box beneath the bar, knees soft, body weight resting on feet, NOT hanging. Clear DIFFERENCE from reference preparation: his left hand has RELEASED the overhead bar and is relaxed down at his side, his right hand still lightly holds bar UNDERHAND with palm facing his own face, right elbow straight overhead; he looks slightly down at secure footing. Left arm down makes exit unmistakable. This is safe exit after re-supporting feet, not a one-arm hang; body visibly standing on box, no jump. Keep full box, both supported feet, both hands, whole bar/rack in frame. Three-quarter profile camera consistent with reference. Anatomical hands/fingers and realistic proportions. No text, arrows, logos, labels, collage, panels, watermark."
+    },
+    {
+      "path": "assets-src/exercises/tke-v358/final.png",
+      "reference": "assets-src/exercises/tke-v358/medio.png",
+      "prompt": "Use case: scientific-educational, precise localized pose edit. Edit the supplied TKE exercise photograph ONLY in the small angle of the man's FRONT knee. Preserve the image's camera, canvas 1024x1536, rack, anchor, gym background, man identity/clothing, back leg, hips, torso, arms/hands-on-hips and especially BOTH SHOE POSITIONS EXACTLY. The FRONT foot must NOT slide, step or lift: preserve its outsole in the EXACT same location and orientation on the floor as reference. Its toe stays at the same pixel position relative to the rack base. Preserve entire front foot and ankle pixels/composition; no zoom, reframing, or camera shift. The man faces left towards rack. In reference front knee is slightly bent. Change only the short terminal movement: bring that knee gently backwards to make thigh and shin align straight above the fixed ankle/foot, without hyperextension. The purple band stays wrapped behind the SAME front knee, with anchor on rack in FRONT at knee height and two taut horizontal strands extending to back of knee; adjust its length a little as knee straightens. Anatomically plausible weight-bearing straight knee, not locked backwards. Keep back foot in exact same place. The result is END of TKE repetition with full front sole flat and no hip rocking. One single clean vertical realistic gym photo, no text/arrows/panels/logos/collage."
+    }
+  ],
+  "visual_review": "Anclaje TKE delante a altura de rodilla; contacto detrás de una sola rodilla; pies apoyados. Hang: ambas palmas hacia el sujeto, codos estirados; preparación y salida con apoyo y sostén sin apoyo. Secuencias educativas, no prueba de tolerancia personal."
+}
