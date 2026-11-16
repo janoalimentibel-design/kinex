@@ -1,6 +1,6 @@
 import { RETIRED_EXERCISES } from '../data/gym';
 import ActivityLog from './ActivityLog';
-import { NOV16_DAYS, NOV16_ID } from '../logic/routineNov16';
+import { NOV16_DAYS, NOV16_ID, nov16Prescription } from '../logic/routineNov16';
 // Vista Hoy — port de renderStrip/renderDay/renderGroups/renderExercise de A2.8.
 import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
@@ -248,6 +248,7 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
   const e = allEx[entry.id];
   if (!e) return <div className="ex"><div className="ex-head"><div className="nm">{session.exerciseLog?.find((item) => item.id === entry.id)?.name ?? entry.id}</div></div><button className="btn btn-danger" onClick={() => ctx.editExercise({ type: 'remove', id: entry.id })}>Quitar del día</button></div>;
   const done = completedIds(session).includes(entry.id);
+  const prescription = ctx.data.plan.routineRevision === NOV16_ID ? nov16Prescription(session.date, entry.id) : undefined;
   const load = e.modes.includes('peso') && e.modes.includes('sinpeso') ? 'mixto' : e.modes.includes('peso') ? 'con peso' : 'sin peso';
   const times = workTimes(e.reps);
 
@@ -262,7 +263,7 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
       <div className="ex-head" onClick={toggleOpen}>
         <div className="ex-ti">
           <div className="nm">{e.name}</div>
-          <div className="sub">{e.sets}×{e.reps} · desc <b>{e.rest}</b></div>
+          <div className="sub">{prescription?.sets ?? e.sets}×{prescription?.reps ?? e.reps} · desc <b>{prescription?.rest ?? e.rest}</b></div>
           <div className="badges">
             <span className="badge">{load}</span>
             <span className={`badge ${e.level === 'Avanzado' ? 'adv' : 'auto'}`}>{e.group === 'core' ? e.level === 'Inicial' ? 'Fácil' : e.level === 'Progresivo' ? 'Intermedio' : e.level : e.level}</span>
@@ -275,14 +276,15 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
         <IconCaret />
       </div>
       <div className="ex-body">
+        {prescription && <p className="notice">{prescription.instruction}</p>}
         <div className={`phases ${isHoldImage(entry.id) ? 'hold-phases' : imageLabels(entry.id).length === 2 ? 'two-phases' : ''}`}>
           {imageLabels(entry.id).map((p) => <PhaseBlock key={p} id={entry.id} exercise={e} label={p} />)}
         </div>
         <div className="ex-info">
           <div className="stats">
-            <div className="stat"><div className="v">{e.sets}</div><div className="k">Series</div></div>
-            <div className="stat"><div className="v">{e.reps}</div><div className="k">{times.length ? 'Tiempo' : 'Reps'}</div></div>
-            <div className="stat"><div className="v">{e.rest}</div><div className="k">Descanso</div></div>
+            <div className="stat"><div className="v">{prescription?.sets ?? e.sets}</div><div className="k">Series</div></div>
+            <div className="stat"><div className="v">{prescription?.reps ?? e.reps}</div><div className="k">{times.length ? 'Tiempo' : 'Reps'}</div></div>
+            <div className="stat"><div className="v">{prescription?.rest ?? e.rest}</div><div className="k">Descanso</div></div>
           </div>
           {times.length > 0 && (
             <div className="work-timers">
@@ -292,8 +294,8 @@ function ExerciseCard({ ctx, entry, open, toggleOpen, toggleDone }: {
               ))}
             </div>
           )}
-          <button className="btn btn-soft rest-start" onClick={() => ctx.startRest(e.name, restSeconds(e.rest))}>
-            ▶ Descanso {e.rest}
+          <button className="btn btn-soft rest-start" onClick={() => ctx.startRest(e.name, restSeconds(prescription?.rest ?? e.rest))}>
+            ▶ Descanso {prescription?.rest ?? e.rest}
           </button>
           <div className="block">
             <div className="bt"><span className="bd"></span>Puntos técnicos</div>
