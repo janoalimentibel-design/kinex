@@ -8,6 +8,7 @@ import { applyNov2Routine } from './routineNov2';
 import { applyOct26Routine } from './routineOct26';
 import { removeRequestedRoutineExercises } from './retiredRoutineExercises';
 import { refreshPendingCorePreferences } from './pendingCorePreferences';
+import { applyNov16Routine } from './routineNov16';
 
 // Only the requested routine is distributed. Personal backups and activity
 // records must never be bundled with the public application.
@@ -27,7 +28,10 @@ export const WEEK_ROUTINE: { date: string; groups: GroupId[]; ids: string[] }[] 
 
 /** One-time, additive delivery. Never import/replace the user's database. */
 export function applyPublishedRoutine(data: AppData, today: string, force = false): AppData {
-  data = refreshPendingCorePreferences(removeRequestedRoutineExercises(data, today), today);
+  data = removeRequestedRoutineExercises(data, today);
+  const november16 = applyNov16Routine(data, today, force);
+  if (november16 !== data || data.plan.routineRevision?.startsWith('2026-11-16-')) return november16;
+  data = refreshPendingCorePreferences(data, today);
   const nextNovember = applyNov9Routine(data, today, force);
   if (nextNovember !== data || data.plan.routineRevision?.startsWith('2026-11-09-r')) return nextNovember;
   const november = applyNov2Routine(data, today, force);

@@ -1,5 +1,6 @@
 import { RETIRED_EXERCISES } from '../data/gym';
 import ActivityLog from './ActivityLog';
+import { NOV16_DAYS, NOV16_ID } from '../logic/routineNov16';
 // Vista Hoy — port de renderStrip/renderDay/renderGroups/renderExercise de A2.8.
 import { useEffect, useState } from 'react';
 import { DIAS, FORMATS, GROUPS, MES, PROGRESSIONS } from '../data/exercises';
@@ -115,6 +116,13 @@ export default function Today({ ctx, notice, warnings, dismissNotice }: {
       )}
 
       {curDate < today && !data.sessions[curDate] && <div className="notice">No hay un registro guardado para este día en este dispositivo. Los ejercicios de abajo son una sugerencia, no un entrenamiento realizado.</div>}
+      {data.plan.routineRevision === NOV16_ID && NOV16_DAYS.some(day => day.date === curDate) && (
+        <div className="notice" data-testid="recovery-day">
+          <b>Semana de descarga activa.</b> {NOV16_DAYS.find(day => day.date === curDate)?.walkingText}
+          <p>Seguí la propuesta de descarga de Plan. Tus ejercicios y registros anteriores se conservan.</p>
+          <button className="btn btn-soft" onClick={() => ctx.setView('plan')}>Ver semana suave</button>
+        </div>
+      )}
       <div>
         <div className="dayhead">
           <div className="dlabel">{`${DIAS[d.getDay()]} ${d.getDate()} ${MES[d.getMonth()]} · ${data.plan.week || 'Semana 1'} · ${data.plan.focus || 'Fuerza'}`}</div>

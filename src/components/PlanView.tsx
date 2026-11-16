@@ -2,6 +2,8 @@ import { GYM_EQUIPMENT } from '../data/gym';
 import { useState } from 'react';
 // Vista Plan — port de renderPlan/copyWeeklySummary de A2.8.
 import Tracking from './Tracking';
+import RecoveryWeek from './RecoveryWeek';
+import { NOV16_DAYS, NOV16_ID } from '../logic/routineNov16';
 import { FORMATS, GROUPS } from '../data/exercises';
 import type { Plan, Session } from '../db/schema';
 import { buildExerciseList, createSession, nextSessionSuggestion, weeklyCoveragePairs } from '../logic/session';
@@ -28,7 +30,9 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
   const sessions = Object.values(data.sessions).filter(hasActivity);
   const suggestion = nextSessionSuggestion(ctx.curDate, data.sessions, plan);
   const scheduledSessions = Object.values(data.sessions)
-    .filter((session) => plan.routineRevision === NOV9_ID && plan.week === '9–15 nov'
+    .filter((session) => plan.routineRevision === NOV16_ID && plan.week === '16–22 nov'
+      ? NOV16_DAYS.some(day => day.date === session.date)
+      : plan.routineRevision === NOV9_ID && plan.week === '9–15 nov'
       ? NOV9_DAYS.some(day => day.date === session.date)
       : plan.routineRevision === NOV2_ID && plan.week === '2–8 nov'
       ? NOV2_DAYS.some(day => day.date === session.date)
@@ -135,6 +139,7 @@ export default function PlanView({ ctx }: { ctx: Ctx }) {
   return (
     <div className="plan">
       <Tracking ctx={ctx} />
+      <RecoveryWeek revision={plan.routineRevision} loading={loadingRoutine} error={routineError} onLoad={() => void loadReviewed()} />
       <details className="wkcard"><summary>Equipo de tu gimnasio</summary><p>{GYM_EQUIPMENT.join(' · ')}</p><p>La selección automática usa este equipo. Las máquinas no confirmadas siguen disponibles para elegir manualmente. El banco abdominal y la banca declinada tienen condiciones explicadas en sus fichas.</p></details>
       <div className="sectionhead">
         <div>

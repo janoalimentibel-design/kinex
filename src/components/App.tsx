@@ -15,6 +15,7 @@ import { activitySignature } from '../logic/aerobic';
 import { zSession } from '../db/schema';
 import { applyPublishedRoutine } from '../logic/publishedRoutine';
 import { NOV9_DAYS, NOV9_ID } from '../logic/routineNov9';
+import { NOV16_DAYS, NOV16_ID } from '../logic/routineNov16';
 import { NOV2_DAYS, NOV2_ID } from '../logic/routineNov2';
 import { OCT26_DAYS, OCT26_ID } from '../logic/routineOct26';
 import { rebalancePending } from '../logic/rebalance';
@@ -164,7 +165,7 @@ export default function App() {
         const today = isoDate(new Date());
         const updated = rebalancePending(applyPublishedRoutine(current, today, true), today);
         replacedPlan = updated.plan !== current.plan;
-        const dates = updated.plan.routineRevision === NOV9_ID ? NOV9_DAYS.map(day => day.date) : updated.plan.routineRevision === NOV2_ID ? NOV2_DAYS.map(day => day.date) : updated.plan.routineRevision === OCT26_ID ? OCT26_DAYS.map(day => day.date) : Object.keys(updated.sessions).sort();
+        const dates = updated.plan.routineRevision === NOV16_ID ? NOV16_DAYS.map(day => day.date) : updated.plan.routineRevision === NOV9_ID ? NOV9_DAYS.map(day => day.date) : updated.plan.routineRevision === NOV2_ID ? NOV2_DAYS.map(day => day.date) : updated.plan.routineRevision === OCT26_ID ? OCT26_DAYS.map(day => day.date) : Object.keys(updated.sessions).sort();
         openDate = dates.find(date => date >= today && updated.sessions[date] && !hasActivity(updated.sessions[date]) &&
           buildExerciseList(updated.sessions[date], { ...CATALOG, ...updated.custom }, updated.sessions).length > 0)
           ?? dates.find(date => date >= today && updated.sessions[date]) ?? dates.filter(date => updated.sessions[date]).at(-1);
@@ -226,7 +227,7 @@ export default function App() {
           <div className="streak">
             <div className="n">{savedCount}</div>
             <div className="l">sesiones</div>
-            <div className="version">v3.58</div>
+            <div className="version">v3.59</div>
           </div>
         </div>
       </div>
